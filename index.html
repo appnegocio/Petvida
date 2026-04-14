@@ -1193,19 +1193,43 @@ function buildAlerts(petId) {
     alerts.push({ type:'ok', icon:'💊', text:`Es hora del remedio de ${name}`, meta:`${m.name} · ${m.dose || ''} · ${m.freq}`, score:1 });
   });
 
-  // Appointments (next 7 days)
-  getPetAppts(petId).forEach(a => {
-    const apptDate = new Date(a.date + 'T00:00:00');
-    const diff = Math.round((apptDate - today) / 86400000);
-    if (diff >= 0 && diff <= 7) {
-      const dayStr = diff === 0 ? 'hoy' : diff === 1 ? 'mañana' : `en ${diff} días`;
-      alerts.push({ type: diff <= 1 ? 'warn' : 'ok', icon:'📅',
+  // Appointments — próximos 10 días, ordenadas por fecha+hora
+  getPetAppts(petId)
+    .filter(a => {
+      const apptDate = new Date(a.date + 'T00:00:00');
+      const diff = Math.round((apptDate - today) / 86400000);
+      return diff >= 0 && diff <= 10;
+    })
+    .sort((a, b) => {
+      // Ordenar por fecha, luego por hora
+      const dateA = new Date(a.date + 'T' + (a.time || '00:00'));
+      const dateB = new Date(b.date + 'T' + (b.time || '00:00'));
+      return dateA - dateB;
+    })
+    .forEach(a => {
+      const apptDate = new Date(a.date + 'T00:00:00');
+      const diff = Math.round((apptDate - today) / 86400000);
+      let type, score, dayStr;
+      if (diff === 0)      { type='warn'; score=4; dayStr='hoy'; }
+      else if (diff === 1) { type='warn'; score=3; dayStr='mañana'; }
+      else if (diff <= 3)  { type='warn'; score=2; dayStr=`en ${diff} días`; }
+      else                 { type='ok';   score=1; dayStr=`en ${diff} días`; }
+      alerts.push({
+        type, icon:'📅',
         text:`Cita con Dr. ${a.vet} ${dayStr} a las ${a.time}`,
-        meta: a.place || '', score: diff <= 1 ? 2 : 1 });
-    }
-  });
+        meta: [a.specialty, a.place].filter(Boolean).join(' · '),
+        score,
+        daysUntil: diff
+      });
+    });
 
-  return alerts.sort((a,b) => b.score - a.score);
+  // Ordenar: primero por urgencia (score), luego por proximidad (días)
+  return alerts.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    const dA = a.daysUntil !== undefined ? a.daysUntil : 0;
+    const dB = b.daysUntil !== undefined ? b.daysUntil : 0;
+    return dA - dB;
+  });
 }
 
 /* ================================================================
@@ -1274,15 +1298,22 @@ function renderHome() {
   // Summary card
   const summaryEl = document.getElementById('home-summary');
   if (pet) {
-    const alerts = buildAlerts(pet.id);
-    const urgent = alerts.filter(a => a.type === 'urgent').length;
-    if (urgent === 0 && alerts.length === 0) {
+    const alerts  = buildAlerts(pet.id);
+    const urgentC = alerts.filter(a => a.type === 'urgent').length;
+    const upcomingAppts = alerts.filter(a => a.icon === '📅').length;
+    if (urgentC === 0 && alerts.length === 0) {
       summaryEl.innerHTML = `
         <div class="alert-row ok">
           <span class="alert-icon">✓</span>
           <div class="alert-text">${pet.name} tiene todo bajo control hoy — disfruten su día juntos</div>
         </div>`;
-    } else if (urgent === 0) {
+    } else if (urgentC === 0 && upcomingAppts > 0) {
+      summaryEl.innerHTML = `
+        <div class="alert-row ok">
+          <span class="alert-icon">📅</span>
+          <div class="alert-text">${pet.name} está bien — tenés ${upcomingAppts} cita${upcomingAppts>1?'s':''} próxima${upcomingAppts>1?'s':''} agendada${upcomingAppts>1?'s':''}</div>
+        </div>`;
+    } else if (urgentC === 0) {
       summaryEl.innerHTML = `
         <div class="alert-row ok">
           <span class="alert-icon">✓</span>
@@ -1292,7 +1323,7 @@ function renderHome() {
       summaryEl.innerHTML = `
         <div class="alert-row urgent">
           <span class="alert-icon">⚠️</span>
-          <div class="alert-text">${urgent} alerta${urgent>1?'s':''} pendiente${urgent>1?'s':''} de ${pet.name}</div>
+          <div class="alert-text">${urgentC} alerta${urgentC>1?'s':''} pendiente${urgentC>1?'s':''} de ${pet.name}</div>
         </div>`;
     }
   } else {
@@ -1311,18 +1342,44 @@ function renderHome() {
     return;
   }
   const alerts = buildAlerts(pet.id);
-  if (!alerts.length) {
-    alertsEl.innerHTML = `<div class="text-muted text-sm" style="padding:8px 0">Sin alertas para hoy.</div>`;
+
+  // Separar en: urgentes/hoy (vacunas, medicamentos, citas inminentes) vs citas futuras
+  const urgent   = alerts.filter(a => a.icon !== '📅' || (a.daysUntil !== undefined && a.daysUntil <= 7));
+  const upcoming = alerts.filter(a => a.icon === '📅' && a.daysUntil !== undefined && a.daysUntil > 7);
+
+  let html = '';
+
+  if (urgent.length) {
+    html += urgent.map(a => alertRow(a)).join('');
   } else {
-    alertsEl.innerHTML = alerts.map(a => `
-      <div class="alert-row ${a.type}">
-        <span class="alert-icon">${a.icon}</span>
-        <div>
+    html += `<div class="text-muted text-sm" style="padding:4px 0 8px">Sin alertas urgentes hoy.</div>`;
+  }
+
+  if (upcoming.length) {
+    html += `<div class="section-title mt-12">📅 Próximas citas</div>`;
+    html += upcoming.map(a => `
+      <div class="alert-row ok" style="cursor:pointer" onclick="goToSection('citas')">
+        <span class="alert-icon">📅</span>
+        <div style="flex:1">
           <div class="alert-text">${a.text}</div>
           ${a.meta ? `<div class="alert-meta">${a.meta}</div>` : ''}
+          <div class="alert-meta" style="color:var(--green);font-weight:700">Faltan ${a.daysUntil} días</div>
         </div>
+        <span style="color:var(--text-light);font-size:1rem">›</span>
       </div>`).join('');
   }
+
+  alertsEl.innerHTML = html || `<div class="text-muted text-sm" style="padding:8px 0">Sin alertas para hoy.</div>`;
+}
+
+function alertRow(a) {
+  return `<div class="alert-row ${a.type}">
+    <span class="alert-icon">${a.icon}</span>
+    <div>
+      <div class="alert-text">${a.text}</div>
+      ${a.meta ? `<div class="alert-meta">${a.meta}</div>` : ''}
+    </div>
+  </div>`;
 }
 
 function setActivePet(id) {
