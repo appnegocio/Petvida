@@ -3,14 +3,14 @@
 <head>
 <!--
 ================================================================================
-PETVIDA — App de Salud y Felicidad para Mascotas
+PETVIDA v2 — App de Salud y Felicidad para Mascotas
 ================================================================================
-FASE 1: PWA instalable desde navegador (index.html + manifest.json + sw.js)
-FASE 2 (migración a nativo):
-  - Datos: extraer sección "DATA LAYER" y conectar a Firebase/Supabase
-  - Lógica: extraer sección "BUSINESS LOGIC" → servicios en Flutter/React Native
-  - UI: cada pantalla en sección "UI SCREENS" → Screens/Widgets nativos
-  - Reemplazar localStorage por AsyncStorage (RN) o SharedPreferences (Flutter)
+FASE 1: PWA instalable desde navegador
+FASE 2 (migración Flutter/React Native):
+  - DATA LAYER: reemplazar localStorage por API REST / Firebase / Supabase
+  - BUSINESS LOGIC: extraer funciones puras a servicios
+  - UI SCREENS: cada sección → Widget/Screen nativo
+  - Color Fase 2: header background: linear-gradient(135deg,#E8845A,#D4623A)
 ================================================================================
 -->
 <meta charset="UTF-8">
@@ -21,1891 +21,909 @@ FASE 2 (migración a nativo):
 <meta name="apple-mobile-web-app-title" content="Petvida">
 <meta name="description" content="Porque tu mascota se merece lo mejor">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-192.png">
 <title>Petvida 🐾</title>
-
-<!-- Google Fonts: Nunito (warmth + readability) + Playfair Display (character) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-
 <style>
-/* ============================================================
-   CSS VARIABLES & RESET
-   ============================================================ */
 :root {
-  --coral:       #E8845A;
-  --coral-dark:  #D06B43;
-  --coral-light: #FFF0E8;
-  --green:       #1D9E75;
-  --green-light: #E8F7F1;
-  --bg:          #FAFAF9;
-  --text:        #2C2C2A;
-  --text-muted:  #7A7A77;
-  --text-light:  #B0B0AC;
-  --card:        #FFFFFF;
-  --border:      #EFEFED;
-  --orange:      #F0A050;
-  --orange-light:#FFF5E0;
-  --shadow-sm:   0 2px 8px rgba(44,44,42,0.07);
-  --shadow-md:   0 4px 20px rgba(44,44,42,0.10);
-  --radius-sm:   10px;
-  --radius-md:   16px;
-  --radius-lg:   24px;
-  --nav-h:       72px;
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --coral:#E8845A; --coral-dk:#D06B43; --coral-lt:#FFF0E8; --coral-bd:#F5C4A8;
+  --green:#1D9E75; --green-lt:#E8F7F1; --green-bd:#B8E8D8;
+  --orange:#F0A050; --orange-lt:#FFF5E0;
+  --purple:#7F77DD; --purple-lt:#F0EDFF;
+  --blue-lt:#EBF4FF;
+  --bg:#F8F8F7; --card:#FFFFFF;
+  --text:#1C1C1E; --text-mid:#3C3C3E; --text-muted:#8E8E93; --text-lt:#C0C0BC;
+  --border:#ECECEA; --border-md:#DEDED9;
+  --sh-sm:0 1px 6px rgba(28,28,30,.06); --sh-md:0 3px 16px rgba(28,28,30,.09);
+  --r-sm:8px; --r-md:12px; --r-lg:16px; --r-xl:22px;
+  --nav-h:68px; --safe:env(safe-area-inset-bottom,0px);
 }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-tap-highlight-color:transparent}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+input,select,textarea{font-family:inherit}
+img{max-width:100%}
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+#app{max-width:430px;margin:0 auto;min-height:100dvh;position:relative;background:var(--bg)}
 
-html { font-size: 16px; -webkit-tap-highlight-color: transparent; }
+.screen{display:none;flex-direction:column;min-height:100dvh;padding-bottom:calc(var(--nav-h) + var(--safe) + 8px);animation:sIn .2s ease}
+.screen.active{display:flex}
+@keyframes sIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px}
 
-body {
-  font-family: 'Nunito', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  min-height: 100dvh;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-}
+/* HEADER */
+.hdr{background:var(--coral);padding:52px 18px 18px;color:white;flex-shrink:0;position:sticky;top:0;z-index:20}
+.hdr-brand{font-size:.7rem;font-weight:700;letter-spacing:.8px;opacity:.55;text-transform:uppercase;margin-bottom:6px}
+.hdr-title{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;line-height:1.2}
+.hdr-sub{font-size:.76rem;opacity:.65;margin-top:3px;font-weight:500}
+.hdr-back{display:flex;align-items:center;gap:6px;font-size:.82rem;font-weight:700;opacity:.85;color:white;padding:4px 0 8px;cursor:pointer}
 
-button { font-family: inherit; cursor: pointer; border: none; background: none; }
-input, select, textarea { font-family: inherit; }
-img { max-width: 100%; }
+.home-hdr{background:var(--coral);padding:52px 18px 16px;color:white;flex-shrink:0}
+.home-brand{font-size:.7rem;font-weight:700;letter-spacing:.8px;opacity:.55;text-transform:uppercase;margin-bottom:8px}
+.home-name{font-family:'Playfair Display',serif;font-size:1.55rem;font-weight:700;line-height:1.15}
+.home-sub{font-size:.78rem;opacity:.65;margin-top:2px;font-weight:500}
+.status-pill{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.18);border:.5px solid rgba(255,255,255,.28);border-radius:20px;padding:4px 10px;font-size:.73rem;font-weight:600;margin-top:10px}
+.sd{width:6px;height:6px;border-radius:50%}
+.sd-ok{background:#A8FFD8}.sd-warn{background:#FFD8A8}.sd-urgent{background:#FFB8B8}
 
-/* ============================================================
-   LAYOUT
-   ============================================================ */
-#app {
-  max-width: 430px;
-  margin: 0 auto;
-  min-height: 100dvh;
-  position: relative;
-  background: var(--bg);
-}
+.pet-pills{display:flex;gap:7px;overflow-x:auto;padding:12px 16px 4px;flex-shrink:0}
+.pet-pills::-webkit-scrollbar{display:none}
+.pet-pill{display:flex;align-items:center;gap:6px;padding:7px 13px;background:var(--card);border-radius:24px;border:1.5px solid var(--border);font-size:.82rem;font-weight:700;white-space:nowrap;flex-shrink:0;color:var(--text-muted);transition:all .15s;cursor:pointer}
+.pet-pill.active{border-color:var(--coral);background:var(--coral-lt);color:var(--coral)}
 
-.screen {
-  display: none;
-  flex-direction: column;
-  min-height: 100dvh;
-  padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 8px);
-  animation: fadeIn .22s ease;
-}
-.screen.active { display: flex; }
+/* NAV */
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;height:calc(var(--nav-h) + var(--safe));padding-bottom:var(--safe);background:var(--card);border-top:.5px solid var(--border);display:flex;align-items:center;justify-content:space-around;z-index:100;box-shadow:0 -2px 16px rgba(28,28,30,.06)}
+.nitem{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 12px;color:var(--text-lt);font-size:.62rem;font-weight:700;letter-spacing:.3px;text-transform:uppercase;transition:color .15s;min-width:52px}
+.nitem.active{color:var(--coral)}
+.nicon{font-size:1.25rem;line-height:1}
+.nbar{width:16px;height:2.5px;border-radius:2px;background:transparent;transition:background .15s}
+.nitem.active .nbar{background:var(--coral)}
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+/* CARDS */
+.card{background:var(--card);border-radius:var(--r-lg);border:.5px solid var(--border);padding:14px;margin-bottom:10px;box-shadow:var(--sh-sm)}
+.card-flush{background:var(--card);border-radius:var(--r-lg);border:.5px solid var(--border);overflow:hidden;margin-bottom:10px}
 
-.scroll-area {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding: 16px;
-}
+/* SECTION TITLE */
+.stitle{font-size:.7rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 8px}
+.stitle:first-child{margin-top:4px}
 
-/* ============================================================
-   HEADER
-   ============================================================ */
-.header {
-  background: var(--coral);
-  padding: 56px 20px 20px;
-  color: white;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  flex-shrink: 0;
-}
-.header-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: -0.3px;
-}
-.header-sub {
-  font-size: .82rem;
-  opacity: .85;
-  margin-top: 2px;
-  font-weight: 500;
-}
-.header-back {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: white;
-  font-size: .9rem;
-  font-weight: 600;
-  opacity: .9;
-  padding: 8px 0;
-  margin-bottom: 4px;
-}
+/* ALERT ROWS */
+.arow{display:flex;align-items:flex-start;gap:10px;padding:11px 13px;border-radius:var(--r-md);margin-bottom:7px}
+.arow.ok{background:var(--green-lt)}.arow.warn{background:var(--orange-lt)}.arow.urgent{background:var(--coral-lt)}
+.aicon{font-size:1.1rem;flex-shrink:0;margin-top:1px}
+.atext{font-size:.86rem;font-weight:700;line-height:1.35;flex:1}
+.ameta{font-size:.73rem;color:var(--text-muted);font-weight:500;margin-top:2px}
+.adays{font-size:.73rem;font-weight:700;color:var(--green);margin-top:2px}
 
-/* ============================================================
-   BOTTOM NAV
-   ============================================================ */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 430px;
-  height: calc(var(--nav-h) + var(--safe-bottom));
-  padding-bottom: var(--safe-bottom);
-  background: var(--card);
-  border-top: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  z-index: 100;
-  box-shadow: 0 -4px 20px rgba(44,44,42,.07);
-}
-.nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  padding: 8px 16px;
-  color: var(--text-light);
-  font-size: .68rem;
-  font-weight: 700;
-  transition: color .18s;
-  letter-spacing: .3px;
-  text-transform: uppercase;
-}
-.nav-item.active { color: var(--coral); }
-.nav-icon { font-size: 1.4rem; line-height: 1; }
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:.68rem;font-weight:800;white-space:nowrap}
+.bok{background:var(--green-lt);color:var(--green);border:.5px solid var(--green-bd)}
+.bwarn{background:var(--orange-lt);color:var(--orange)}
+.balert{background:var(--coral-lt);color:var(--coral);border:.5px solid var(--coral-bd)}
+.bpurple{background:var(--purple-lt);color:var(--purple)}
+.bblue{background:var(--blue-lt);color:#1A5FA0}
+.bgray{background:var(--bg);color:var(--text-muted);border:.5px solid var(--border)}
 
-/* ============================================================
-   CARDS
-   ============================================================ */
-.card {
-  background: var(--card);
-  border-radius: var(--radius-md);
-  padding: 16px;
-  box-shadow: var(--shadow-sm);
-  margin-bottom: 12px;
-}
-.card-flat {
-  background: var(--card);
-  border-radius: var(--radius-md);
-  padding: 16px;
-  border: 1px solid var(--border);
-  margin-bottom: 10px;
-}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 22px;border-radius:var(--r-md);font-size:.88rem;font-weight:700;transition:all .15s}
+.btn-p{background:var(--coral);color:white;box-shadow:0 2px 10px rgba(232,132,90,.28)}
+.btn-p:active{transform:scale(.97);background:var(--coral-dk)}
+.btn-g{background:var(--bg);color:var(--text-muted);border:.5px solid var(--border-md)}
+.btn-d{background:#FEE;color:#C0392B;border:.5px solid #FAD}
+.btn-c{background:var(--blue-lt);color:#1A5FA0}
+.btn-f{width:100%}
+.btn-sm{padding:8px 14px;font-size:.78rem}
 
-/* ============================================================
-   BADGES
-   ============================================================ */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 10px;
-  border-radius: 20px;
-  font-size: .72rem;
-  font-weight: 800;
-  letter-spacing: .2px;
-}
-.badge-ok     { background: var(--green-light); color: var(--green); }
-.badge-warn   { background: var(--orange-light); color: var(--orange); }
-.badge-alert  { background: var(--coral-light); color: var(--coral); }
+/* FORMS */
+.fg{margin-bottom:13px}
+.fl{display:block;font-size:.72rem;font-weight:800;color:var(--text-muted);margin-bottom:5px;letter-spacing:.3px;text-transform:uppercase}
+.fi{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-size:.9rem;color:var(--text);background:var(--bg);-webkit-appearance:none;transition:border-color .15s}
+.fi:focus{outline:none;border-color:var(--coral);background:white}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fsec{font-size:.7rem;font-weight:800;color:var(--coral);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 10px}
 
-/* ============================================================
-   ALERT ROWS
-   ============================================================ */
-.alert-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: var(--radius-sm);
-  margin-bottom: 8px;
-}
-.alert-row.ok     { background: var(--green-light); }
-.alert-row.warn   { background: var(--orange-light); }
-.alert-row.urgent { background: var(--coral-light); }
-.alert-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
-.alert-text { flex: 1; font-size: .88rem; font-weight: 600; line-height: 1.35; }
-.alert-meta { font-size: .75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px; }
+/* TOGGLE */
+.tgl-wrap{display:flex;align-items:center;justify-content:space-between}
+.tgl{position:relative;width:42px;height:24px}
+.tgl input{opacity:0;width:0;height:0}
+.tgl-sl{position:absolute;inset:0;background:var(--border-md);border-radius:12px;transition:.2s;cursor:pointer}
+.tgl-sl::before{content:'';position:absolute;width:18px;height:18px;background:white;border-radius:50%;left:3px;top:3px;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.tgl input:checked+.tgl-sl{background:var(--green)}
+.tgl input:checked+.tgl-sl::before{transform:translateX(18px)}
 
-/* ============================================================
-   BUTTONS
-   ============================================================ */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 12px 24px;
-  border-radius: var(--radius-sm);
-  font-size: .9rem;
-  font-weight: 700;
-  transition: all .18s;
-  letter-spacing: .1px;
-}
-.btn-primary {
-  background: var(--coral);
-  color: white;
-  box-shadow: 0 3px 12px rgba(232,132,90,.30);
-}
-.btn-primary:active { transform: scale(.97); background: var(--coral-dark); }
-.btn-secondary {
-  background: var(--green-light);
-  color: var(--green);
-}
-.btn-ghost {
-  background: var(--bg);
-  color: var(--text-muted);
-  border: 1px solid var(--border);
-}
-.btn-full { width: 100%; }
-.btn-sm { padding: 8px 16px; font-size: .8rem; }
-.btn-danger { background: #FEE; color: #C0392B; border: 1px solid #FAD; }
+/* PHOTO UPLOAD */
+.pup{border:1.5px dashed var(--border-md);border-radius:var(--r-md);padding:18px;text-align:center;color:var(--text-muted);font-size:.82rem;font-weight:600;cursor:pointer;transition:all .15s}
+.pup:active{border-color:var(--coral);background:var(--coral-lt)}
+.ppre{width:100%;border-radius:var(--r-md);object-fit:cover;max-height:160px;display:none;margin-top:8px}
 
-/* ============================================================
-   FORMS
-   ============================================================ */
-.form-group { margin-bottom: 14px; }
-.form-label {
-  display: block;
-  font-size: .8rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  margin-bottom: 5px;
-  letter-spacing: .3px;
-  text-transform: uppercase;
-}
-.form-input {
-  width: 100%;
-  padding: 11px 14px;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-size: .92rem;
-  color: var(--text);
-  background: var(--bg);
-  transition: border-color .18s;
-  -webkit-appearance: none;
-}
-.form-input:focus {
-  outline: none;
-  border-color: var(--coral);
-  background: white;
-}
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.form-section {
-  font-size: .78rem;
-  font-weight: 800;
-  color: var(--coral);
-  text-transform: uppercase;
-  letter-spacing: .5px;
-  margin: 18px 0 10px;
-}
+/* AVATAR */
+.ava{width:52px;height:52px;border-radius:14px;background:var(--coral-lt);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;overflow:hidden;border:.5px solid var(--coral-bd)}
+.ava img,.ava-xl img{width:100%;height:100%;object-fit:cover}
+.ava-xl{width:80px;height:80px;border-radius:22px;background:var(--coral-lt);display:flex;align-items:center;justify-content:center;font-size:2.2rem;overflow:hidden;border:2px solid white;box-shadow:var(--sh-md)}
 
-/* ============================================================
-   PET AVATAR
-   ============================================================ */
-.pet-avatar {
-  width: 56px; height: 56px;
-  border-radius: 50%;
-  background: var(--coral-light);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.6rem;
-  flex-shrink: 0;
-  overflow: hidden;
-}
-.pet-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.pet-avatar-lg {
-  width: 88px; height: 88px;
-  border-radius: 50%;
-  background: var(--coral-light);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 2.5rem;
-  margin: 0 auto;
-  overflow: hidden;
-  border: 3px solid white;
-  box-shadow: var(--shadow-md);
-}
-.pet-avatar-lg img { width: 100%; height: 100%; object-fit: cover; }
+/* MOD ROWS */
+.mrow{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:.5px solid var(--border);cursor:pointer;transition:background .12s}
+.mrow:last-child{border-bottom:none}
+.mrow:active{background:var(--bg)}
+.micon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.mi-c{background:var(--coral-lt)}.mi-g{background:var(--green-lt)}.mi-b{background:var(--blue-lt)}.mi-p{background:var(--purple-lt)}.mi-o{background:var(--orange-lt)}.mi-gr{background:var(--bg);border:.5px solid var(--border)}
+.minfo{flex:1}
+.mname{font-size:.9rem;font-weight:700}
+.msub{font-size:.75rem;color:var(--text-muted);margin-top:2px}
+.marrow{color:var(--text-lt);font-size:1rem}
 
-/* ============================================================
-   SECTION TITLE
-   ============================================================ */
-.section-title {
-  font-size: .75rem;
-  font-weight: 800;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: .6px;
-  margin-bottom: 10px;
-  margin-top: 6px;
-}
+/* DETAIL ROWS */
+.drow{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:.5px solid var(--border);font-size:.88rem}
+.drow:last-child{border-bottom:none}
+.dlbl{color:var(--text-muted);font-weight:600}
+.dval{font-weight:700;text-align:right;max-width:58%}
 
-/* ============================================================
-   CHIP TOGGLE
-   ============================================================ */
-.chip-group { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
-.chip {
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: .82rem;
-  font-weight: 700;
-  border: 1.5px solid var(--border);
-  color: var(--text-muted);
-  transition: all .15s;
-}
-.chip.selected { border-color: var(--coral); background: var(--coral-light); color: var(--coral); }
+/* LIST ITEMS */
+.litem{background:var(--card);border-radius:var(--r-lg);border:.5px solid var(--border);padding:13px;margin-bottom:8px;display:flex;align-items:flex-start;gap:11px}
+.licon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.lbody{flex:1;min-width:0}
+.ltitle{font-size:.92rem;font-weight:700}
+.lsub{font-size:.75rem;color:var(--text-muted);margin-top:3px;line-height:1.4}
+.lact{display:flex;gap:6px;flex-shrink:0;align-items:center}
 
-/* ============================================================
-   MODAL / SHEET
-   ============================================================ */
-.modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(44,44,42,.45);
-  z-index: 200;
-  align-items: flex-end;
-  justify-content: center;
-}
-.modal-overlay.open { display: flex; animation: fadeOverlay .2s ease; }
-@keyframes fadeOverlay { from { opacity: 0; } to { opacity: 1; } }
+/* APPT DATE */
+.adb{background:var(--coral-lt);border-radius:var(--r-sm);padding:8px 9px;text-align:center;min-width:44px;flex-shrink:0;border:.5px solid var(--coral-bd)}
+.aday{font-size:1.25rem;font-weight:900;color:var(--coral);line-height:1}
+.amon{font-size:.6rem;font-weight:800;color:var(--coral);text-transform:uppercase}
 
-.modal-sheet {
-  background: var(--card);
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  width: 100%;
-  max-width: 430px;
-  max-height: 92dvh;
-  overflow-y: auto;
-  padding: 0 20px 32px;
-  animation: slideUp .25s ease;
-  padding-bottom: calc(32px + var(--safe-bottom));
-}
-@keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+/* CONSULT CARD */
+.ccard{background:var(--card);border-radius:var(--r-lg);border:.5px solid var(--border);overflow:hidden;margin-bottom:8px}
+.chead{padding:11px 13px 9px;display:flex;align-items:flex-start;justify-content:space-between;border-bottom:.5px solid var(--border)}
+.cbody{padding:10px 13px}
+.cdiag{background:var(--bg);border-radius:var(--r-sm);padding:8px 10px;border-left:2.5px solid var(--coral);font-size:.82rem;color:var(--text-mid);line-height:1.45;margin-top:6px}
+.cdiag-lbl{font-size:.68rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px}
 
-.modal-handle {
-  width: 36px; height: 4px;
-  background: var(--border);
-  border-radius: 2px;
-  margin: 12px auto 16px;
-}
-.modal-title {
-  font-size: 1.1rem;
-  font-weight: 800;
-  margin-bottom: 16px;
-}
-.modal-close {
-  position: absolute;
-  right: 20px;
-  top: 20px;
-  font-size: 1.4rem;
-  color: var(--text-muted);
-  padding: 4px;
-}
+/* WEIGHT */
+.witem{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:.5px solid var(--border)}
+.witem:last-child{border-bottom:none}
+.wbar-wrap{flex:1;height:4px;background:var(--border);border-radius:2px}
+.wbar{height:4px;background:var(--coral);border-radius:2px;transition:width .3s}
 
-/* ============================================================
-   EMPTY STATE
-   ============================================================ */
-.empty-state {
-  text-align: center;
-  padding: 40px 20px;
-  color: var(--text-muted);
-}
-.empty-icon { font-size: 3rem; margin-bottom: 12px; }
-.empty-title { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
-.empty-sub { font-size: .85rem; line-height: 1.5; }
+/* QUICK GRID */
+.qgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:14px}
+.qitem{display:flex;flex-direction:column;align-items:center;gap:4px;padding:11px 4px;background:var(--card);border-radius:var(--r-md);font-size:.65rem;font-weight:700;color:var(--text-muted);border:.5px solid var(--border);text-align:center;cursor:pointer;transition:all .12s}
+.qitem:active{border-color:var(--coral);color:var(--coral)}
+.qico{font-size:1.3rem}
 
-/* ============================================================
-   TOAST
-   ============================================================ */
-.toast {
-  position: fixed;
-  bottom: calc(var(--nav-h) + var(--safe-bottom) + 16px);
-  left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  background: var(--text);
-  color: white;
-  padding: 12px 20px;
-  border-radius: var(--radius-sm);
-  font-size: .88rem;
-  font-weight: 600;
-  z-index: 999;
-  opacity: 0;
-  pointer-events: none;
-  transition: all .3s;
-  white-space: nowrap;
-  max-width: 90vw;
-  text-align: center;
-}
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* MODAL */
+.moverlay{display:none;position:fixed;inset:0;background:rgba(28,28,30,.45);z-index:200;align-items:flex-end;justify-content:center}
+.moverlay.open{display:flex;animation:oIn .18s ease}
+@keyframes oIn{from{opacity:0}to{opacity:1}}
+.msheet{background:var(--card);border-radius:var(--r-xl) var(--r-xl) 0 0;width:100%;max-width:430px;max-height:92dvh;overflow-y:auto;padding:0 18px calc(28px + var(--safe));animation:sUp .22s ease}
+@keyframes sUp{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
+.mhandle{width:34px;height:4px;background:var(--border);border-radius:2px;margin:10px auto 14px}
+.mtitle{font-size:1.05rem;font-weight:800;margin-bottom:14px}
 
-/* ============================================================
-   FAB
-   ============================================================ */
-.fab {
-  position: fixed;
-  bottom: calc(var(--nav-h) + var(--safe-bottom) + 16px);
-  right: 20px;
-  width: 52px; height: 52px;
-  background: var(--coral);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.5rem;
-  color: white;
-  box-shadow: 0 4px 16px rgba(232,132,90,.4);
-  z-index: 50;
-  transition: transform .18s;
-}
-.fab:active { transform: scale(.92); }
+/* TOAST */
+.toast{position:fixed;bottom:calc(var(--nav-h) + var(--safe) + 14px);left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);color:white;padding:11px 18px;border-radius:var(--r-sm);font-size:.85rem;font-weight:600;z-index:999;opacity:0;pointer-events:none;transition:all .25s;white-space:nowrap;max-width:88vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-/* ============================================================
-   PROFILE DETAIL ROWS
-   ============================================================ */
-.detail-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 11px 0;
-  border-bottom: 1px solid var(--border);
-  font-size: .9rem;
-}
-.detail-row:last-child { border-bottom: none; }
-.detail-label { color: var(--text-muted); font-weight: 600; }
-.detail-value { font-weight: 700; text-align: right; max-width: 60%; }
+/* FAB */
+.fab{position:fixed;bottom:calc(var(--nav-h) + var(--safe) + 14px);right:18px;width:50px;height:50px;background:var(--coral);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:white;box-shadow:0 3px 14px rgba(232,132,90,.38);z-index:50;transition:transform .15s}
+.fab:active{transform:scale(.91)}
 
-/* ============================================================
-   VACCINE CARD
-   ============================================================ */
-.vax-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 13px;
-  background: var(--card);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border);
-  margin-bottom: 8px;
-  transition: box-shadow .15s;
-}
-.vax-item:active { box-shadow: var(--shadow-sm); }
-.vax-info { flex: 1; }
-.vax-name { font-size: .95rem; font-weight: 700; }
-.vax-dates { font-size: .75rem; color: var(--text-muted); margin-top: 3px; }
+/* EMPTY */
+.empty{text-align:center;padding:36px 20px;color:var(--text-muted)}
+.eico{font-size:2.8rem;margin-bottom:10px}
+.etit{font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:5px}
+.esub{font-size:.82rem;line-height:1.5}
 
-/* ============================================================
-   MED CARD
-   ============================================================ */
-.med-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 13px;
-  background: var(--card);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border);
-  margin-bottom: 8px;
-}
-.med-dot {
-  width: 10px; height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.med-dot.active { background: var(--green); }
-.med-dot.inactive { background: var(--text-light); }
+/* WELCOME */
+#swelcome{background:var(--coral);color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 32px calc(32px + var(--safe));min-height:100dvh}
+.wlogo{font-size:3.8rem;margin-bottom:20px}
+.wtitle{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:700;margin-bottom:8px}
+.wsub{font-size:.95rem;opacity:.8;margin-bottom:40px;line-height:1.55;font-weight:500}
+.wbtn{background:white;color:var(--coral);border-radius:var(--r-lg);padding:15px 40px;font-size:.95rem;font-weight:800;box-shadow:0 4px 18px rgba(0,0,0,.15)}
 
-/* ============================================================
-   APPT CARD
-   ============================================================ */
-.appt-item {
-  background: var(--card);
-  border-radius: var(--radius-md);
-  padding: 14px;
-  border: 1px solid var(--border);
-  margin-bottom: 8px;
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-}
-.appt-date-block {
-  background: var(--coral-light);
-  border-radius: var(--radius-sm);
-  padding: 8px 10px;
-  text-align: center;
-  min-width: 46px;
-  flex-shrink: 0;
-}
-.appt-day { font-size: 1.3rem; font-weight: 900; color: var(--coral); line-height: 1; }
-.appt-month { font-size: .65rem; font-weight: 800; color: var(--coral); text-transform: uppercase; letter-spacing: .3px; }
-
-/* ============================================================
-   SWITCH TOGGLE
-   ============================================================ */
-.toggle-wrap { display: flex; align-items: center; justify-content: space-between; }
-.toggle {
-  position: relative;
-  width: 44px; height: 26px;
-}
-.toggle input { opacity: 0; width: 0; height: 0; }
-.toggle-slider {
-  position: absolute;
-  inset: 0;
-  background: var(--border);
-  border-radius: 13px;
-  transition: .2s;
-  cursor: pointer;
-}
-.toggle-slider::before {
-  content: '';
-  position: absolute;
-  width: 20px; height: 20px;
-  background: white;
-  border-radius: 50%;
-  left: 3px; top: 3px;
-  transition: .2s;
-  box-shadow: 0 1px 4px rgba(0,0,0,.2);
-}
-.toggle input:checked + .toggle-slider { background: var(--green); }
-.toggle input:checked + .toggle-slider::before { transform: translateX(18px); }
-
-/* ============================================================
-   PHOTO UPLOAD AREA
-   ============================================================ */
-.photo-upload {
-  border: 2px dashed var(--border);
-  border-radius: var(--radius-md);
-  padding: 20px;
-  text-align: center;
-  color: var(--text-muted);
-  font-size: .85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all .18s;
-}
-.photo-upload:active { border-color: var(--coral); background: var(--coral-light); }
-.photo-preview {
-  width: 100%;
-  border-radius: var(--radius-md);
-  object-fit: cover;
-  max-height: 180px;
-  display: none;
-}
-
-/* ============================================================
-   HOME HERO
-   ============================================================ */
-.home-hero {
-  background: var(--coral);
-  padding: 56px 20px 24px;
-  color: white;
-  flex-shrink: 0;
-}
-.hero-greeting {
-  font-size: .82rem;
-  font-weight: 600;
-  opacity: .8;
-  margin-bottom: 4px;
-  letter-spacing: .3px;
-}
-.hero-name {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.7rem;
-  font-weight: 700;
-  line-height: 1.2;
-}
-.hero-paw { font-size: 1.1rem; }
-
-/* ============================================================
-   PET SELECTOR PILL
-   ============================================================ */
-.pet-pills { display: flex; gap: 8px; overflow-x: auto; padding: 12px 20px; flex-shrink: 0; }
-.pet-pills::-webkit-scrollbar { display: none; }
-.pet-pill {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  background: var(--card);
-  border-radius: 30px;
-  border: 1.5px solid var(--border);
-  font-size: .85rem;
-  font-weight: 700;
-  white-space: nowrap;
-  transition: all .15s;
-  flex-shrink: 0;
-}
-.pet-pill.active { border-color: var(--coral); background: var(--coral-light); color: var(--coral); }
-.pet-pill-emoji { font-size: 1.1rem; }
-
-/* ============================================================
-   QUICK ACCESS GRID
-   ============================================================ */
-.quick-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin-bottom: 16px;
-}
-.quick-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  padding: 12px 4px;
-  background: var(--card);
-  border-radius: var(--radius-md);
-  font-size: .7rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  border: 1px solid var(--border);
-  text-align: center;
-  transition: all .15s;
-}
-.quick-item:active { border-color: var(--coral); color: var(--coral); }
-.quick-item-icon { font-size: 1.4rem; }
-
-/* ============================================================
-   WELCOME / ONBOARDING
-   ============================================================ */
-#screen-welcome {
-  background: var(--coral);
-  color: white;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 40px 32px;
-  min-height: 100dvh;
-  padding-bottom: calc(32px + var(--safe-bottom));
-  animation: fadeIn .3s ease;
-}
-.welcome-paw { font-size: 4rem; margin-bottom: 24px; }
-.welcome-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 2.2rem;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-.welcome-sub { font-size: 1rem; opacity: .85; margin-bottom: 40px; line-height: 1.5; font-weight: 500; }
-.welcome-btn {
-  background: white;
-  color: var(--coral);
-  border-radius: var(--radius-md);
-  padding: 16px 40px;
-  font-size: 1rem;
-  font-weight: 800;
-  box-shadow: 0 4px 20px rgba(0,0,0,.15);
-}
-
-/* ============================================================
-   MISC UTILS
-   ============================================================ */
-.flex-between { display: flex; align-items: center; justify-content: space-between; }
-.flex-center  { display: flex; align-items: center; gap: 10px; }
-.mt-4  { margin-top: 4px; }
-.mt-8  { margin-top: 8px; }
-.mt-12 { margin-top: 12px; }
-.mt-16 { margin-top: 16px; }
-.text-sm { font-size: .82rem; }
-.text-muted { color: var(--text-muted); }
-.text-green { color: var(--green); }
-.text-coral { color: var(--coral); }
-.font-bold { font-weight: 700; }
-.font-black { font-weight: 900; }
-.line-through { text-decoration: line-through; opacity: .5; }
+.flex-c{display:flex;align-items:center;gap:8px}
+.mt-8{margin-top:8px}.mt-12{margin-top:12px}.mt-16{margin-top:16px}
+.tsm{font-size:.8rem}.tm{color:var(--text-muted)}.fw8{font-weight:800}
 </style>
 </head>
 <body>
-
 <div id="app">
 
-  <!-- =========================================================
-       WELCOME SCREEN (first launch)
-       ========================================================= -->
-  <div id="screen-welcome">
-    <div class="welcome-paw">🐾</div>
-    <div class="welcome-title">Petvida</div>
-    <div class="welcome-sub">Salud y felicidad para quienes más amás</div>
-    <button class="welcome-btn" onclick="startOnboarding()">Comenzar →</button>
+<!-- WELCOME -->
+<div id="swelcome">
+  <div class="wlogo">🐾</div>
+  <div class="wtitle">Petvida</div>
+  <div class="wsub">La salud y felicidad de tu mascota, siempre a mano</div>
+  <button class="wbtn" onclick="startApp()">Comenzar →</button>
+</div>
+
+<!-- MAIN APP -->
+<div id="main-app" style="display:none">
+
+  <!-- HOME -->
+  <div id="screen-home" class="screen active">
+    <div class="home-hdr">
+      <div class="home-brand">Petvida</div>
+      <div class="home-sub" id="home-sub">Bienvenido</div>
+      <div class="home-name" id="home-name">—</div>
+      <div id="home-spill"></div>
+    </div>
+    <div class="pet-pills" id="pet-pills"></div>
+    <div class="scroll-area">
+      <div class="stitle">Acceso rápido</div>
+      <div class="qgrid">
+        <div class="qitem" onclick="goTo('vacunas')"><span class="qico">💉</span>Vacunas</div>
+        <div class="qitem" onclick="goTo('medicamentos')"><span class="qico">💊</span>Remedios</div>
+        <div class="qitem" onclick="goTo('citas')"><span class="qico">📅</span>Citas</div>
+        <div class="qitem" onclick="goTo('mascotas')"><span class="qico">🐾</span>Mascotas</div>
+      </div>
+      <div class="stitle">Hoy</div>
+      <div id="home-alerts"></div>
+      <div id="home-upcoming"></div>
+    </div>
   </div>
 
-  <!-- =========================================================
-       MAIN APP (after onboarding)
-       ========================================================= -->
-  <div id="main-app" style="display:none">
-
-    <!-- ── HOME ─────────────────────────────────────────────── -->
-    <div id="screen-home" class="screen active">
-      <div class="home-hero" id="home-hero">
-        <div class="hero-greeting" id="hero-greeting">Bienvenido a Petvida</div>
-        <div class="hero-name" id="hero-name">Cargando...</div>
-      </div>
-
-      <!-- Pet pills selector -->
-      <div class="pet-pills" id="pet-pills"></div>
-
-      <div class="scroll-area">
-        <!-- Today's summary -->
-        <div id="home-summary"></div>
-
-        <!-- Quick access -->
-        <div class="section-title mt-8">Acceso rápido</div>
-        <div class="quick-grid">
-          <div class="quick-item" onclick="goToSection('vacunas')">
-            <span class="quick-item-icon">💉</span>Vacunas
-          </div>
-          <div class="quick-item" onclick="goToSection('medicamentos')">
-            <span class="quick-item-icon">💊</span>Remedios
-          </div>
-          <div class="quick-item" onclick="goToSection('citas')">
-            <span class="quick-item-icon">📅</span>Citas
-          </div>
-          <div class="quick-item" onclick="goToSection('recordatorios')">
-            <span class="quick-item-icon">🔔</span>Alertas
-          </div>
-        </div>
-
-        <!-- Alerts -->
-        <div class="section-title">Hoy</div>
-        <div id="home-alerts"></div>
-      </div>
+  <!-- MASCOTAS -->
+  <div id="screen-mascotas" class="screen">
+    <div class="hdr"><div class="hdr-brand">Petvida</div><div class="hdr-title">Mis mascotas</div></div>
+    <div class="scroll-area">
+      <div id="pets-list"></div>
+      <button class="btn btn-p btn-f mt-8" onclick="openM('modal-pet')">+ Registrar mascota</button>
     </div>
+  </div>
 
-    <!-- ── MASCOTAS LIST ─────────────────────────────────────── -->
-    <div id="screen-mascotas" class="screen">
-      <div class="header">
-        <div class="header-title">Mis mascotas</div>
-        <div class="header-sub">Todos tus compañeros</div>
-      </div>
-      <div class="scroll-area">
-        <div id="pets-list"></div>
-        <button class="btn btn-primary btn-full mt-12" onclick="openModal('modal-add-pet')">
-          + Registrar mascota
-        </button>
-      </div>
+  <!-- PET PROFILE -->
+  <div id="screen-pet-profile" class="screen">
+    <div class="hdr" style="padding-top:44px">
+      <div class="hdr-back" onclick="goTo('mascotas')">← Mis mascotas</div>
+      <div class="hdr-title" id="ptitle">Perfil</div>
     </div>
+    <div class="scroll-area" id="pcontent"></div>
+  </div>
 
-    <!-- ── PET PROFILE ───────────────────────────────────────── -->
-    <div id="screen-pet-profile" class="screen">
-      <div class="header" style="padding-top:44px">
-        <div class="header-back" onclick="goBack()">← Mis mascotas</div>
-        <div class="header-title" id="profile-pet-name">Perfil</div>
-      </div>
-      <div class="scroll-area" id="pet-profile-content"></div>
-    </div>
+  <!-- VACUNAS -->
+  <div id="screen-vacunas" class="screen">
+    <div class="hdr"><div class="hdr-brand">Petvida</div><div class="hdr-title" id="vtitle">Vacunas</div><div class="hdr-sub">Carnet digital</div></div>
+    <div class="scroll-area" id="vlist"></div>
+    <button class="fab" onclick="openM('modal-vax')">+</button>
+  </div>
 
-    <!-- ── VACUNAS ───────────────────────────────────────────── -->
-    <div id="screen-vacunas" class="screen">
-      <div class="header">
-        <div class="header-title" id="vax-screen-title">Vacunas</div>
-        <div class="header-sub" id="vax-screen-sub"></div>
-      </div>
-      <div class="scroll-area">
-        <div id="vax-list"></div>
-      </div>
-      <button class="fab" onclick="openModal('modal-add-vax')">+</button>
-    </div>
+  <!-- MEDICAMENTOS -->
+  <div id="screen-medicamentos" class="screen">
+    <div class="hdr"><div class="hdr-brand">Petvida</div><div class="hdr-title" id="medtitle">Medicamentos</div></div>
+    <div class="scroll-area" id="medlist"></div>
+    <button class="fab" onclick="openM('modal-med')">+</button>
+  </div>
 
-    <!-- ── MEDICAMENTOS ──────────────────────────────────────── -->
-    <div id="screen-medicamentos" class="screen">
-      <div class="header">
-        <div class="header-title" id="med-screen-title">Medicamentos</div>
-        <div class="header-sub" id="med-screen-sub"></div>
-      </div>
-      <div class="scroll-area">
-        <div id="med-list"></div>
-      </div>
-      <button class="fab" onclick="openModal('modal-add-med')">+</button>
-    </div>
+  <!-- CITAS -->
+  <div id="screen-citas" class="screen">
+    <div class="hdr"><div class="hdr-brand">Petvida</div><div class="hdr-title" id="aptitle">Citas</div><div class="hdr-sub">Agenda veterinaria</div></div>
+    <div class="scroll-area" id="aplist"></div>
+    <button class="fab" onclick="openM('modal-appt')">+</button>
+  </div>
 
-    <!-- ── CITAS ─────────────────────────────────────────────── -->
-    <div id="screen-citas" class="screen">
-      <div class="header">
-        <div class="header-title" id="appt-screen-title">Citas</div>
-        <div class="header-sub" id="appt-screen-sub"></div>
-      </div>
-      <div class="scroll-area">
-        <div id="appt-list"></div>
-      </div>
-      <button class="fab" onclick="openModal('modal-add-appt')">+</button>
-    </div>
+  <!-- CONSULTAS -->
+  <div id="screen-consultas" class="screen">
+    <div class="hdr" style="padding-top:44px"><div class="hdr-back" onclick="goTo('pet-profile')">← Perfil</div><div class="hdr-title" id="contitle">Consultas</div></div>
+    <div class="scroll-area" id="conlist"></div>
+    <button class="fab" onclick="openM('modal-consulta')">+</button>
+  </div>
 
-    <!-- ── RECORDATORIOS ─────────────────────────────────────── -->
-    <div id="screen-recordatorios" class="screen">
-      <div class="header">
-        <div class="header-title" id="rem-screen-title">Recordatorios</div>
-        <div class="header-sub" id="rem-screen-sub"></div>
-      </div>
-      <div class="scroll-area" id="rem-list"></div>
-    </div>
+  <!-- DESPARASITACION -->
+  <div id="screen-desparasitacion" class="screen">
+    <div class="hdr" style="padding-top:44px"><div class="hdr-back" onclick="goTo('pet-profile')">← Perfil</div><div class="hdr-title" id="dptitle">Desparasitación</div></div>
+    <div class="scroll-area" id="dpcontent"></div>
+    <button class="fab" onclick="openM('modal-despar')">+</button>
+  </div>
 
-    <!-- ─────────────────────────────────────────────────────── -->
-    <!-- BOTTOM NAV                                              -->
-    <!-- ─────────────────────────────────────────────────────── -->
-    <nav class="bottom-nav">
-      <button class="nav-item active" data-screen="home" onclick="navigate('home',this)">
-        <span class="nav-icon">🏠</span>Inicio
-      </button>
-      <button class="nav-item" data-screen="mascotas" onclick="navigate('mascotas',this)">
-        <span class="nav-icon">🐾</span>Mascotas
-      </button>
-      <button class="nav-item" data-screen="vacunas" onclick="navigate('vacunas',this)">
-        <span class="nav-icon">💉</span>Vacunas
-      </button>
-      <button class="nav-item" data-screen="medicamentos" onclick="navigate('medicamentos',this)">
-        <span class="nav-icon">💊</span>Remedios
-      </button>
-      <button class="nav-item" data-screen="citas" onclick="navigate('citas',this)">
-        <span class="nav-icon">📅</span>Citas
-      </button>
-    </nav>
-  </div><!-- /main-app -->
-</div><!-- /app -->
+  <!-- PESO -->
+  <div id="screen-peso" class="screen">
+    <div class="hdr" style="padding-top:44px"><div class="hdr-back" onclick="goTo('pet-profile')">← Perfil</div><div class="hdr-title" id="wtitle">Historial de peso</div></div>
+    <div class="scroll-area" id="wcontent"></div>
+    <button class="fab" onclick="openM('modal-peso')">+</button>
+  </div>
 
-<!-- ================================================================
-     MODALS
-     ================================================================ -->
+  <!-- EXAMENES -->
+  <div id="screen-examenes" class="screen">
+    <div class="hdr" style="padding-top:44px"><div class="hdr-back" onclick="goTo('pet-profile')">← Perfil</div><div class="hdr-title" id="extitle">Exámenes</div></div>
+    <div class="scroll-area" id="exlist"></div>
+    <button class="fab" onclick="openM('modal-examen')">+</button>
+  </div>
 
-<!-- ADD PET -->
-<div class="modal-overlay" id="modal-add-pet">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Registrar mascota</div>
+  <!-- ALIMENTACION -->
+  <div id="screen-alimentacion" class="screen">
+    <div class="hdr" style="padding-top:44px"><div class="hdr-back" onclick="goTo('pet-profile')">← Perfil</div><div class="hdr-title" id="ftitle">Alimentación</div></div>
+    <div class="scroll-area" id="fcontent"></div>
+  </div>
 
-    <div class="form-section">Foto</div>
-    <div class="photo-upload" id="pet-photo-drop" onclick="document.getElementById('pet-photo-input').click()">
-      📷 Toca para agregar foto
-    </div>
-    <input type="file" id="pet-photo-input" accept="image/*" style="display:none" onchange="previewPetPhoto(this)">
-    <img class="photo-preview" id="pet-photo-preview">
+  <!-- ENFERMEDADES -->
+  <div id="screen-enfermedades" class="screen">
+    <div class="hdr" style="padding-top:44px"><div class="hdr-back" onclick="goTo('pet-profile')">← Perfil</div><div class="hdr-title" id="entitle">Enfermedades crónicas</div></div>
+    <div class="scroll-area" id="enlist"></div>
+    <button class="fab" onclick="openM('modal-enfermedad')">+</button>
+  </div>
 
-    <div class="form-section">Datos generales</div>
-    <div class="form-group">
-      <label class="form-label">Nombre *</label>
-      <input class="form-input" id="pet-name" placeholder="ej. Max" maxlength="30">
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Especie *</label>
-        <select class="form-input" id="pet-species" onchange="toggleCustomSpecies(this.value)">
-          <option value="">Elegir</option>
-          <option value="Perro">Perro 🐶</option>
-          <option value="Gato">Gato 🐱</option>
-          <option value="Conejo">Conejo 🐰</option>
-          <option value="Ave">Ave 🐦</option>
-          <option value="Otro">Otro 🐾</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Raza</label>
-        <input class="form-input" id="pet-breed" placeholder="ej. Labrador">
-      </div>
-    </div>
-    <div class="form-group" id="pet-species-custom-wrap" style="display:none">
-      <label class="form-label">¿Qué especie es? *</label>
-      <input class="form-input" id="pet-species-custom" placeholder="ej. Tortuga, Hamster, Serpiente...">
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Fecha nacimiento</label>
-        <input class="form-input" id="pet-dob" type="date">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Peso (kg)</label>
-        <input class="form-input" id="pet-weight" type="number" step="0.1" placeholder="8.5">
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Sexo</label>
-        <select class="form-input" id="pet-sex">
-          <option value="">N/A</option>
-          <option value="Macho">Macho</option>
-          <option value="Hembra">Hembra</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Esterilizado</label>
-        <select class="form-input" id="pet-neutered">
-          <option value="">N/A</option>
-          <option value="Sí">Sí</option>
-          <option value="No">No</option>
-        </select>
-      </div>
-    </div>
+  <!-- BOTTOM NAV -->
+  <nav class="bnav">
+    <button class="nitem active" data-nav="home" onclick="navigate('home',this)"><span class="nicon">🏠</span><div class="nbar"></div><span>Inicio</span></button>
+    <button class="nitem" data-nav="mascotas" onclick="navigate('mascotas',this)"><span class="nicon">🐾</span><div class="nbar"></div><span>Mascotas</span></button>
+    <button class="nitem" data-nav="vacunas" onclick="navigate('vacunas',this)"><span class="nicon">💉</span><div class="nbar"></div><span>Vacunas</span></button>
+    <button class="nitem" data-nav="medicamentos" onclick="navigate('medicamentos',this)"><span class="nicon">💊</span><div class="nbar"></div><span>Remedios</span></button>
+    <button class="nitem" data-nav="citas" onclick="navigate('citas',this)"><span class="nicon">📅</span><div class="nbar"></div><span>Citas</span></button>
+  </nav>
+</div>
+</div>
 
-    <div class="form-section">Salud</div>
-    <div class="form-group">
-      <label class="form-label">Microchip</label>
-      <input class="form-input" id="pet-chip" placeholder="Número de microchip">
+<!-- MODALS -->
+<div class="moverlay" id="modal-pet">
+  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Registrar mascota</div>
+    <div class="fsec">Foto</div>
+    <div class="pup" id="pp-drop" onclick="document.getElementById('pp-inp').click()">📷 Toca para agregar foto</div>
+    <input type="file" id="pp-inp" accept="image/*" style="display:none" onchange="prevPhoto(this,'pp-pre','pp-drop')">
+    <img class="ppre" id="pp-pre">
+    <div class="fsec">Datos generales</div>
+    <div class="fg"><label class="fl">Nombre *</label><input class="fi" id="p-name" placeholder="ej. Max" maxlength="30"></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Especie *</label><select class="fi" id="p-species" onchange="toggleSp(this.value)"><option value="">Elegir</option><option>Perro 🐶</option><option>Gato 🐱</option><option>Conejo 🐰</option><option>Ave 🐦</option><option value="Otro">Otro 🐾</option></select></div>
+      <div class="fg"><label class="fl">Raza</label><input class="fi" id="p-breed" placeholder="ej. Labrador"></div>
     </div>
-    <div class="form-group">
-      <label class="form-label">Alergias</label>
-      <input class="form-input" id="pet-allergies" placeholder="ej. Polen, pollo">
+    <div class="fg" id="p-sp-wrap" style="display:none"><label class="fl">¿Qué especie? *</label><input class="fi" id="p-sp-custom" placeholder="ej. Tortuga, Hamster..."></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Fecha nac.</label><input class="fi" id="p-dob" type="date"></div>
+      <div class="fg"><label class="fl">Peso (kg)</label><input class="fi" id="p-weight" type="number" step="0.1" placeholder="8.5"></div>
     </div>
-
-    <div class="form-section">Veterinario</div>
-    <div class="form-group">
-      <label class="form-label">Nombre veterinario</label>
-      <input class="form-input" id="pet-vet" placeholder="Dr. García">
+    <div class="fr">
+      <div class="fg"><label class="fl">Sexo</label><select class="fi" id="p-sex"><option value="">N/A</option><option>Macho</option><option>Hembra</option></select></div>
+      <div class="fg"><label class="fl">Esterilizado</label><select class="fi" id="p-neut"><option value="">N/A</option><option value="Sí">Sí</option><option>No</option></select></div>
     </div>
-    <div class="form-group">
-      <label class="form-label">Teléfono clínica</label>
-      <input class="form-input" id="pet-vet-phone" placeholder="+56 9 1234 5678" type="tel">
-    </div>
-
-    <div class="mt-16" style="display:flex;gap:8px">
-      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('modal-add-pet')">Cancelar</button>
-      <button class="btn btn-primary" style="flex:2" onclick="savePet()">Guardar mascota</button>
+    <div class="fsec">Salud</div>
+    <div class="fg"><label class="fl">Microchip</label><input class="fi" id="p-chip" placeholder="Número de microchip"></div>
+    <div class="fg"><label class="fl">Alergias</label><input class="fi" id="p-allerg" placeholder="ej. Pollo, Polen"></div>
+    <div class="fsec">Veterinario de cabecera</div>
+    <div class="fg"><label class="fl">Nombre</label><input class="fi" id="p-vet" placeholder="Dr. García"></div>
+    <div class="fg"><label class="fl">Teléfono clínica</label><input class="fi" id="p-vphone" type="tel" placeholder="+56 9 1234 5678"></div>
+    <div class="mt-12 flex-c" style="gap:8px">
+      <button class="btn btn-g" style="flex:1" onclick="closeM('modal-pet')">Cancelar</button>
+      <button class="btn btn-p" style="flex:2" onclick="savePet()">Guardar mascota</button>
     </div>
   </div>
 </div>
 
-<!-- ADD VACCINE -->
-<div class="modal-overlay" id="modal-add-vax">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Nueva vacuna</div>
-    <div class="form-group">
-      <label class="form-label">Nombre vacuna *</label>
-      <input class="form-input" id="vax-name" placeholder="ej. Antirrábica, Bordetella">
+<div class="moverlay" id="modal-vax">
+  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Nueva vacuna</div>
+    <div class="fg"><label class="fl">Nombre *</label><input class="fi" id="v-name" placeholder="ej. Antirrábica, Bordetella"></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Fecha aplicación</label><input class="fi" id="v-date" type="date"></div>
+      <div class="fg"><label class="fl">Vence</label><input class="fi" id="v-expiry" type="date"></div>
     </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Fecha aplicación</label>
-        <input class="form-input" id="vax-date" type="date">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Vence</label>
-        <input class="form-input" id="vax-expiry" type="date">
-      </div>
+    <div class="fg"><label class="fl">Veterinario que aplicó</label><input class="fi" id="v-vet" placeholder="Dr. García"></div>
+    <div class="fg"><label class="fl">Lote / laboratorio</label><input class="fi" id="v-batch" placeholder="Opcional"></div>
+    <div class="fg"><label class="fl">Foto del sticker (opcional)</label>
+      <div class="pup" onclick="document.getElementById('vs-inp').click()">📷 Subir foto del sticker</div>
+      <input type="file" id="vs-inp" accept="image/*" style="display:none" onchange="prevPhoto(this,'vs-pre',null)">
+      <img class="ppre" id="vs-pre">
     </div>
-    <div class="form-group">
-      <label class="form-label">Lote / laboratorio</label>
-      <input class="form-input" id="vax-batch" placeholder="Opcional">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Foto del sticker (opcional)</label>
-      <div class="photo-upload" onclick="document.getElementById('vax-sticker-input').click()">
-        📷 Subir foto del sticker
-      </div>
-      <input type="file" id="vax-sticker-input" accept="image/*" style="display:none" onchange="previewVaxSticker(this)">
-      <img class="photo-preview" id="vax-sticker-preview">
-    </div>
-    <div class="mt-12" style="display:flex;gap:8px">
-      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('modal-add-vax')">Cancelar</button>
-      <button class="btn btn-primary" style="flex:2" onclick="saveVax()">Guardar</button>
+    <div class="mt-12 flex-c" style="gap:8px">
+      <button class="btn btn-g" style="flex:1" onclick="closeM('modal-vax')">Cancelar</button>
+      <button class="btn btn-p" style="flex:2" onclick="saveVax()">Guardar</button>
     </div>
   </div>
 </div>
 
-<!-- ADD MEDICATION -->
-<div class="modal-overlay" id="modal-add-med">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Nuevo medicamento</div>
-    <div class="form-group">
-      <label class="form-label">Nombre *</label>
-      <input class="form-input" id="med-name" placeholder="ej. Omeprazol">
+<div class="moverlay" id="modal-med">
+  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Nuevo medicamento</div>
+    <div class="fg"><label class="fl">Nombre *</label><input class="fi" id="m-name" placeholder="ej. Omeprazol"></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Dosis</label><input class="fi" id="m-dose" placeholder="5mg"></div>
+      <div class="fg"><label class="fl">Frecuencia</label><select class="fi" id="m-freq"><option>Cada 8 horas</option><option>Cada 12 horas</option><option>1 vez al día</option><option>Cada 24 horas</option><option>Semanal</option><option>Mensual</option><option>Cuando necesite</option></select></div>
     </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Dosis</label>
-        <input class="form-input" id="med-dose" placeholder="5mg">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Frecuencia</label>
-        <select class="form-input" id="med-freq">
-          <option value="Cada 12 horas">Cada 12h</option>
-          <option value="Cada 8 horas">Cada 8h</option>
-          <option value="1 vez al día">1x día</option>
-          <option value="Cada 24 horas">Cada 24h</option>
-          <option value="Semanal">Semanal</option>
-          <option value="Mensual">Mensual</option>
-          <option value="Cuando necesite">Si necesita</option>
-        </select>
-      </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Fecha inicio</label><input class="fi" id="m-start" type="date"></div>
+      <div class="fg"><label class="fl">Fecha fin</label><input class="fi" id="m-end" type="date"></div>
     </div>
-    <div class="form-group">
-      <label class="form-label">Horario</label>
-      <input class="form-input" id="med-time" type="time">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Notas</label>
-      <input class="form-input" id="med-notes" placeholder="ej. Con comida">
-    </div>
-    <div class="form-group">
-      <div class="toggle-wrap">
-        <span class="form-label" style="margin:0">Activo</span>
-        <label class="toggle">
-          <input type="checkbox" id="med-active" checked>
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-    </div>
-    <div class="mt-12" style="display:flex;gap:8px">
-      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('modal-add-med')">Cancelar</button>
-      <button class="btn btn-primary" style="flex:2" onclick="saveMed()">Guardar</button>
+    <div class="fg"><label class="fl">Horario</label><input class="fi" id="m-time" type="time"></div>
+    <div class="fg"><label class="fl">Notas</label><input class="fi" id="m-notes" placeholder="ej. Con comida"></div>
+    <div class="fg"><div class="tgl-wrap"><span class="fl" style="margin:0">Activo</span><label class="tgl"><input type="checkbox" id="m-active" checked><span class="tgl-sl"></span></label></div></div>
+    <div class="mt-12 flex-c" style="gap:8px">
+      <button class="btn btn-g" style="flex:1" onclick="closeM('modal-med')">Cancelar</button>
+      <button class="btn btn-p" style="flex:2" onclick="saveMed()">Guardar</button>
     </div>
   </div>
 </div>
 
-<!-- ADD APPOINTMENT -->
-<div class="modal-overlay" id="modal-add-appt">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Nueva cita</div>
-    <div class="form-group">
-      <label class="form-label">Veterinario *</label>
-      <input class="form-input" id="appt-vet" placeholder="Dr. García">
+<div class="moverlay" id="modal-appt">
+  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Nueva cita</div>
+    <div class="fg"><label class="fl">Veterinario *</label><input class="fi" id="a-vet" placeholder="Dr. García"></div>
+    <div class="fg"><label class="fl">Especialidad</label><input class="fi" id="a-spec" placeholder="ej. Dermatología"></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Fecha *</label><input class="fi" id="a-date" type="date"></div>
+      <div class="fg"><label class="fl">Hora *</label><input class="fi" id="a-time" type="time"></div>
     </div>
-    <div class="form-group">
-      <label class="form-label">Especialidad</label>
-      <input class="form-input" id="appt-specialty" placeholder="ej. Dermatología">
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Fecha *</label>
-        <input class="form-input" id="appt-date" type="date">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Hora *</label>
-        <input class="form-input" id="appt-time" type="time">
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Lugar / clínica</label>
-      <input class="form-input" id="appt-place" placeholder="Clínica Vetcare">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Motivo</label>
-      <input class="form-input" id="appt-reason" placeholder="ej. Control anual">
-    </div>
-    <div class="mt-12" style="display:flex;gap:8px">
-      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('modal-add-appt')">Cancelar</button>
-      <button class="btn btn-primary" style="flex:2" onclick="saveAppt()">Guardar</button>
+    <div class="fg"><label class="fl">Lugar / clínica</label><input class="fi" id="a-place" placeholder="Clínica Vetcare"></div>
+    <div class="fg"><label class="fl">Motivo</label><input class="fi" id="a-reason" placeholder="ej. Control anual"></div>
+    <div class="mt-12 flex-c" style="gap:8px">
+      <button class="btn btn-g" style="flex:1" onclick="closeM('modal-appt')">Cancelar</button>
+      <button class="btn btn-p" style="flex:2" onclick="saveAppt()">Guardar</button>
     </div>
   </div>
 </div>
 
-<!-- TOAST -->
+<div class="moverlay" id="modal-consulta">
+  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Registrar consulta</div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Fecha *</label><input class="fi" id="c-date" type="date"></div>
+      <div class="fg"><label class="fl">Tipo</label><select class="fi" id="c-type"><option>Control</option><option>Urgencia</option><option>Cirugía</option><option>Vacunación</option><option>Examen</option><option>Otro</option></select></div>
+    </div>
+    <div class="fg"><label class="fl">Veterinario *</label><input class="fi" id="c-vet" placeholder="Dr. García"></div>
+    <div class="fg"><label class="fl">Clínica / lugar</label><input class="fi" id="c-place" placeholder="Clínica Vetcare"></div>
+    <div class="fg"><label class="fl">Motivo de consulta</label><input class="fi" id="c-reason" placeholder="ej. Vómitos frecuentes"></div>
+    <div class="fg"><label class="fl">Diagnóstico</label><textarea class="fi" id="c-diag" rows="3" style="resize:none;line-height:1.5" placeholder="ej. Gastroenteritis aguda. Dieta blanda 3 días."></textarea></div>
+    <div class="fg"><label class="fl">Tratamiento indicado</label><textarea class="fi" id="c-treat" rows="2" style="resize:none;line-height:1.5" placeholder="ej. Metronidazol 250mg cada 12h por 5 días"></textarea></div>
+    <div class="fg"><label class="fl">Próximo control</label><input class="fi" id="c-follow" type="date"></div>
+    <div class="mt-12 flex-c" style="gap:8px">
+      <button class="btn btn-g" style="flex:1" onclick="closeM('modal-consulta')">Cancelar</button>
+      <button class="btn btn-p" style="flex:2" onclick="saveConsulta()">Guardar consulta</button>
+    </div>
+  </div>
+</div>
+
+<div class="moverlay" id="modal-despar">
+  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Registrar desparasitación</div>
+    <div class="fg"><label class="fl">Tipo *</label><select class="fi" id="dp-type"><option value="Interna">Interna (antiparasitario oral)</option><option value="Externa">Externa (antipulgas / garrapatas)</option></select></div>
+    <div class="fg"><label class="fl">Producto usado</label><input class="fi" id="dp-prod" placeholder="ej. Drontal Plus, Frontline, Bravecto"></div>
+    <div class="fg"><label class="fl">Fecha aplicación *</label><input class="fi" id="dp-date" type="date" oninput="calcNextDp()"></div>
+    <div class="fg"><label class="fl">Frecuencia</label><select class="fi" id="dp-freq" onchange="calcNextDp()"><option value="30">Mensual (30 días)</option><option value="90" selected>Trimestral (90 días)</option><option value="180">Semestral (180 días)</option></select></div>
+    <div class="fg"><label class="fl">Próxima aplicación (calculada)</label><input class="fi" id="dp-next" type="date" readonly style="background:#f5f5f3;color:var(--text-muted)"></div>
+    <div class="fg"><label class="fl">Notas</label><input class="fi" id="dp-notes" placeholder="Opcional"></div>
+    <div class="mt-12 flex-c" style="gap:8px">
+      <button class="btn btn-g" style="flex:1" onclick="closeM('modal-despar')">Cancelar</button>
+      <button class="btn btn-p" style="flex:2" onclick="saveDespar()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="moverlay" id="modal-peso">
+  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Registrar peso</div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Peso (kg) *</label><input class="fi" id="w-val" type="number" step="0.1" placeholder="8.5"></div>
+      <div class="fg"><label class="fl">Fecha *</label><input class="fi" id="w-date" type="date"></div>
+    </div>
+    <div class="fg"><label class="fl">Condición corporal (BCS 1–9)</label><select class="fi" id="w-bcs"><option value="">No evaluado</option><option value="1-3">1-3 · Bajo peso</option><option value="4-5">4-5 · Ideal</option><option value="6-7">6-7 · Sobrepeso</option><option value="8-9">8-9 · Obesidad</option></select></div>
+    <div class="fg"><label class="fl">Notas</label><input class="fi" id="w-notes" placeholder="ej. Pesado en clínica Vetcare"></div>
+    <div class="mt-12 flex-c" style="gap:8px">
+      <button class="btn btn-g" style="flex:1" onclick="closeM('modal-peso')">Cancelar</button>
+      <button class="btn btn-p" style="flex:2" onclick="savePeso()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="moverlay" id="modal-examen">
+  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Nuevo examen</div>
+    <div class="fg"><label class="fl">Tipo de examen *</label><select class="fi" id="ex-type" onchange="document.getElementById('ex-cw').style.display=this.value==='Otro'?'block':'none'"><option>Hemograma</option><option>Perfil bioquímico</option><option>Orina</option><option>Radiografía</option><option>Ecografía</option><option>Cultivo</option><option value="Otro">Otro</option></select></div>
+    <div class="fg" id="ex-cw" style="display:none"><label class="fl">Especificar</label><input class="fi" id="ex-custom" placeholder="Nombre del examen"></div>
+    <div class="fg"><label class="fl">Fecha *</label><input class="fi" id="ex-date" type="date"></div>
+    <div class="fg"><label class="fl">Laboratorio / clínica</label><input class="fi" id="ex-lab" placeholder="ej. Labovets"></div>
+    <div class="fg"><label class="fl">Resultado / observación</label><textarea class="fi" id="ex-result" rows="3" style="resize:none;line-height:1.5" placeholder="ej. Valores dentro de rango normal"></textarea></div>
+    <div class="fg"><label class="fl">Foto del resultado (opcional)</label>
+      <div class="pup" onclick="document.getElementById('ex-inp').click()">📷 Subir foto del resultado</div>
+      <input type="file" id="ex-inp" accept="image/*" style="display:none" onchange="prevPhoto(this,'ex-pre',null)">
+      <img class="ppre" id="ex-pre">
+    </div>
+    <div class="mt-12 flex-c" style="gap:8px">
+      <button class="btn btn-g" style="flex:1" onclick="closeM('modal-examen')">Cancelar</button>
+      <button class="btn btn-p" style="flex:2" onclick="saveExamen()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="moverlay" id="modal-alimento">
+  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Alimentación</div>
+    <div class="fg"><label class="fl">Marca / alimento *</label><input class="fi" id="f-brand" placeholder="ej. Royal Canin, Hills, BARF"></div>
+    <div class="fg"><label class="fl">Tipo</label><select class="fi" id="f-type"><option>Seco (croquetas)</option><option>Húmedo (lata/sobre)</option><option>BARF (crudo)</option><option>Casero</option><option>Mixto</option></select></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Cantidad diaria</label><input class="fi" id="f-amount" placeholder="250g"></div>
+      <div class="fg"><label class="fl">Veces al día</label><select class="fi" id="f-times"><option>1 vez</option><option selected>2 veces</option><option>3 veces</option><option>A libre demanda</option></select></div>
+    </div>
+    <div class="fg"><label class="fl">Notas / restricciones</label><textarea class="fi" id="f-notes" rows="2" style="resize:none;line-height:1.5" placeholder="ej. Sin pollo por alergia"></textarea></div>
+    <div class="mt-12 flex-c" style="gap:8px">
+      <button class="btn btn-g" style="flex:1" onclick="closeM('modal-alimento')">Cancelar</button>
+      <button class="btn btn-p" style="flex:2" onclick="saveAlimento()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="moverlay" id="modal-enfermedad">
+  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Enfermedad crónica</div>
+    <div class="fg"><label class="fl">Nombre / diagnóstico *</label><input class="fi" id="en-name" placeholder="ej. Diabetes, Epilepsia, Displasia de cadera"></div>
+    <div class="fg"><label class="fl">Fecha de diagnóstico</label><input class="fi" id="en-date" type="date"></div>
+    <div class="fg"><label class="fl">Veterinario que diagnosticó</label><input class="fi" id="en-vet" placeholder="Dr. García"></div>
+    <div class="fg"><label class="fl">Notas / tratamiento base</label><textarea class="fi" id="en-notes" rows="3" style="resize:none;line-height:1.5" placeholder="ej. Insulina 2 UI cada 12h, controles cada 3 meses"></textarea></div>
+    <div class="mt-12 flex-c" style="gap:8px">
+      <button class="btn btn-g" style="flex:1" onclick="closeM('modal-enfermedad')">Cancelar</button>
+      <button class="btn btn-p" style="flex:2" onclick="saveEnfermedad()">Guardar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
-<!-- ================================================================
-     JAVASCRIPT
-     ================================================================ -->
 <script>
 /* ================================================================
    DATA LAYER
-   — All data stored in localStorage as structured JSON.
-   — For Fase 2 migration: replace localStorage.getItem/setItem
-     with API calls to your backend (Supabase, Firebase, etc.)
+   Fase 2: reemplazar get/set con llamadas a API
    ================================================================ */
-
-const DB = {
-  get pets()   { return JSON.parse(localStorage.getItem('pv_pets')   || '[]'); },
-  get vax()    { return JSON.parse(localStorage.getItem('pv_vax')    || '[]'); },
-  get meds()   { return JSON.parse(localStorage.getItem('pv_meds')   || '[]'); },
-  get appts()  { return JSON.parse(localStorage.getItem('pv_appts')  || '[]'); },
-  get activePetId() { return localStorage.getItem('pv_active_pet') || ''; },
-
-  savePets(data)  { localStorage.setItem('pv_pets',  JSON.stringify(data)); },
-  saveVax(data)   { localStorage.setItem('pv_vax',   JSON.stringify(data)); },
-  saveMeds(data)  { localStorage.setItem('pv_meds',  JSON.stringify(data)); },
-  saveAppts(data) { localStorage.setItem('pv_appts', JSON.stringify(data)); },
-  setActivePet(id){ localStorage.setItem('pv_active_pet', id); },
-
-  uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+const DB={
+  get pets(){return J('pv2_pets')},
+  get vax(){return J('pv2_vax')},
+  get meds(){return J('pv2_meds')},
+  get appts(){return J('pv2_appts')},
+  get cons(){return J('pv2_cons')},
+  get despar(){return J('pv2_despar')},
+  get pesos(){return J('pv2_pesos')},
+  get exams(){return J('pv2_exams')},
+  get foods(){return J('pv2_foods')},
+  get enfs(){return J('pv2_enfs')},
+  get aid(){return localStorage.getItem('pv2_aid')||''},
+  save(k,d){localStorage.setItem('pv2_'+k,JSON.stringify(d))},
+  setAid(id){localStorage.setItem('pv2_aid',id)},
+  uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
 };
+function J(k){return JSON.parse(localStorage.getItem(k)||'[]')}
 
 /* ================================================================
    BUSINESS LOGIC
-   — Pure functions. No DOM. Easy to extract to services.
    ================================================================ */
+const getAP=()=>{const ps=DB.pets;if(!ps.length)return null;return ps.find(p=>p.id===DB.aid)||ps[0]};
+const byPet=(pid,col)=>col.filter(x=>x.petId===pid);
+const pEmo=s=>({Perro:'🐶',Gato:'🐱',Conejo:'🐰',Ave:'🐦'}[s]||'🐾');
+function calcAge(dob){if(!dob)return null;const b=new Date(dob+'T00:00:00'),t=new Date();let y=t.getFullYear()-b.getFullYear(),m=t.getMonth()-b.getMonth();if(m<0){y--;m+=12}return y>0?(y===1?'1 año':`${y} años`):(m<=1?'1 mes':`${m} meses`)}
+function fD(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('es-CL',{day:'numeric',month:'short',year:'numeric'})}
+function fDs(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('es-CL',{day:'numeric',month:'short'})}
+function dDiff(ds){const t=new Date();t.setHours(0,0,0,0);return Math.round((new Date(ds+'T00:00:00')-t)/86400000)}
+function vSt(v){if(!v.expiry)return'ok';const d=dDiff(v.expiry);return d<0?'expired':d<=30?'soon':'ok'}
 
-function getActivePet() {
-  const pets = DB.pets;
-  if (!pets.length) return null;
-  return pets.find(p => p.id === DB.activePetId) || pets[0];
-}
-
-function getPetVax(petId) {
-  return DB.vax.filter(v => v.petId === petId);
-}
-function getPetMeds(petId) {
-  return DB.meds.filter(m => m.petId === petId);
-}
-function getPetAppts(petId) {
-  return DB.appts.filter(a => a.petId === petId);
-}
-
-function vaxStatus(vax) {
-  if (!vax.expiry) return 'ok';
-  const today = new Date(); today.setHours(0,0,0,0);
-  const exp   = new Date(vax.expiry + 'T00:00:00');
-  const diffDays = Math.round((exp - today) / 86400000);
-  if (diffDays < 0)  return 'expired';
-  if (diffDays <= 30) return 'soon';
-  return 'ok';
-}
-
-function petEmoji(species) {
-  const map = { Perro:'🐶', Gato:'🐱', Conejo:'🐰', Ave:'🐦' };
-  return map[species] || '🐾';
-}
-
-function calcAge(dob) {
-  if (!dob) return null;
-  const birth = new Date(dob + 'T00:00:00');
-  const today = new Date();
-  let years  = today.getFullYear() - birth.getFullYear();
-  let months = today.getMonth() - birth.getMonth();
-  if (months < 0) { years--; months += 12; }
-  if (years > 0) return years === 1 ? '1 año' : `${years} años`;
-  return months <= 1 ? '1 mes' : `${months} meses`;
-}
-
-function formatDate(dateStr) {
-  if (!dateStr) return '—';
-  const d = new Date(dateStr + 'T00:00:00');
-  return d.toLocaleDateString('es-CL', { day:'numeric', month:'short', year:'numeric' });
-}
-
-function buildAlerts(petId) {
-  const pet   = DB.pets.find(p => p.id === petId);
-  if (!pet) return [];
-  const name  = pet.name;
-  const today = new Date(); today.setHours(0,0,0,0);
-  const alerts = [];
-
-  // Vaccines
-  getPetVax(petId).forEach(v => {
-    const s = vaxStatus(v);
-    if (s === 'expired') {
-      alerts.push({ type:'urgent', icon:'💉', text:`${v.name} vencida`, meta:`Venció ${formatDate(v.expiry)}`, score:3 });
-    } else if (s === 'soon') {
-      const exp = new Date(v.expiry + 'T00:00:00');
-      const diff = Math.round((exp - today) / 86400000);
-      alerts.push({ type:'warn', icon:'💉', text:`La vacuna de ${name} vence pronto — a tiempo`, meta:`${v.name} · ${diff} día${diff!==1?'s':''} restante${diff!==1?'s':''}`, score:2 });
-    }
+function buildAlerts(pid){
+  const pet=DB.pets.find(p=>p.id===pid);if(!pet)return{urgent:[],upcoming:[]};
+  const name=pet.name,all=[];
+  byPet(pid,DB.vax).forEach(v=>{
+    const s=vSt(v);
+    if(s==='expired')all.push({type:'urgent',icon:'💉',text:`${v.name} vencida`,meta:`Venció ${fD(v.expiry)}`,score:4,kind:'h'});
+    else if(s==='soon'){const d=dDiff(v.expiry);all.push({type:'warn',icon:'💉',text:`La vacuna de ${name} vence pronto`,meta:`${v.name} · ${d} día${d!==1?'s':''} restante${d!==1?'s':''}`,score:3,kind:'h'})}
   });
-
-  // Medications
-  getPetMeds(petId).filter(m => m.active).forEach(m => {
-    alerts.push({ type:'ok', icon:'💊', text:`Es hora del remedio de ${name}`, meta:`${m.name} · ${m.dose || ''} · ${m.freq}`, score:1 });
+  byPet(pid,DB.despar).forEach(dp=>{
+    if(!dp.next)return;const d=dDiff(dp.next);
+    if(d<0)all.push({type:'urgent',icon:'🪱',text:`Desparasitación de ${name} vencida`,meta:`${dp.type} · Venció ${fD(dp.next)}`,score:4,kind:'h'});
+    else if(d<=15)all.push({type:d<=3?'warn':'ok',icon:'🪱',text:`Desparasitación de ${name} próxima`,meta:`${dp.type}${dp.prod?' · '+dp.prod:''} · en ${d} días`,score:d<=3?3:1,kind:'h'});
   });
-
-  // Appointments — próximos 10 días, ordenadas por fecha+hora
-  getPetAppts(petId)
-    .filter(a => {
-      const apptDate = new Date(a.date + 'T00:00:00');
-      const diff = Math.round((apptDate - today) / 86400000);
-      return diff >= 0 && diff <= 10;
-    })
-    .sort((a, b) => {
-      // Ordenar por fecha, luego por hora
-      const dateA = new Date(a.date + 'T' + (a.time || '00:00'));
-      const dateB = new Date(b.date + 'T' + (b.time || '00:00'));
-      return dateA - dateB;
-    })
-    .forEach(a => {
-      const apptDate = new Date(a.date + 'T00:00:00');
-      const diff = Math.round((apptDate - today) / 86400000);
-      let type, score, dayStr;
-      if (diff === 0)      { type='warn'; score=4; dayStr='hoy'; }
-      else if (diff === 1) { type='warn'; score=3; dayStr='mañana'; }
-      else if (diff <= 3)  { type='warn'; score=2; dayStr=`en ${diff} días`; }
-      else                 { type='ok';   score=1; dayStr=`en ${diff} días`; }
-      alerts.push({
-        type, icon:'📅',
-        text:`Cita con Dr. ${a.vet} ${dayStr} a las ${a.time}`,
-        meta: [a.specialty, a.place].filter(Boolean).join(' · '),
-        score,
-        daysUntil: diff
-      });
-    });
-
-  // Ordenar: primero por urgencia (score), luego por proximidad (días)
-  return alerts.sort((a, b) => {
-    if (b.score !== a.score) return b.score - a.score;
-    const dA = a.daysUntil !== undefined ? a.daysUntil : 0;
-    const dB = b.daysUntil !== undefined ? b.daysUntil : 0;
-    return dA - dB;
+  byPet(pid,DB.meds).filter(m=>m.active).forEach(m=>{
+    all.push({type:'ok',icon:'💊',text:`Es hora del remedio de ${name}`,meta:`${m.name}${m.dose?' · '+m.dose:''}${m.time?' · '+m.time:''}`,score:2,kind:'m'});
   });
+  byPet(pid,DB.appts).filter(a=>{const d=dDiff(a.date);return d>=0&&d<=10}).sort((a,b)=>new Date(a.date+'T'+(a.time||'00:00'))-new Date(b.date+'T'+(b.time||'00:00'))).forEach(a=>{
+    const d=dDiff(a.date),ds=d===0?'hoy':d===1?'mañana':`en ${d} días`;
+    all.push({type:d<=3?'warn':'ok',icon:'📅',text:`Cita con Dr. ${a.vet} ${ds} a las ${a.time}`,meta:[a.spec,a.place].filter(Boolean).join(' · '),score:d<=1?3:d<=3?2:1,dU:d,kind:'a'});
+  });
+  all.sort((a,b)=>b.score!==a.score?b.score-a.score:(a.dU||0)-(b.dU||0));
+  return{urgent:all.filter(a=>a.kind!=='a'||a.dU<=3),upcoming:all.filter(a=>a.kind==='a'&&a.dU>3)};
 }
-
-/* ================================================================
-   UI STATE
-   ================================================================ */
-let _prevScreen = 'home';
 
 /* ================================================================
    NAVIGATION
    ================================================================ */
-function navigate(screenId, btn) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('screen-' + screenId).classList.add('active');
-  if (btn) btn.classList.add('active');
-  renderScreen(screenId);
-  _prevScreen = screenId;
+let _pid=null;
+function navigate(sid,btn){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nitem').forEach(n=>n.classList.remove('active'));
+  document.getElementById('screen-'+sid).classList.add('active');
+  if(btn)btn.classList.add('active');
+  renderS(sid);
 }
-
-function goToSection(section) {
-  navigate(section, document.querySelector(`[data-screen="${section}"]`));
-}
-
-function goBack() {
-  navigate('mascotas', document.querySelector('[data-screen="mascotas"]'));
-}
-
-function renderScreen(id) {
-  const pet = getActivePet();
-  if (id === 'home')          renderHome();
-  if (id === 'mascotas')      renderPetsList();
-  if (id === 'vacunas')       renderVax(pet);
-  if (id === 'medicamentos')  renderMeds(pet);
-  if (id === 'citas')         renderAppts(pet);
-  if (id === 'recordatorios') renderReminders(pet);
+function goTo(sid){navigate(sid,document.querySelector(`[data-nav="${sid}"]`))}
+function goSub(sid){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+sid).classList.add('active');renderS(sid)}
+function renderS(id){
+  const pet=getAP();
+  ({home:renderHome,mascotas:renderPets,'pet-profile':()=>renderProfile(_pid),vacunas:()=>renderVax(pet),medicamentos:()=>renderMeds(pet),citas:()=>renderAppts(pet),consultas:()=>renderCons(_pid),desparasitacion:()=>renderDespar(_pid),peso:()=>renderPeso(_pid),examenes:()=>renderExams(_pid),alimentacion:()=>renderFood(_pid),enfermedades:()=>renderEnfs(_pid)})[id]?.()
 }
 
 /* ================================================================
-   UI SCREENS — Home
+   HOME
    ================================================================ */
-function renderHome() {
-  const pet = getActivePet();
-  const pets = DB.pets;
-
-  // Hero
-  if (pet) {
-    document.getElementById('hero-greeting').textContent = 'Porque ' + pet.name + ' se merece lo mejor 🐾';
-    document.getElementById('hero-name').textContent = '¡Hola! 👋';
-  } else {
-    document.getElementById('hero-greeting').textContent = 'Bienvenido a Petvida';
-    document.getElementById('hero-name').textContent = 'Registra tu primera mascota →';
-  }
-
-  // Pet pills
-  const pillsEl = document.getElementById('pet-pills');
-  if (!pets.length) {
-    pillsEl.innerHTML = '';
-    return;
-  }
-  pillsEl.innerHTML = pets.map(p => `
-    <div class="pet-pill ${p.id === (pet && pet.id) ? 'active' : ''}" onclick="setActivePet('${p.id}')">
-      <span class="pet-pill-emoji">${petEmoji(p.species)}</span>
-      ${p.name}
-    </div>`).join('');
-
-  // Summary card
-  const summaryEl = document.getElementById('home-summary');
-  if (pet) {
-    const alerts  = buildAlerts(pet.id);
-    const urgentC = alerts.filter(a => a.type === 'urgent').length;
-    const upcomingAppts = alerts.filter(a => a.icon === '📅').length;
-    if (urgentC === 0 && alerts.length === 0) {
-      summaryEl.innerHTML = `
-        <div class="alert-row ok">
-          <span class="alert-icon">✓</span>
-          <div class="alert-text">${pet.name} tiene todo bajo control hoy — disfruten su día juntos</div>
-        </div>`;
-    } else if (urgentC === 0 && upcomingAppts > 0) {
-      summaryEl.innerHTML = `
-        <div class="alert-row ok">
-          <span class="alert-icon">📅</span>
-          <div class="alert-text">${pet.name} está bien — tenés ${upcomingAppts} cita${upcomingAppts>1?'s':''} próxima${upcomingAppts>1?'s':''} agendada${upcomingAppts>1?'s':''}</div>
-        </div>`;
-    } else if (urgentC === 0) {
-      summaryEl.innerHTML = `
-        <div class="alert-row ok">
-          <span class="alert-icon">✓</span>
-          <div class="alert-text">${pet.name} está perfecto hoy ✓</div>
-        </div>`;
-    } else {
-      summaryEl.innerHTML = `
-        <div class="alert-row urgent">
-          <span class="alert-icon">⚠️</span>
-          <div class="alert-text">${urgentC} alerta${urgentC>1?'s':''} pendiente${urgentC>1?'s':''} de ${pet.name}</div>
-        </div>`;
-    }
-  } else {
-    summaryEl.innerHTML = '';
-  }
-
-  // Alerts
-  const alertsEl = document.getElementById('home-alerts');
-  if (!pet) {
-    alertsEl.innerHTML = `<div class="empty-state">
-      <div class="empty-icon">🐾</div>
-      <div class="empty-title">Sin mascotas aún</div>
-      <div class="empty-sub">Registrá a tu compañero para empezar a llevar su historial de salud.</div>
-      <button class="btn btn-primary mt-12" onclick="navigate('mascotas', document.querySelector('[data-screen=mascotas]'))">Registrar mascota</button>
-    </div>`;
-    return;
-  }
-  const alerts = buildAlerts(pet.id);
-
-  // Separar en: urgentes/hoy (vacunas, medicamentos, citas inminentes) vs citas futuras
-  const urgent   = alerts.filter(a => a.icon !== '📅' || (a.daysUntil !== undefined && a.daysUntil <= 7));
-  const upcoming = alerts.filter(a => a.icon === '📅' && a.daysUntil !== undefined && a.daysUntil > 7);
-
-  let html = '';
-
-  if (urgent.length) {
-    html += urgent.map(a => alertRow(a)).join('');
-  } else {
-    html += `<div class="text-muted text-sm" style="padding:4px 0 8px">Sin alertas urgentes hoy.</div>`;
-  }
-
-  if (upcoming.length) {
-    html += `<div class="section-title mt-12">📅 Próximas citas</div>`;
-    html += upcoming.map(a => `
-      <div class="alert-row ok" style="cursor:pointer" onclick="goToSection('citas')">
-        <span class="alert-icon">📅</span>
-        <div style="flex:1">
-          <div class="alert-text">${a.text}</div>
-          ${a.meta ? `<div class="alert-meta">${a.meta}</div>` : ''}
-          <div class="alert-meta" style="color:var(--green);font-weight:700">Faltan ${a.daysUntil} días</div>
-        </div>
-        <span style="color:var(--text-light);font-size:1rem">›</span>
-      </div>`).join('');
-  }
-
-  alertsEl.innerHTML = html || `<div class="text-muted text-sm" style="padding:8px 0">Sin alertas para hoy.</div>`;
+function renderHome(){
+  const pet=getAP(),pets=DB.pets;
+  document.getElementById('home-sub').textContent=pet?`Porque ${pet.name} se merece lo mejor 🐾`:'Bienvenido a Petvida';
+  document.getElementById('home-name').textContent=pet?'¡Hola! 👋':'Registrá tu primera mascota';
+  document.getElementById('pet-pills').innerHTML=pets.map(p=>`<div class="pet-pill ${p.id===DB.aid?'active':''}" onclick="setAP('${p.id}')">${pEmo(p.species)} ${p.name}</div>`).join('');
+  const spEl=document.getElementById('home-spill');
+  if(!pet){spEl.innerHTML='';document.getElementById('home-alerts').innerHTML=empty('🐾','Sin mascotas aún','Registrá a tu compañero para empezar.');document.getElementById('home-upcoming').innerHTML='';return}
+  const{urgent,upcoming}=buildAlerts(pet.id);
+  const hasU=urgent.filter(a=>a.type==='urgent').length;
+  spEl.innerHTML=`<div class="status-pill"><div class="sd ${hasU?'sd-urgent':urgent.length?'sd-warn':'sd-ok'}"></div>${hasU?`${hasU} alerta${hasU>1?'s':''} urgente${hasU>1?'s':''}`:urgent.length===0&&upcoming.length===0?`${pet.name} está perfecto hoy ✓`:upcoming.length&&!urgent.length?`${pet.name} está bien · ${upcoming.length} cita${upcoming.length>1?'s':''} próxima${upcoming.length>1?'s':''}` :'Recordatorios pendientes'}</div>`;
+  document.getElementById('home-alerts').innerHTML=urgent.length?urgent.map(aRow).join(''):`<div class="arow ok"><span class="aicon">✓</span><div><div class="atext">${pet.name} tiene todo bajo control hoy — disfruten su día juntos</div></div></div>`;
+  document.getElementById('home-upcoming').innerHTML=upcoming.length?`<div class="stitle mt-8">📅 Próximas citas</div>`+upcoming.map(a=>`<div class="arow ok" style="cursor:pointer" onclick="goTo('citas')"><span class="aicon">📅</span><div style="flex:1"><div class="atext">${a.text}</div>${a.meta?`<div class="ameta">${a.meta}</div>`:''}<div class="adays">Faltan ${a.dU} días</div></div><span style="color:var(--text-lt)">›</span></div>`).join(''):'';
 }
+function aRow(a){return`<div class="arow ${a.type}"><span class="aicon">${a.icon}</span><div><div class="atext">${a.text}</div>${a.meta?`<div class="ameta">${a.meta}</div>`:''}</div></div>`}
+function setAP(id){DB.setAid(id);renderHome()}
 
-function alertRow(a) {
-  return `<div class="alert-row ${a.type}">
-    <span class="alert-icon">${a.icon}</span>
-    <div>
-      <div class="alert-text">${a.text}</div>
-      ${a.meta ? `<div class="alert-meta">${a.meta}</div>` : ''}
-    </div>
-  </div>`;
-}
-
-function setActivePet(id) {
-  DB.setActivePet(id);
-  renderHome();
-  // Also update other screens if visible
-  const pet = getActivePet();
-  renderVax(pet);
-  renderMeds(pet);
-  renderAppts(pet);
-  renderReminders(pet);
+/* ================================================================
+   MASCOTAS
+   ================================================================ */
+function renderPets(){
+  const ps=DB.pets,el=document.getElementById('pets-list');
+  if(!ps.length){el.innerHTML=empty('🐾','Sin mascotas registradas','Agregá a tu compañero para cuidar su salud.');return}
+  el.innerHTML=ps.map(p=>{const age=calcAge(p.dob);return`<div class="card" style="display:flex;align-items:center;gap:12px;cursor:pointer;margin-bottom:8px" onclick="showP('${p.id}')"><div class="ava">${p.photo?`<img src="${p.photo}" alt="${p.name}">`:pEmo(p.species)}</div><div style="flex:1"><div style="font-size:.95rem;font-weight:800">${p.name}</div><div class="tm tsm">${p.species}${p.breed?' · '+p.breed:''}${age?' · '+age:''}</div></div><span style="color:var(--text-lt);font-size:1.1rem">›</span></div>`}).join('')
 }
 
 /* ================================================================
-   UI SCREENS — Pets list
+   PROFILE
    ================================================================ */
-function renderPetsList() {
-  const pets = DB.pets;
-  const el = document.getElementById('pets-list');
-  if (!pets.length) {
-    el.innerHTML = `<div class="empty-state">
-      <div class="empty-icon">🐾</div>
-      <div class="empty-title">Sin mascotas registradas</div>
-      <div class="empty-sub">Agregá a tu compañero y empezá a cuidar su salud.</div>
-    </div>`;
-    return;
-  }
-  el.innerHTML = pets.map(p => {
-    const age = calcAge(p.dob);
-    return `<div class="card" style="display:flex;align-items:center;gap:14px;cursor:pointer" onclick="showPetProfile('${p.id}')">
-      <div class="pet-avatar">
-        ${p.photo ? `<img src="${p.photo}" alt="${p.name}">` : petEmoji(p.species)}
-      </div>
-      <div style="flex:1">
-        <div style="font-size:1rem;font-weight:800">${p.name}</div>
-        <div class="text-muted text-sm">${p.species}${p.breed ? ' · ' + p.breed : ''}${age ? ' · ' + age : ''}</div>
-      </div>
-      <span style="color:var(--text-light);font-size:1.2rem">›</span>
-    </div>`;
-  }).join('');
+function showP(pid){_pid=pid;DB.setAid(pid);renderProfile(pid);document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-pet-profile').classList.add('active')}
+function renderProfile(pid){
+  if(!pid)return;const pet=DB.pets.find(p=>p.id===pid);if(!pet)return;
+  document.getElementById('ptitle').textContent=pet.name;
+  const age=calcAge(pet.dob),vl=byPet(pid,DB.vax),vok=vl.filter(v=>vSt(v)==='ok').length,vw=vl.filter(v=>vSt(v)!=='ok').length;
+  const cons=byPet(pid,DB.cons),lcon=cons.sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+  const dps=byPet(pid,DB.despar),ldp=dps.sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+  const ps=byPet(pid,DB.pesos).sort((a,b)=>new Date(b.date)-new Date(a.date)),lp=ps[0];
+  const exs=byPet(pid,DB.exams),lex=exs.sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+  const food=byPet(pid,DB.foods)[0],enfs=byPet(pid,DB.enfs);
+  let dpBadge=`<span class="badge bgray">Sin registro</span>`;
+  if(ldp?.next){const d=dDiff(ldp.next);dpBadge=d<0?`<span class="badge balert">Vencida</span>`:d<=15?`<span class="badge bwarn">En ${d} días</span>`:`<span class="badge bok">Al día</span>`}
+  const upAppts=byPet(pid,DB.appts).filter(a=>dDiff(a.date)>=0).length;
+  document.getElementById('pcontent').innerHTML=`
+    <div style="display:flex;align-items:center;gap:14px;padding:16px 0 8px">
+      <div class="ava-xl">${pet.photo?`<img src="${pet.photo}" alt="${pet.name}">`:pEmo(pet.species)}</div>
+      <div><div style="font-family:'Playfair Display',serif;font-size:1.45rem;font-weight:700">${pet.name}</div><div class="tm tsm">${pet.species}${pet.breed?' · '+pet.breed:''}${age?' · '+age:''}</div>${pet.weight?`<div class="tsm fw8 mt-8">${pet.weight} kg</div>`:''}</div>
+    </div>
+    <div class="card"><div class="stitle" style="margin-top:0">Información</div>${dr('Sexo',pet.sex||'—')}${dr('Esterilizado',pet.neut||'—')}${dr('Microchip',pet.chip||'—')}${dr('Alergias',pet.allerg||'—')}${dr('Veterinario',pet.vet||'—')}${pet.vphone?dr('Teléfono',`<a href="tel:${pet.vphone}" style="color:var(--coral)">${pet.vphone}</a>`):''}</div>
+    ${enfs.length?`<div class="card" style="border-color:var(--coral-bd);background:var(--coral-lt)"><div class="stitle" style="margin-top:0;color:var(--coral)">⚠️ Enfermedades crónicas activas</div>${enfs.map(e=>`<div style="font-size:.88rem;font-weight:700;padding:4px 0;border-bottom:.5px solid var(--coral-bd)">${e.name}${e.date?' · desde '+fDs(e.date):''}</div>`).join('')}</div>`:''}
+    <div class="stitle">Ficha clínica</div>
+    <div class="card-flush">
+      <div class="mrow" onclick="goSub('consultas')"><div class="micon mi-c">🏥</div><div class="minfo"><div class="mname">Historial de consultas</div><div class="msub">${cons.length?`${cons.length} consulta${cons.length>1?'s':''} · Última ${fDs(lcon.date)}`:'Sin consultas aún'}</div></div><span class="marrow">›</span></div>
+      <div class="mrow" onclick="goSub('peso')"><div class="micon mi-o">⚖️</div><div class="minfo"><div class="mname">Historial de peso</div><div class="msub">${lp?`Último: ${lp.value} kg · ${fDs(lp.date)}`:'Sin registros de peso'}</div></div><span class="marrow">›</span></div>
+      <div class="mrow" onclick="goSub('desparasitacion')"><div class="micon mi-b">🪱</div><div class="minfo"><div class="mname">Desparasitación</div><div class="msub">${ldp?`${ldp.type} · ${ldp.prod||''}`:' Sin registros'}</div></div>${dpBadge}</div>
+      <div class="mrow" onclick="goSub('examenes')"><div class="micon mi-p">🧪</div><div class="minfo"><div class="mname">Exámenes de laboratorio</div><div class="msub">${lex?`${lex.type} · ${fDs(lex.date)}`:'Sin exámenes registrados'}</div></div><span class="marrow">›</span></div>
+      <div class="mrow" onclick="goSub('alimentacion')"><div class="micon mi-gr">🍽️</div><div class="minfo"><div class="mname">Alimentación</div><div class="msub">${food?`${food.brand} · ${food.amount||''} · ${food.times}`:'Sin registrar'}</div></div><span class="marrow">›</span></div>
+      <div class="mrow" onclick="goSub('enfermedades')"><div class="micon mi-c">🦠</div><div class="minfo"><div class="mname">Enfermedades crónicas</div><div class="msub">${enfs.length?`${enfs.length} condición${enfs.length>1?'es':''} registrada${enfs.length>1?'s':''}`:'Sin condiciones registradas'}</div></div><span class="marrow">›</span></div>
+    </div>
+    <div class="stitle">Salud diaria</div>
+    <div class="card-flush">
+      <div class="mrow" onclick="goTo('vacunas')"><div class="micon mi-g">💉</div><div class="minfo"><div class="mname">Vacunas</div><div class="msub">${vl.length?`${vok} al día${vw?' · '+vw+' requieren atención':''}`:'Sin vacunas registradas'}</div></div>${vw?`<span class="badge bwarn">Atención</span>`:`<span class="badge bok">Al día</span>`}</div>
+      <div class="mrow" onclick="goTo('medicamentos')"><div class="micon mi-g">💊</div><div class="minfo"><div class="mname">Medicamentos</div><div class="msub">${byPet(pid,DB.meds).filter(m=>m.active).length?byPet(pid,DB.meds).filter(m=>m.active).length+' activo'+(byPet(pid,DB.meds).filter(m=>m.active).length>1?'s':''):'Sin medicamentos activos'}</div></div><span class="marrow">›</span></div>
+      <div class="mrow" onclick="goTo('citas')"><div class="micon mi-b">📅</div><div class="minfo"><div class="mname">Citas veterinarias</div><div class="msub">${upAppts} próxima${upAppts!==1?'s':''}</div></div><span class="marrow">›</span></div>
+    </div>
+    <div style="padding-bottom:8px"><button class="btn btn-d btn-sm btn-f" onclick="delPet('${pid}')">🗑 Eliminar mascota</button></div>`;
+}
+function dr(l,v){return`<div class="drow"><span class="dlbl">${l}</span><span class="dval">${v}</span></div>`}
+function delPet(pid){if(!confirm('¿Eliminar esta mascota y todos sus datos?'))return;['pets','vax','meds','appts','cons','despar','pesos','exams','foods','enfs'].forEach(k=>{if(k==='pets')DB.save(k,DB.pets.filter(p=>p.id!==pid));else DB.save(k,DB[k].filter(x=>x.petId!==pid))});showToast('Mascota eliminada');goTo('mascotas')}
+
+/* ================================================================
+   VACUNAS
+   ================================================================ */
+function renderVax(pet){
+  if(!pet){document.getElementById('vlist').innerHTML=noP();return}
+  document.getElementById('vtitle').textContent='Vacunas de '+pet.name;
+  const list=byPet(pet.id,DB.vax),el=document.getElementById('vlist');
+  if(!list.length){el.innerHTML=empty('💉','Sin vacunas registradas',`Agregá la primera vacuna de ${pet.name}.`);return}
+  el.innerHTML=list.map(v=>{const s=vSt(v),bg=s==='ok'?'<span class="badge bok">✓ Al día</span>':s==='soon'?'<span class="badge bwarn">⚠ Por vencer</span>':'<span class="badge balert">✕ Vencida</span>';
+    return`<div class="litem"><div class="licon mi-g">${v.sticker?`<img src="${v.sticker}" style="width:38px;height:38px;border-radius:8px;object-fit:cover">`:' 💉'}</div><div class="lbody"><div class="ltitle">${v.name}</div><div class="lsub">Aplicada ${fD(v.date)}${v.expiry?' · Vence '+fD(v.expiry):''}${v.vet?`<br>Dr. ${v.vet}`:''}${v.batch?' · Lote: '+v.batch:''}</div></div><div class="lact">${bg}</div></div>`}).join('')
 }
 
 /* ================================================================
-   UI SCREENS — Pet Profile
+   MEDICAMENTOS
    ================================================================ */
-function showPetProfile(petId) {
-  const pet = DB.pets.find(p => p.id === petId);
-  if (!pet) return;
-  DB.setActivePet(petId);
-  document.getElementById('profile-pet-name').textContent = pet.name;
-
-  const age = calcAge(pet.dob);
-  const vaxList = getPetVax(petId);
-  const vaxOk   = vaxList.filter(v => vaxStatus(v) === 'ok').length;
-
-  document.getElementById('pet-profile-content').innerHTML = `
-    <div style="text-align:center;padding:24px 0 16px">
-      <div class="pet-avatar-lg">
-        ${pet.photo ? `<img src="${pet.photo}" alt="${pet.name}">` : petEmoji(pet.species)}
-      </div>
-      <div style="font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;margin-top:12px">${pet.name}</div>
-      <div class="text-muted text-sm mt-4">${pet.species}${pet.breed ? ' · ' + pet.breed : ''}</div>
-    </div>
-
-    <div class="card">
-      <div class="section-title">Información</div>
-      ${row('Edad',        age || '—')}
-      ${row('Peso',        pet.weight ? pet.weight + ' kg' : '—')}
-      ${row('Sexo',        pet.sex || '—')}
-      ${row('Esterilizado', pet.neutered || '—')}
-      ${row('Microchip',   pet.chip || '—')}
-      ${row('Alergias',    pet.allergies || '—')}
-    </div>
-
-    <div class="card">
-      <div class="section-title">Veterinario</div>
-      ${row('Nombre', pet.vet || '—')}
-      ${row('Teléfono', pet.vetPhone ? `<a href="tel:${pet.vetPhone}" style="color:var(--coral)">${pet.vetPhone}</a>` : '—')}
-    </div>
-
-    <div class="card">
-      <div class="section-title">Resumen salud</div>
-      ${row('Vacunas al día', `<span class="badge badge-ok">${vaxOk} ✓</span>`)}
-      ${row('Medicamentos activos', getPetMeds(petId).filter(m=>m.active).length)}
-      ${row('Citas pendientes', getPetAppts(petId).filter(a => new Date(a.date+'T00:00:00') >= new Date()).length)}
-    </div>
-
-    <div style="display:flex;gap:8px;margin-top:4px">
-      <button class="btn btn-ghost btn-sm" style="flex:1" onclick="editPet('${petId}')">✏️ Editar</button>
-      <button class="btn btn-danger btn-sm" style="flex:1" onclick="deletePet('${petId}')">🗑 Eliminar</button>
-    </div>
-  `;
-
-  navigate('pet-profile', null);
-  document.getElementById('screen-pet-profile').classList.add('active');
+function renderMeds(pet){
+  if(!pet){document.getElementById('medlist').innerHTML=noP();return}
+  document.getElementById('medtitle').textContent='Remedios de '+pet.name;
+  const list=byPet(pet.id,DB.meds),el=document.getElementById('medlist');
+  if(!list.length){el.innerHTML=empty('💊','Sin medicamentos',`Registrá los remedios de ${pet.name}.`);return}
+  const act=list.filter(m=>m.active),inact=list.filter(m=>!m.active);
+  let h='';
+  if(act.length)h+=`<div class="stitle">Activos</div>`+act.map(mI).join('');
+  if(inact.length)h+=`<div class="stitle mt-12">Anteriores</div>`+inact.map(mI).join('');
+  el.innerHTML=h
 }
+function mI(m){return`<div class="litem" style="${!m.active?'opacity:.55':''}"><div class="licon mi-g">💊</div><div class="lbody"><div class="ltitle">${m.name}</div><div class="lsub">${m.dose?m.dose+' · ':''}${m.freq}${m.time?' · '+m.time:''}${m.notes?'<br>'+m.notes:''}${m.end?'<br>Hasta '+fD(m.end):''}</div></div><div class="lact">${m.active?'<span class="badge bok">Activo</span>':'<span class="badge bgray">Inactivo</span>'}</div></div>`}
 
-function row(label, value) {
-  return `<div class="detail-row"><span class="detail-label">${label}</span><span class="detail-value">${value}</span></div>`;
+/* ================================================================
+   CITAS
+   ================================================================ */
+function renderAppts(pet){
+  if(!pet){document.getElementById('aplist').innerHTML=noP();return}
+  document.getElementById('aptitle').textContent='Citas de '+pet.name;
+  const today=new Date();today.setHours(0,0,0,0);
+  const list=byPet(pet.id,DB.appts).sort((a,b)=>new Date(a.date)-new Date(b.date)),el=document.getElementById('aplist');
+  if(!list.length){el.innerHTML=empty('📅','Sin citas registradas',`Agendá la próxima visita de ${pet.name}.`);return}
+  const up=list.filter(a=>new Date(a.date+'T00:00:00')>=today),pa=list.filter(a=>new Date(a.date+'T00:00:00')<today);
+  let h='';
+  if(up.length)h+=`<div class="stitle">Próximas</div>`+up.map(a=>apI(a)).join('');
+  if(pa.length)h+=`<div class="stitle mt-12">Anteriores</div>`+pa.map(a=>apI(a,true)).join('');
+  el.innerHTML=h
 }
+function apI(a,past=false){const d=new Date(a.date+'T00:00:00');return`<div class="litem" style="${past?'opacity:.5':''}"><div class="adb"><div class="aday">${d.getDate()}</div><div class="amon">${d.toLocaleString('es',{month:'short'}).replace('.','')}</div></div><div class="lbody"><div class="ltitle">Dr. ${a.vet}</div><div class="lsub">${a.time}${a.spec?' · '+a.spec:''}${a.place?'<br>'+a.place:''}${a.reason?'<br>'+a.reason:''}</div></div><div class="lact">${!past?`<button class="btn btn-c btn-sm" onclick='addCal(${JSON.stringify(a).replace(/'/g,"&#39;")})'>📅</button>`:''}  <button onclick="delItem('appts','${a.id}',()=>renderAppts(getAP()))" style="color:var(--text-lt);padding:4px;font-size:1rem">✕</button></div></div>`}
 
-function editPet(petId) {
-  showToast('Función de edición próximamente');
+/* ================================================================
+   CALENDAR
+   ================================================================ */
+function addCal(a){
+  const pet=getAP(),title=encodeURIComponent(`Cita de ${pet?.name||'mascota'} con Dr. ${a.vet}`),det=encodeURIComponent([a.spec,a.reason].filter(Boolean).join(' · ')),loc=encodeURIComponent(a.place||''),ds=a.date.replace(/-/g,''),ts=a.time?(a.time.replace(':','')+'00'):'090000',start=ds+'T'+ts,eh=a.time?String(parseInt(a.time.split(':')[0])+1).padStart(2,'0'):'10',end=ds+'T'+eh+ts.slice(2);
+  window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${det}&location=${loc}`,'_blank');
+  showToast('Abriendo Google Calendar 📅')
 }
-
-function deletePet(petId) {
-  if (!confirm('¿Eliminar esta mascota y todos sus datos?')) return;
-  DB.savePets(DB.pets.filter(p => p.id !== petId));
-  DB.saveVax(DB.vax.filter(v => v.petId !== petId));
-  DB.saveMeds(DB.meds.filter(m => m.petId !== petId));
-  DB.saveAppts(DB.appts.filter(a => a.petId !== petId));
-  showToast('Mascota eliminada');
-  navigate('mascotas', document.querySelector('[data-screen="mascotas"]'));
+function calDp(date,tipo,pname){
+  const title=encodeURIComponent(`Desparasitación ${tipo} de ${pname}`),ds=date.replace(/-/g,'');
+  window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${ds}/${ds}`,'_blank');
+  showToast('Abriendo Google Calendar 📅')
 }
 
 /* ================================================================
-   UI SCREENS — Vacunas
+   CONSULTAS
    ================================================================ */
-function renderVax(pet) {
-  if (!pet) { showEmptyPet('vax-list'); return; }
-  document.getElementById('vax-screen-title').textContent = 'Vacunas de ' + pet.name;
-  document.getElementById('vax-screen-sub').textContent = 'Carnet digital';
-  const list = getPetVax(pet.id);
-  const el = document.getElementById('vax-list');
-  if (!list.length) {
-    el.innerHTML = emptyState('💉', 'Sin vacunas registradas', `Agregá la primera vacuna de ${pet.name}.`);
-    return;
-  }
-  el.innerHTML = list.map(v => {
-    const s = vaxStatus(v);
-    const badgeClass = s==='ok' ? 'badge-ok' : s==='soon' ? 'badge-warn' : 'badge-alert';
-    const badgeText  = s==='ok' ? '✓ Al día' : s==='soon' ? '⚠ Por vencer' : '✕ Vencida';
-    return `<div class="vax-item">
-      ${v.sticker ? `<img src="${v.sticker}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0">` : `<div style="width:44px;height:44px;background:var(--bg);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0">💉</div>`}
-      <div class="vax-info">
-        <div class="vax-name">${v.name}</div>
-        <div class="vax-dates">Aplicada ${formatDate(v.date)}${v.expiry ? ' · Vence ' + formatDate(v.expiry) : ''}</div>
-        ${v.batch ? `<div class="vax-dates">Lote: ${v.batch}</div>` : ''}
-      </div>
-      <span class="badge ${badgeClass}">${badgeText}</span>
-    </div>`;
-  }).join('');
+function renderCons(pid){
+  if(!pid)return;const pet=DB.pets.find(p=>p.id===pid);if(!pet)return;
+  document.getElementById('contitle').textContent='Consultas de '+pet.name;
+  const list=byPet(pid,DB.cons).sort((a,b)=>new Date(b.date)-new Date(a.date)),el=document.getElementById('conlist');
+  if(!list.length){el.innerHTML=empty('🏥','Sin consultas registradas','Registrá cada visita al veterinario para tener el historial completo.');return}
+  const tcol={Control:'bblue',Urgencia:'balert',Cirugía:'bpurple',Vacunación:'bok',Examen:'bgray',Otro:'bgray'};
+  el.innerHTML=list.map(c=>`<div class="ccard"><div class="chead"><div><div style="font-size:.88rem;font-weight:800">${c.vet}${c.place?' · '+c.place:''}</div><div class="tm tsm mt-8">${fD(c.date)}</div></div><span class="badge ${tcol[c.type]||'bgray'}">${c.type}</span></div><div class="cbody">${c.reason?`<div class="tsm tm">Motivo: ${c.reason}</div>`:''} ${c.diag?`<div class="cdiag"><div class="cdiag-lbl">Diagnóstico</div>${c.diag}</div>`:''} ${c.treat?`<div style="margin-top:6px;font-size:.8rem;color:var(--text-mid)"><span style="font-weight:800;color:var(--text-muted)">TRATAMIENTO</span><br>${c.treat}</div>`:''} ${c.follow?`<div style="margin-top:6px"><span class="badge bblue">Próximo control: ${fD(c.follow)}</span></div>`:''}<button onclick="delItem('cons','${c.id}',()=>renderCons('${pid}'))" style="margin-top:8px;font-size:.75rem;color:var(--text-lt);font-weight:600">Eliminar registro</button></div></div>`).join('')
 }
 
 /* ================================================================
-   UI SCREENS — Medicamentos
+   DESPARASITACION
    ================================================================ */
-function renderMeds(pet) {
-  if (!pet) { showEmptyPet('med-list'); return; }
-  document.getElementById('med-screen-title').textContent = 'Remedios de ' + pet.name;
-  document.getElementById('med-screen-sub').textContent = 'Tratamientos activos y pasados';
-  const list = getPetMeds(pet.id);
-  const el = document.getElementById('med-list');
-  if (!list.length) {
-    el.innerHTML = emptyState('💊', 'Sin medicamentos', `Registrá los remedios de ${pet.name}.`);
-    return;
-  }
-
-  const active   = list.filter(m => m.active);
-  const inactive = list.filter(m => !m.active);
-
-  let html = '';
-  if (active.length) {
-    html += `<div class="section-title">Activos</div>`;
-    html += active.map(m => medItem(m, pet.name)).join('');
-  }
-  if (inactive.length) {
-    html += `<div class="section-title mt-16">Anteriores</div>`;
-    html += inactive.map(m => medItem(m, pet.name)).join('');
-  }
-  el.innerHTML = html;
-}
-
-function medItem(m, petName) {
-  return `<div class="med-item">
-    <div class="med-dot ${m.active ? 'active' : 'inactive'}"></div>
-    <div style="flex:1">
-      <div style="font-weight:700;${!m.active ? 'opacity:.5' : ''}">${m.name}</div>
-      <div class="text-muted text-sm mt-4">${m.dose ? m.dose + ' · ' : ''}${m.freq}${m.time ? ' · ' + m.time : ''}</div>
-      ${m.notes ? `<div class="text-muted text-sm">${m.notes}</div>` : ''}
-    </div>
-    ${m.active ? `<span class="badge badge-ok">Activo</span>` : `<span class="badge" style="background:var(--bg);color:var(--text-muted)">Inactivo</span>`}
-  </div>`;
+function renderDespar(pid){
+  if(!pid)return;const pet=DB.pets.find(p=>p.id===pid);if(!pet)return;
+  document.getElementById('dptitle').textContent='Desparasitación de '+pet.name;
+  const list=byPet(pid,DB.despar).sort((a,b)=>new Date(b.date)-new Date(a.date)),el=document.getElementById('dpcontent');
+  const sec=(items,tipo,ico)=>{
+    const last=items[0];let nb=`<span class="badge bgray">Sin registro</span>`,ni='';
+    if(last?.next){const d=dDiff(last.next);nb=d<0?`<span class="badge balert">Vencida hace ${Math.abs(d)} días</span>`:d===0?`<span class="badge bwarn">¡Hoy!</span>`:d<=15?`<span class="badge bwarn">En ${d} días</span>`:`<span class="badge bok">Al día</span>`;ni=`<div class="arow ${d<0?'urgent':d<=15?'warn':'ok'}" style="margin-bottom:10px"><span class="aicon">${ico}</span><div style="flex:1"><div class="atext">Próxima ${tipo.toLowerCase()}: ${fD(last.next)}</div><div class="ameta">${last.prod||''}</div></div><button class="btn btn-c btn-sm" onclick="calDp('${last.next}','${tipo}','${pet.name}')">📅</button></div>`}
+    return`<div class="stitle">${ico} ${tipo}</div>${ni}${items.length?items.map(d=>`<div class="litem"><div class="licon mi-b">${ico}</div><div class="lbody"><div class="ltitle">${d.prod||tipo}</div><div class="lsub">Aplicada ${fD(d.date)} · Próxima ${fD(d.next)}${d.notes?'<br>'+d.notes:''}</div></div><button onclick="delItem('despar','${d.id}',()=>renderDespar('${pid}'))" style="color:var(--text-lt);padding:4px">✕</button></div>`).join(''):`<div class="tm tsm" style="padding:8px 0 12px">Sin registros de ${tipo.toLowerCase()}.</div>`}`
+  };
+  el.innerHTML=sec(list.filter(d=>d.type==='Interna'),'Interna','🪱')+sec(list.filter(d=>d.type==='Externa'),'Externa','🦟')
 }
 
 /* ================================================================
-   UI SCREENS — Citas
+   PESO
    ================================================================ */
-function renderAppts(pet) {
-  if (!pet) { showEmptyPet('appt-list'); return; }
-  document.getElementById('appt-screen-title').textContent = 'Citas de ' + pet.name;
-  document.getElementById('appt-screen-sub').textContent = 'Agenda veterinaria';
-  const today = new Date(); today.setHours(0,0,0,0);
-  const list  = getPetAppts(pet.id).sort((a,b) => new Date(a.date) - new Date(b.date));
-  const el = document.getElementById('appt-list');
-  if (!list.length) {
-    el.innerHTML = emptyState('📅', 'Sin citas registradas', `Agendá la próxima visita de ${pet.name} al veterinario.`);
-    return;
-  }
-
-  const upcoming = list.filter(a => new Date(a.date+'T00:00:00') >= today);
-  const past     = list.filter(a => new Date(a.date+'T00:00:00') < today);
-
-  let html = '';
-  if (upcoming.length) {
-    html += `<div class="section-title">Próximas</div>`;
-    html += upcoming.map(a => apptItem(a)).join('');
-  }
-  if (past.length) {
-    html += `<div class="section-title mt-16">Anteriores</div>`;
-    html += past.map(a => apptItem(a, true)).join('');
-  }
-  el.innerHTML = html;
-}
-
-function apptItem(a, past=false) {
-  const d = new Date(a.date + 'T00:00:00');
-  const day   = d.getDate();
-  const month = d.toLocaleString('es',{month:'short'}).replace('.','');
-  return `<div class="appt-item" style="${past ? 'opacity:.55' : ''}">
-    <div class="appt-date-block">
-      <div class="appt-day">${day}</div>
-      <div class="appt-month">${month}</div>
-    </div>
-    <div style="flex:1">
-      <div style="font-weight:800">Cita con Dr. ${a.vet}</div>
-      ${a.specialty ? `<div class="text-muted text-sm">${a.specialty}</div>` : ''}
-      <div class="text-muted text-sm mt-4">${a.time}${a.place ? ' · ' + a.place : ''}</div>
-      ${a.reason ? `<div class="text-muted text-sm">${a.reason}</div>` : ''}
-    </div>
-    <button onclick="deleteAppt('${a.id}')" style="color:var(--text-light);font-size:1.1rem;padding:4px">✕</button>
-  </div>`;
+function renderPeso(pid){
+  if(!pid)return;const pet=DB.pets.find(p=>p.id===pid);if(!pet)return;
+  document.getElementById('wtitle').textContent='Peso de '+pet.name;
+  const list=byPet(pid,DB.pesos).sort((a,b)=>new Date(a.date)-new Date(b.date)),el=document.getElementById('wcontent');
+  if(!list.length){el.innerHTML=empty('⚖️','Sin registros de peso','Registrá el peso de '+pet.name+' en cada control.');return}
+  const max=Math.max(...list.map(p=>parseFloat(p.value))),min=Math.min(...list.map(p=>parseFloat(p.value)));
+  const last=list[list.length-1],prev=list[list.length-2];
+  let tend='';if(prev){const df=(parseFloat(last.value)-parseFloat(prev.value)).toFixed(1);tend=df>0?`↑ +${df} kg desde último`:df<0?`↓ ${df} kg desde último`:'Sin cambio desde último'}
+  el.innerHTML=`<div class="card" style="margin-bottom:10px"><div style="display:flex;align-items:flex-start;justify-content:space-between"><div><div class="tm tsm">Último registro</div><div style="font-size:1.8rem;font-weight:900;color:var(--coral)">${last.value} <span style="font-size:1rem;font-weight:600">kg</span></div><div class="tm tsm">${fD(last.date)}</div></div>${tend?`<div class="badge bgray" style="align-self:flex-start">${tend}</div>`:''}</div>${last.bcs?`<div class="mt-8"><span class="badge bblue">BCS ${last.bcs}</span></div>`:''}</div><div class="stitle">Historial</div><div class="card">${list.slice().reverse().map(p=>{const pct=max===min?50:Math.round(((parseFloat(p.value)-min)/(max-min))*100);return`<div class="witem"><div style="min-width:68px;font-size:.78rem;color:var(--text-muted)">${fDs(p.date)}</div><div class="wbar-wrap"><div class="wbar" style="width:${pct}%"></div></div><div style="min-width:52px;text-align:right;font-size:.88rem;font-weight:800">${p.value} kg</div>${p.bcs?`<span class="badge bgray" style="font-size:.65rem">${p.bcs}</span>`:''}</div>`}).join('')}</div>`
 }
 
 /* ================================================================
-   UI SCREENS — Recordatorios
+   EXAMENES
    ================================================================ */
-function renderReminders(pet) {
-  if (!pet) { document.getElementById('rem-list').innerHTML = emptyState('🔔','Sin mascota','Seleccioná una mascota primero.'); return; }
-  document.getElementById('rem-screen-title').textContent = 'Recordatorios de ' + pet.name;
-  document.getElementById('rem-screen-sub').textContent = 'Ordenados por urgencia';
-
-  const alerts = buildAlerts(pet.id);
-  const el = document.getElementById('rem-list');
-
-  if (!alerts.length) {
-    el.innerHTML = `<div class="alert-row ok">
-      <span class="alert-icon">✓</span>
-      <div class="alert-text">${pet.name} tiene todo bajo control hoy — disfruten su día juntos</div>
-    </div>`;
-    return;
-  }
-  el.innerHTML = alerts.map(a => `
-    <div class="alert-row ${a.type}">
-      <span class="alert-icon">${a.icon}</span>
-      <div>
-        <div class="alert-text">${a.text}</div>
-        ${a.meta ? `<div class="alert-meta">${a.meta}</div>` : ''}
-      </div>
-    </div>`).join('');
+function renderExams(pid){
+  if(!pid)return;const pet=DB.pets.find(p=>p.id===pid);if(!pet)return;
+  document.getElementById('extitle').textContent='Exámenes de '+pet.name;
+  const list=byPet(pid,DB.exams).sort((a,b)=>new Date(b.date)-new Date(a.date)),el=document.getElementById('exlist');
+  if(!list.length){el.innerHTML=empty('🧪','Sin exámenes registrados','Agregá hemogramas, ecografías y otros resultados.');return}
+  el.innerHTML=list.map(e=>`<div class="litem"><div class="licon mi-p">🧪</div><div class="lbody"><div class="ltitle">${e.type}</div><div class="lsub">${fD(e.date)}${e.lab?' · '+e.lab:''}${e.result?'<br>'+e.result:''}</div>${e.photo?`<img src="${e.photo}" style="margin-top:6px;width:100%;border-radius:8px;max-height:120px;object-fit:cover">`:''}</div><button onclick="delItem('exams','${e.id}',()=>renderExams('${pid}'))" style="color:var(--text-lt);padding:4px">✕</button></div>`).join('')
 }
 
 /* ================================================================
-   HELPERS
+   ALIMENTACION
    ================================================================ */
-function emptyState(icon, title, sub) {
-  return `<div class="empty-state"><div class="empty-icon">${icon}</div><div class="empty-title">${title}</div><div class="empty-sub">${sub}</div></div>`;
-}
-function showEmptyPet(elId) {
-  const el = document.getElementById(elId);
-  if (el) el.innerHTML = emptyState('🐾','Sin mascota seleccionada','Registrá una mascota primero.');
+function renderFood(pid){
+  if(!pid)return;const pet=DB.pets.find(p=>p.id===pid);if(!pet)return;
+  document.getElementById('ftitle').textContent='Alimentación de '+pet.name;
+  const food=byPet(pid,DB.foods)[0],el=document.getElementById('fcontent');
+  if(!food){el.innerHTML=empty('🍽️','Sin dieta registrada','Registrá qué come '+pet.name+' para tener la info siempre a mano.')+`<div style="padding:0 0 8px"><button class="btn btn-p btn-f" onclick="openM('modal-alimento')">+ Registrar alimentación</button></div>`;return}
+  el.innerHTML=`<div class="card"><div class="stitle" style="margin-top:0">Dieta actual</div>${dr('Alimento',food.brand)}${dr('Tipo',food.type)}${dr('Cantidad diaria',food.amount||'—')}${dr('Frecuencia',food.times)}${food.notes?`<div style="margin-top:10px;padding:10px;background:var(--bg);border-radius:var(--r-sm);font-size:.85rem;color:var(--text-mid);border-left:2.5px solid var(--coral)">${food.notes}</div>`:''}</div><button class="btn btn-g btn-f btn-sm mt-8" onclick="delItem('foods','${food.id}',()=>renderFood('${pid}'));openM('modal-alimento')">✏️ Actualizar dieta</button>`
 }
 
 /* ================================================================
-   MODALS
+   ENFERMEDADES
    ================================================================ */
-function openModal(id) {
-  document.getElementById(id).classList.add('open');
+function renderEnfs(pid){
+  if(!pid)return;const pet=DB.pets.find(p=>p.id===pid);if(!pet)return;
+  document.getElementById('entitle').textContent='Condiciones de '+pet.name;
+  const list=byPet(pid,DB.enfs),el=document.getElementById('enlist');
+  if(!list.length){el.innerHTML=empty('🦠','Sin condiciones registradas','Registrá enfermedades crónicas o condiciones permanentes.');return}
+  el.innerHTML=list.map(e=>`<div class="ccard"><div class="chead"><div><div style="font-size:.92rem;font-weight:800">${e.name}</div>${e.date?`<div class="tm tsm mt-8">Desde ${fD(e.date)}</div>`:''}</div><span class="badge balert">Crónica</span></div>${e.vet||e.notes?`<div class="cbody">${e.vet?`<div class="tsm tm">Diagnosticó: Dr. ${e.vet}</div>`:''} ${e.notes?`<div class="cdiag"><div class="cdiag-lbl">Notas / tratamiento</div>${e.notes}</div>`:''}<button onclick="delItem('enfs','${e.id}',()=>renderEnfs('${pid}'))" style="margin-top:8px;font-size:.75rem;color:var(--text-lt);font-weight:600">Eliminar</button></div>`:''}</div>`).join('')
 }
-function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
-}
-// Close on overlay tap
-document.querySelectorAll('.modal-overlay').forEach(o => {
-  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
-});
 
 /* ================================================================
    SAVE FUNCTIONS
    ================================================================ */
-function toggleCustomSpecies(val) {
-  const wrap = document.getElementById('pet-species-custom-wrap');
-  const input = document.getElementById('pet-species-custom');
-  if (val === 'Otro') {
-    wrap.style.display = 'block';
-    input.focus();
-  } else {
-    wrap.style.display = 'none';
-    input.value = '';
-  }
+function savePet(){
+  const name=g('p-name');let species=g('p-species');
+  if(species==='Otro'){species=g('p-sp-custom');if(!species){showToast('Escribí qué especie es');return}}
+  else species=species.split(' ')[0]; // remove emoji
+  if(!name||!species){showToast('Completá nombre y especie');return}
+  const pet={id:DB.uid(),name,species,breed:g('p-breed'),dob:g('p-dob'),weight:g('p-weight'),sex:g('p-sex'),neut:g('p-neut'),chip:g('p-chip'),allerg:g('p-allerg'),vet:g('p-vet'),vphone:g('p-vphone'),photo:document.getElementById('pp-pre').src||'',createdAt:new Date().toISOString()};
+  const ps=DB.pets;ps.push(pet);DB.save('pets',ps);DB.setAid(pet.id);
+  closeM('modal-pet');resetF(['p-name','p-species','p-breed','p-dob','p-weight','p-sex','p-neut','p-chip','p-allerg','p-vet','p-vphone','p-sp-custom']);
+  document.getElementById('pp-pre').style.display='none';document.getElementById('pp-drop').style.display='block';document.getElementById('p-sp-wrap').style.display='none';
+  showToast(`¡${pet.name} registrado/a! 🐾`);renderHome();renderPets()
 }
-
-function savePet() {
-  const name = document.getElementById('pet-name').value.trim();
-  let species = document.getElementById('pet-species').value;
-  if (species === 'Otro') {
-    species = document.getElementById('pet-species-custom').value.trim();
-    if (!species) { showToast('Escribí qué especie es'); return; }
-  }
-  if (!name || !species) { showToast('Completá nombre y especie'); return; }
-
-  const pet = {
-    id:        DB.uid(),
-    name,
-    species,
-    breed:     document.getElementById('pet-breed').value.trim(),
-    dob:       document.getElementById('pet-dob').value,
-    weight:    document.getElementById('pet-weight').value,
-    sex:       document.getElementById('pet-sex').value,
-    neutered:  document.getElementById('pet-neutered').value,
-    chip:      document.getElementById('pet-chip').value.trim(),
-    allergies: document.getElementById('pet-allergies').value.trim(),
-    vet:       document.getElementById('pet-vet').value.trim(),
-    vetPhone:  document.getElementById('pet-vet-phone').value.trim(),
-    photo:     document.getElementById('pet-photo-preview').src || '',
-    createdAt: new Date().toISOString()
-  };
-
-  const pets = DB.pets;
-  pets.push(pet);
-  DB.savePets(pets);
-  DB.setActivePet(pet.id);
-
-  closeModal('modal-add-pet');
-  resetForm(['pet-name','pet-species','pet-breed','pet-dob','pet-weight','pet-sex','pet-neutered','pet-chip','pet-allergies','pet-vet','pet-vet-phone']);
-  document.getElementById('pet-species-custom').value = '';
-  document.getElementById('pet-species-custom-wrap').style.display = 'none';
-  document.getElementById('pet-photo-preview').style.display='none';
-  document.getElementById('pet-photo-drop').style.display='block';
-
-  showToast('¡' + pet.name + ' registrado/a! 🐾');
-  renderHome();
-  renderPetsList();
+function saveVax(){
+  const name=g('v-name');if(!name){showToast('Ingresá el nombre');return}
+  const pet=getAP();if(!pet){showToast('Seleccioná una mascota');return}
+  const item={id:DB.uid(),petId:pet.id,name,date:g('v-date'),expiry:g('v-expiry'),vet:g('v-vet'),batch:g('v-batch'),sticker:document.getElementById('vs-pre').src||'',createdAt:new Date().toISOString()};
+  const arr=DB.vax;arr.push(item);DB.save('vax',arr);closeM('modal-vax');resetF(['v-name','v-date','v-expiry','v-vet','v-batch']);document.getElementById('vs-pre').style.display='none';
+  showToast(`Un paso más para la salud de ${pet.name} 💉`);renderVax(pet)
 }
-
-function saveVax() {
-  const name = document.getElementById('vax-name').value.trim();
-  if (!name) { showToast('Ingresá el nombre de la vacuna'); return; }
-  const pet = getActivePet();
-  if (!pet) { showToast('Seleccioná una mascota primero'); return; }
-
-  const v = {
-    id:      DB.uid(),
-    petId:   pet.id,
-    name,
-    date:    document.getElementById('vax-date').value,
-    expiry:  document.getElementById('vax-expiry').value,
-    batch:   document.getElementById('vax-batch').value.trim(),
-    sticker: document.getElementById('vax-sticker-preview').src || '',
-    createdAt: new Date().toISOString()
-  };
-
-  const vax = DB.vax;
-  vax.push(v);
-  DB.saveVax(vax);
-  closeModal('modal-add-vax');
-  resetForm(['vax-name','vax-date','vax-expiry','vax-batch']);
-  document.getElementById('vax-sticker-preview').style.display='none';
-
-  showToast(`Un paso más para la salud de ${pet.name} 💉`);
-  renderVax(pet);
+function saveMed(){
+  const name=g('m-name');if(!name){showToast('Ingresá el nombre');return}
+  const pet=getAP();if(!pet){showToast('Seleccioná una mascota');return}
+  const item={id:DB.uid(),petId:pet.id,name,dose:g('m-dose'),freq:g('m-freq'),start:g('m-start'),end:g('m-end'),time:g('m-time'),notes:g('m-notes'),active:document.getElementById('m-active').checked,createdAt:new Date().toISOString()};
+  const arr=DB.meds;arr.push(item);DB.save('meds',arr);closeM('modal-med');resetF(['m-name','m-dose','m-time','m-notes','m-start','m-end']);document.getElementById('m-active').checked=true;
+  showToast(`Listo — ${pet.name} está cada vez mejor 💊`);renderMeds(pet)
 }
-
-function saveMed() {
-  const name = document.getElementById('med-name').value.trim();
-  if (!name) { showToast('Ingresá el nombre del medicamento'); return; }
-  const pet = getActivePet();
-  if (!pet) { showToast('Seleccioná una mascota primero'); return; }
-
-  const m = {
-    id:     DB.uid(),
-    petId:  pet.id,
-    name,
-    dose:   document.getElementById('med-dose').value.trim(),
-    freq:   document.getElementById('med-freq').value,
-    time:   document.getElementById('med-time').value,
-    notes:  document.getElementById('med-notes').value.trim(),
-    active: document.getElementById('med-active').checked,
-    createdAt: new Date().toISOString()
-  };
-
-  const meds = DB.meds;
-  meds.push(m);
-  DB.saveMeds(meds);
-  closeModal('modal-add-med');
-  resetForm(['med-name','med-dose','med-time','med-notes']);
-  document.getElementById('med-active').checked = true;
-
-  showToast(`Listo — ${pet.name} está cada vez mejor 💊`);
-  renderMeds(pet);
+function saveAppt(){
+  const vet=g('a-vet'),date=g('a-date'),time=g('a-time');if(!vet||!date||!time){showToast('Completá veterinario, fecha y hora');return}
+  const pet=getAP();if(!pet){showToast('Seleccioná una mascota');return}
+  const item={id:DB.uid(),petId:pet.id,vet,spec:g('a-spec'),date,time,place:g('a-place'),reason:g('a-reason'),createdAt:new Date().toISOString()};
+  const arr=DB.appts;arr.push(item);DB.save('appts',arr);closeM('modal-appt');resetF(['a-vet','a-spec','a-date','a-time','a-place','a-reason']);
+  showToast('Cita guardada 📅');renderAppts(pet)
 }
-
-function saveAppt() {
-  const vet  = document.getElementById('appt-vet').value.trim();
-  const date = document.getElementById('appt-date').value;
-  const time = document.getElementById('appt-time').value;
-  if (!vet || !date || !time) { showToast('Completá veterinario, fecha y hora'); return; }
-  const pet = getActivePet();
-  if (!pet) { showToast('Seleccioná una mascota primero'); return; }
-
-  const a = {
-    id:        DB.uid(),
-    petId:     pet.id,
-    vet,
-    specialty: document.getElementById('appt-specialty').value.trim(),
-    date,
-    time,
-    place:     document.getElementById('appt-place').value.trim(),
-    reason:    document.getElementById('appt-reason').value.trim(),
-    createdAt: new Date().toISOString()
-  };
-
-  const appts = DB.appts;
-  appts.push(a);
-  DB.saveAppts(appts);
-  closeModal('modal-add-appt');
-  resetForm(['appt-vet','appt-specialty','appt-date','appt-time','appt-place','appt-reason']);
-
-  const d = new Date(date+'T00:00:00');
-  const dayStr = d.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'});
-  showToast(`Cita con Dr. ${vet} el ${dayStr} 📅`);
-  renderAppts(pet);
+function saveConsulta(){
+  const date=g('c-date'),vet=g('c-vet');if(!date||!vet){showToast('Completá fecha y veterinario');return}
+  if(!_pid)return;const item={id:DB.uid(),petId:_pid,date,type:g('c-type')||'Control',vet,place:g('c-place'),reason:g('c-reason'),diag:g('c-diag'),treat:g('c-treat'),follow:g('c-follow'),createdAt:new Date().toISOString()};
+  const arr=DB.cons;arr.push(item);DB.save('cons',arr);closeM('modal-consulta');resetF(['c-date','c-vet','c-place','c-reason','c-diag','c-treat','c-follow']);
+  const pet=DB.pets.find(p=>p.id===_pid);showToast(`Consulta de ${pet?.name||''} guardada 🏥`);renderCons(_pid)
 }
-
-function deleteAppt(id) {
-  if (!confirm('¿Eliminar esta cita?')) return;
-  DB.saveAppts(DB.appts.filter(a => a.id !== id));
-  renderAppts(getActivePet());
-  showToast('Cita eliminada');
+function saveDespar(){
+  const date=g('dp-date');if(!date){showToast('Ingresá la fecha');return}
+  if(!_pid)return;const item={id:DB.uid(),petId:_pid,type:g('dp-type')||'Interna',prod:g('dp-prod'),date,freq:g('dp-freq'),next:g('dp-next'),notes:g('dp-notes'),createdAt:new Date().toISOString()};
+  const arr=DB.despar;arr.push(item);DB.save('despar',arr);closeM('modal-despar');resetF(['dp-prod','dp-date','dp-notes','dp-next']);
+  const pet=DB.pets.find(p=>p.id===_pid);showToast(`Desparasitación de ${pet?.name||''} registrada 🪱`);renderDespar(_pid)
 }
-
-function resetForm(ids) {
-  ids.forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    if (el.tagName === 'SELECT') el.selectedIndex = 0;
-    else el.value = '';
-  });
+function savePeso(){
+  const val=g('w-val'),date=g('w-date');if(!val||!date){showToast('Ingresá peso y fecha');return}
+  if(!_pid)return;const item={id:DB.uid(),petId:_pid,value:parseFloat(val).toFixed(1),date,bcs:g('w-bcs'),notes:g('w-notes'),createdAt:new Date().toISOString()};
+  const arr=DB.pesos;arr.push(item);DB.save('pesos',arr);closeM('modal-peso');resetF(['w-val','w-date','w-notes']);document.getElementById('w-bcs').selectedIndex=0;
+  showToast('Peso registrado ⚖️');renderPeso(_pid)
+}
+function saveExamen(){
+  const date=g('ex-date');if(!date){showToast('Ingresá la fecha');return}
+  if(!_pid)return;let type=g('ex-type');if(type==='Otro')type=g('ex-custom')||'Otro';
+  const item={id:DB.uid(),petId:_pid,type,date,lab:g('ex-lab'),result:g('ex-result'),photo:document.getElementById('ex-pre').src||'',createdAt:new Date().toISOString()};
+  const arr=DB.exams;arr.push(item);DB.save('exams',arr);closeM('modal-examen');resetF(['ex-date','ex-lab','ex-result','ex-custom']);document.getElementById('ex-pre').style.display='none';
+  showToast('Examen guardado 🧪');renderExams(_pid)
+}
+function saveAlimento(){
+  const brand=g('f-brand');if(!brand){showToast('Ingresá el alimento');return}
+  if(!_pid)return;const arr=DB.foods.filter(x=>x.petId!==_pid);
+  arr.push({id:DB.uid(),petId:_pid,brand,type:g('f-type'),amount:g('f-amount'),times:g('f-times'),notes:g('f-notes'),createdAt:new Date().toISOString()});
+  DB.save('foods',arr);closeM('modal-alimento');resetF(['f-brand','f-amount','f-notes']);
+  showToast('Dieta registrada 🍽️');renderFood(_pid)
+}
+function saveEnfermedad(){
+  const name=g('en-name');if(!name){showToast('Ingresá el nombre');return}
+  if(!_pid)return;const item={id:DB.uid(),petId:_pid,name,date:g('en-date'),vet:g('en-vet'),notes:g('en-notes'),createdAt:new Date().toISOString()};
+  const arr=DB.enfs;arr.push(item);DB.save('enfs',arr);closeM('modal-enfermedad');resetF(['en-name','en-date','en-vet','en-notes']);
+  showToast('Condición registrada 🦠');renderEnfs(_pid)
 }
 
 /* ================================================================
-   PHOTO PREVIEW
+   UTILS
    ================================================================ */
-function previewPetPhoto(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const img = document.getElementById('pet-photo-preview');
-    img.src = e.target.result;
-    img.style.display = 'block';
-    document.getElementById('pet-photo-drop').style.display = 'none';
-  };
-  reader.readAsDataURL(file);
-}
-
-function previewVaxSticker(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const img = document.getElementById('vax-sticker-preview');
-    img.src = e.target.result;
-    img.style.display = 'block';
-  };
-  reader.readAsDataURL(file);
-}
+function g(id){return(document.getElementById(id)?.value||'').trim()}
+function resetF(ids){ids.forEach(id=>{const el=document.getElementById(id);if(!el)return;el.tagName==='SELECT'?el.selectedIndex=0:el.value=''})}
+function delItem(col,id,cb){if(!confirm('¿Eliminar este registro?'))return;DB.save(col,DB[col].filter(x=>x.id!==id));if(cb)cb();showToast('Eliminado')}
+function empty(ico,tit,sub){return`<div class="empty"><div class="eico">${ico}</div><div class="etit">${tit}</div><div class="esub">${sub}</div></div>`}
+function noP(){return empty('🐾','Sin mascota seleccionada','Registrá una mascota primero desde la sección Mascotas.')}
+function toggleSp(val){const w=document.getElementById('p-sp-wrap'),i=document.getElementById('p-sp-custom');w.style.display=val==='Otro'?'block':'none';if(val==='Otro')i.focus();else i.value=''}
+function prevPhoto(inp,preId,dropId){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{const img=document.getElementById(preId);img.src=e.target.result;img.style.display='block';if(dropId)document.getElementById(dropId).style.display='none'};r.readAsDataURL(f)}
+function calcNextDp(){const date=g('dp-date'),freq=parseInt(g('dp-freq'))||90;if(!date)return;const d=new Date(date+'T00:00:00');d.setDate(d.getDate()+freq);document.getElementById('dp-next').value=d.toISOString().split('T')[0]}
+function openM(id){document.getElementById(id).classList.add('open')}
+function closeM(id){document.getElementById(id).classList.remove('open')}
+document.querySelectorAll('.moverlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open')}));
+function showToast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000)}
 
 /* ================================================================
-   TOAST
+   INIT
    ================================================================ */
-function showToast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 3000);
-}
-
-/* ================================================================
-   ONBOARDING / INIT
-   ================================================================ */
-function startOnboarding() {
-  document.getElementById('screen-welcome').style.display = 'none';
-  document.getElementById('main-app').style.display = 'block';
-  localStorage.setItem('pv_launched', '1');
-  renderHome();
-  renderPetsList();
-}
-
-function init() {
-  if (localStorage.getItem('pv_launched')) {
-    document.getElementById('screen-welcome').style.display = 'none';
-    document.getElementById('main-app').style.display = 'block';
-    renderHome();
-    renderPetsList();
-    const pet = getActivePet();
-    renderVax(pet);
-    renderMeds(pet);
-    renderAppts(pet);
-  }
-}
-
-/* ================================================================
-   SERVICE WORKER REGISTRATION
-   ================================================================ */
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .catch(err => console.log('SW error:', err));
-  });
-}
-
+function startApp(){document.getElementById('swelcome').style.display='none';document.getElementById('main-app').style.display='block';localStorage.setItem('pv2_ok','1');renderHome();renderPets()}
+function init(){if(localStorage.getItem('pv2_ok')){document.getElementById('swelcome').style.display='none';document.getElementById('main-app').style.display='block';renderHome();renderPets();const pet=getAP();renderVax(pet);renderMeds(pet);renderAppts(pet)}}
+if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 init();
 </script>
 </body>
