@@ -889,19 +889,23 @@ img { max-width: 100%; }
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Especie *</label>
-        <select class="form-input" id="pet-species">
+        <select class="form-input" id="pet-species" onchange="toggleCustomSpecies(this.value)">
           <option value="">Elegir</option>
           <option value="Perro">Perro 🐶</option>
           <option value="Gato">Gato 🐱</option>
           <option value="Conejo">Conejo 🐰</option>
           <option value="Ave">Ave 🐦</option>
-          <option value="Otro">Otro</option>
+          <option value="Otro">Otro 🐾</option>
         </select>
       </div>
       <div class="form-group">
         <label class="form-label">Raza</label>
         <input class="form-input" id="pet-breed" placeholder="ej. Labrador">
       </div>
+    </div>
+    <div class="form-group" id="pet-species-custom-wrap" style="display:none">
+      <label class="form-label">¿Qué especie es? *</label>
+      <input class="form-input" id="pet-species-custom" placeholder="ej. Tortuga, Hamster, Serpiente...">
     </div>
     <div class="form-row">
       <div class="form-group">
@@ -1670,9 +1674,25 @@ document.querySelectorAll('.modal-overlay').forEach(o => {
 /* ================================================================
    SAVE FUNCTIONS
    ================================================================ */
+function toggleCustomSpecies(val) {
+  const wrap = document.getElementById('pet-species-custom-wrap');
+  const input = document.getElementById('pet-species-custom');
+  if (val === 'Otro') {
+    wrap.style.display = 'block';
+    input.focus();
+  } else {
+    wrap.style.display = 'none';
+    input.value = '';
+  }
+}
+
 function savePet() {
   const name = document.getElementById('pet-name').value.trim();
-  const species = document.getElementById('pet-species').value;
+  let species = document.getElementById('pet-species').value;
+  if (species === 'Otro') {
+    species = document.getElementById('pet-species-custom').value.trim();
+    if (!species) { showToast('Escribí qué especie es'); return; }
+  }
   if (!name || !species) { showToast('Completá nombre y especie'); return; }
 
   const pet = {
@@ -1699,6 +1719,8 @@ function savePet() {
 
   closeModal('modal-add-pet');
   resetForm(['pet-name','pet-species','pet-breed','pet-dob','pet-weight','pet-sex','pet-neutered','pet-chip','pet-allergies','pet-vet','pet-vet-phone']);
+  document.getElementById('pet-species-custom').value = '';
+  document.getElementById('pet-species-custom-wrap').style.display = 'none';
   document.getElementById('pet-photo-preview').style.display='none';
   document.getElementById('pet-photo-drop').style.display='block';
 
