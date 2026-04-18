@@ -1,18 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<!--
-================================================================================
-PETVIDA v2 — App de Salud y Felicidad para Mascotas
-================================================================================
-FASE 1: PWA instalable desde navegador
-FASE 2 (migración Flutter/React Native):
-  - DATA LAYER: reemplazar localStorage por API REST / Firebase / Supabase
-  - BUSINESS LOGIC: extraer funciones puras a servicios
-  - UI SCREENS: cada sección → Widget/Screen nativo
-  - Color Fase 2: header background: linear-gradient(135deg,#E8845A,#D4623A)
-================================================================================
--->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#E8845A">
@@ -30,7 +18,7 @@ FASE 2 (migración Flutter/React Native):
   --green:#1D9E75; --green-lt:#E8F7F1; --green-bd:#B8E8D8;
   --orange:#F0A050; --orange-lt:#FFF5E0;
   --purple:#7F77DD; --purple-lt:#F0EDFF;
-  --blue-lt:#EBF4FF;
+  --blue:#1A5FA0; --blue-lt:#EBF4FF;
   --bg:#F8F8F7; --card:#FFFFFF;
   --text:#1C1C1E; --text-mid:#3C3C3E; --text-muted:#8E8E93; --text-lt:#C0C0BC;
   --border:#ECECEA; --border-md:#DEDED9;
@@ -44,21 +32,16 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 button{font-family:inherit;cursor:pointer;border:none;background:none}
 input,select,textarea{font-family:inherit}
 img{max-width:100%}
-
 #app{max-width:430px;margin:0 auto;min-height:100dvh;position:relative;background:var(--bg)}
-
 .screen{display:none;flex-direction:column;min-height:100dvh;padding-bottom:calc(var(--nav-h) + var(--safe) + 8px);animation:sIn .2s ease}
 .screen.active{display:flex}
 @keyframes sIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px}
-
-/* HEADER */
 .hdr{background:var(--coral);padding:52px 18px 18px;color:white;flex-shrink:0;position:sticky;top:0;z-index:20}
 .hdr-brand{font-size:.7rem;font-weight:700;letter-spacing:.8px;opacity:.55;text-transform:uppercase;margin-bottom:6px}
 .hdr-title{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;line-height:1.2}
 .hdr-sub{font-size:.76rem;opacity:.65;margin-top:3px;font-weight:500}
 .hdr-back{display:flex;align-items:center;gap:6px;font-size:.82rem;font-weight:700;opacity:.85;color:white;padding:4px 0 8px;cursor:pointer}
-
 .home-hdr{background:var(--coral);padding:52px 18px 16px;color:white;flex-shrink:0}
 .home-brand{font-size:.7rem;font-weight:700;letter-spacing:.8px;opacity:.55;text-transform:uppercase;margin-bottom:8px}
 .home-name{font-family:'Playfair Display',serif;font-size:1.55rem;font-weight:700;line-height:1.15}
@@ -66,64 +49,67 @@ img{max-width:100%}
 .status-pill{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.18);border:.5px solid rgba(255,255,255,.28);border-radius:20px;padding:4px 10px;font-size:.73rem;font-weight:600;margin-top:10px}
 .sd{width:6px;height:6px;border-radius:50%}
 .sd-ok{background:#A8FFD8}.sd-warn{background:#FFD8A8}.sd-urgent{background:#FFB8B8}
-
 .pet-pills{display:flex;gap:7px;overflow-x:auto;padding:12px 16px 4px;flex-shrink:0}
 .pet-pills::-webkit-scrollbar{display:none}
 .pet-pill{display:flex;align-items:center;gap:6px;padding:7px 13px;background:var(--card);border-radius:24px;border:1.5px solid var(--border);font-size:.82rem;font-weight:700;white-space:nowrap;flex-shrink:0;color:var(--text-muted);transition:all .15s;cursor:pointer}
 .pet-pill.active{border-color:var(--coral);background:var(--coral-lt);color:var(--coral)}
-
-/* NAV */
 .bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;height:calc(var(--nav-h) + var(--safe));padding-bottom:var(--safe);background:var(--card);border-top:.5px solid var(--border);display:flex;align-items:center;justify-content:space-around;z-index:100;box-shadow:0 -2px 16px rgba(28,28,30,.06)}
 .nitem{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 12px;color:var(--text-lt);font-size:.62rem;font-weight:700;letter-spacing:.3px;text-transform:uppercase;transition:color .15s;min-width:52px}
 .nitem.active{color:var(--coral)}
 .nicon{font-size:1.25rem;line-height:1}
 .nbar{width:16px;height:2.5px;border-radius:2px;background:transparent;transition:background .15s}
 .nitem.active .nbar{background:var(--coral)}
-
-/* CARDS */
 .card{background:var(--card);border-radius:var(--r-lg);border:.5px solid var(--border);padding:14px;margin-bottom:10px;box-shadow:var(--sh-sm)}
 .card-flush{background:var(--card);border-radius:var(--r-lg);border:.5px solid var(--border);overflow:hidden;margin-bottom:10px}
-
-/* SECTION TITLE */
 .stitle{font-size:.7rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 8px}
 .stitle:first-child{margin-top:4px}
-
-/* ALERT ROWS */
 .arow{display:flex;align-items:flex-start;gap:10px;padding:11px 13px;border-radius:var(--r-md);margin-bottom:7px}
 .arow.ok{background:var(--green-lt)}.arow.warn{background:var(--orange-lt)}.arow.urgent{background:var(--coral-lt)}
 .aicon{font-size:1.1rem;flex-shrink:0;margin-top:1px}
 .atext{font-size:.86rem;font-weight:700;line-height:1.35;flex:1}
 .ameta{font-size:.73rem;color:var(--text-muted);font-weight:500;margin-top:2px}
 .adays{font-size:.73rem;font-weight:700;color:var(--green);margin-top:2px}
-
-/* BADGES */
 .badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:.68rem;font-weight:800;white-space:nowrap}
 .bok{background:var(--green-lt);color:var(--green);border:.5px solid var(--green-bd)}
 .bwarn{background:var(--orange-lt);color:var(--orange)}
 .balert{background:var(--coral-lt);color:var(--coral);border:.5px solid var(--coral-bd)}
 .bpurple{background:var(--purple-lt);color:var(--purple)}
-.bblue{background:var(--blue-lt);color:#1A5FA0}
+.bblue{background:var(--blue-lt);color:var(--blue)}
 .bgray{background:var(--bg);color:var(--text-muted);border:.5px solid var(--border)}
-
-/* BUTTONS */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 22px;border-radius:var(--r-md);font-size:.88rem;font-weight:700;transition:all .15s}
 .btn-p{background:var(--coral);color:white;box-shadow:0 2px 10px rgba(232,132,90,.28)}
 .btn-p:active{transform:scale(.97);background:var(--coral-dk)}
 .btn-g{background:var(--bg);color:var(--text-muted);border:.5px solid var(--border-md)}
 .btn-d{background:#FEE;color:#C0392B;border:.5px solid #FAD}
-.btn-c{background:var(--blue-lt);color:#1A5FA0}
 .btn-f{width:100%}
 .btn-sm{padding:8px 14px;font-size:.78rem}
 
-/* FORMS */
+/* CALENDAR BUTTON — the key new element */
+.btn-cal{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:7px 11px;border-radius:var(--r-sm);
+  background:var(--blue-lt);color:var(--blue);
+  font-size:.75rem;font-weight:800;
+  border:.5px solid #C8DCEF;
+  transition:all .15s;flex-shrink:0;
+}
+.btn-cal:active{background:#D4E8FF;transform:scale(.96)}
+.btn-cal-full{
+  width:100%;padding:11px;border-radius:var(--r-md);
+  background:var(--blue-lt);color:var(--blue);
+  font-size:.84rem;font-weight:800;
+  border:.5px solid #C8DCEF;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  margin-top:8px;transition:all .15s;
+}
+.btn-cal-full:active{background:#D4E8FF}
+
 .fg{margin-bottom:13px}
 .fl{display:block;font-size:.72rem;font-weight:800;color:var(--text-muted);margin-bottom:5px;letter-spacing:.3px;text-transform:uppercase}
 .fi{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-size:.9rem;color:var(--text);background:var(--bg);-webkit-appearance:none;transition:border-color .15s}
 .fi:focus{outline:none;border-color:var(--coral);background:white}
 .fr{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .fsec{font-size:.7rem;font-weight:800;color:var(--coral);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 10px}
-
-/* TOGGLE */
 .tgl-wrap{display:flex;align-items:center;justify-content:space-between}
 .tgl{position:relative;width:42px;height:24px}
 .tgl input{opacity:0;width:0;height:0}
@@ -131,67 +117,42 @@ img{max-width:100%}
 .tgl-sl::before{content:'';position:absolute;width:18px;height:18px;background:white;border-radius:50%;left:3px;top:3px;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
 .tgl input:checked+.tgl-sl{background:var(--green)}
 .tgl input:checked+.tgl-sl::before{transform:translateX(18px)}
-
-/* PHOTO UPLOAD */
 .pup{border:1.5px dashed var(--border-md);border-radius:var(--r-md);padding:18px;text-align:center;color:var(--text-muted);font-size:.82rem;font-weight:600;cursor:pointer;transition:all .15s}
 .pup:active{border-color:var(--coral);background:var(--coral-lt)}
 .ppre{width:100%;border-radius:var(--r-md);object-fit:cover;max-height:160px;display:none;margin-top:8px}
-
-/* AVATAR */
 .ava{width:52px;height:52px;border-radius:14px;background:var(--coral-lt);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;overflow:hidden;border:.5px solid var(--coral-bd)}
 .ava img,.ava-xl img{width:100%;height:100%;object-fit:cover}
 .ava-xl{width:80px;height:80px;border-radius:22px;background:var(--coral-lt);display:flex;align-items:center;justify-content:center;font-size:2.2rem;overflow:hidden;border:2px solid white;box-shadow:var(--sh-md)}
-
-/* MOD ROWS */
 .mrow{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:.5px solid var(--border);cursor:pointer;transition:background .12s}
 .mrow:last-child{border-bottom:none}
 .mrow:active{background:var(--bg)}
 .micon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
 .mi-c{background:var(--coral-lt)}.mi-g{background:var(--green-lt)}.mi-b{background:var(--blue-lt)}.mi-p{background:var(--purple-lt)}.mi-o{background:var(--orange-lt)}.mi-gr{background:var(--bg);border:.5px solid var(--border)}
-.minfo{flex:1}
-.mname{font-size:.9rem;font-weight:700}
-.msub{font-size:.75rem;color:var(--text-muted);margin-top:2px}
+.minfo{flex:1}.mname{font-size:.9rem;font-weight:700}.msub{font-size:.75rem;color:var(--text-muted);margin-top:2px}
 .marrow{color:var(--text-lt);font-size:1rem}
-
-/* DETAIL ROWS */
 .drow{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:.5px solid var(--border);font-size:.88rem}
 .drow:last-child{border-bottom:none}
-.dlbl{color:var(--text-muted);font-weight:600}
-.dval{font-weight:700;text-align:right;max-width:58%}
-
-/* LIST ITEMS */
+.dlbl{color:var(--text-muted);font-weight:600}.dval{font-weight:700;text-align:right;max-width:58%}
 .litem{background:var(--card);border-radius:var(--r-lg);border:.5px solid var(--border);padding:13px;margin-bottom:8px;display:flex;align-items:flex-start;gap:11px}
 .licon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
-.lbody{flex:1;min-width:0}
-.ltitle{font-size:.92rem;font-weight:700}
-.lsub{font-size:.75rem;color:var(--text-muted);margin-top:3px;line-height:1.4}
-.lact{display:flex;gap:6px;flex-shrink:0;align-items:center}
-
-/* APPT DATE */
+.lbody{flex:1;min-width:0}.ltitle{font-size:.92rem;font-weight:700}.lsub{font-size:.75rem;color:var(--text-muted);margin-top:3px;line-height:1.4}
+.lact{display:flex;gap:6px;flex-shrink:0;align-items:flex-start;flex-direction:column}
 .adb{background:var(--coral-lt);border-radius:var(--r-sm);padding:8px 9px;text-align:center;min-width:44px;flex-shrink:0;border:.5px solid var(--coral-bd)}
 .aday{font-size:1.25rem;font-weight:900;color:var(--coral);line-height:1}
 .amon{font-size:.6rem;font-weight:800;color:var(--coral);text-transform:uppercase}
-
-/* CONSULT CARD */
 .ccard{background:var(--card);border-radius:var(--r-lg);border:.5px solid var(--border);overflow:hidden;margin-bottom:8px}
 .chead{padding:11px 13px 9px;display:flex;align-items:flex-start;justify-content:space-between;border-bottom:.5px solid var(--border)}
 .cbody{padding:10px 13px}
 .cdiag{background:var(--bg);border-radius:var(--r-sm);padding:8px 10px;border-left:2.5px solid var(--coral);font-size:.82rem;color:var(--text-mid);line-height:1.45;margin-top:6px}
 .cdiag-lbl{font-size:.68rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px}
-
-/* WEIGHT */
 .witem{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:.5px solid var(--border)}
 .witem:last-child{border-bottom:none}
 .wbar-wrap{flex:1;height:4px;background:var(--border);border-radius:2px}
 .wbar{height:4px;background:var(--coral);border-radius:2px;transition:width .3s}
-
-/* QUICK GRID */
 .qgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:14px}
 .qitem{display:flex;flex-direction:column;align-items:center;gap:4px;padding:11px 4px;background:var(--card);border-radius:var(--r-md);font-size:.65rem;font-weight:700;color:var(--text-muted);border:.5px solid var(--border);text-align:center;cursor:pointer;transition:all .12s}
 .qitem:active{border-color:var(--coral);color:var(--coral)}
 .qico{font-size:1.3rem}
-
-/* MODAL */
 .moverlay{display:none;position:fixed;inset:0;background:rgba(28,28,30,.45);z-index:200;align-items:flex-end;justify-content:center}
 .moverlay.open{display:flex;animation:oIn .18s ease}
 @keyframes oIn{from{opacity:0}to{opacity:1}}
@@ -199,37 +160,35 @@ img{max-width:100%}
 @keyframes sUp{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
 .mhandle{width:34px;height:4px;background:var(--border);border-radius:2px;margin:10px auto 14px}
 .mtitle{font-size:1.05rem;font-weight:800;margin-bottom:14px}
-
-/* TOAST */
 .toast{position:fixed;bottom:calc(var(--nav-h) + var(--safe) + 14px);left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);color:white;padding:11px 18px;border-radius:var(--r-sm);font-size:.85rem;font-weight:600;z-index:999;opacity:0;pointer-events:none;transition:all .25s;white-space:nowrap;max-width:88vw;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-/* FAB */
 .fab{position:fixed;bottom:calc(var(--nav-h) + var(--safe) + 14px);right:18px;width:50px;height:50px;background:var(--coral);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:white;box-shadow:0 3px 14px rgba(232,132,90,.38);z-index:50;transition:transform .15s}
 .fab:active{transform:scale(.91)}
-
-/* EMPTY */
 .empty{text-align:center;padding:36px 20px;color:var(--text-muted)}
 .eico{font-size:2.8rem;margin-bottom:10px}
 .etit{font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:5px}
 .esub{font-size:.82rem;line-height:1.5}
-
-/* WELCOME */
 #swelcome{background:var(--coral);color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 32px calc(32px + var(--safe));min-height:100dvh}
 .wlogo{font-size:3.8rem;margin-bottom:20px}
 .wtitle{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:700;margin-bottom:8px}
 .wsub{font-size:.95rem;opacity:.8;margin-bottom:40px;line-height:1.55;font-weight:500}
 .wbtn{background:white;color:var(--coral);border-radius:var(--r-lg);padding:15px 40px;font-size:.95rem;font-weight:800;box-shadow:0 4px 18px rgba(0,0,0,.15)}
-
 .flex-c{display:flex;align-items:center;gap:8px}
-.mt-8{margin-top:8px}.mt-12{margin-top:12px}.mt-16{margin-top:16px}
+.mt-8{margin-top:8px}.mt-12{margin-top:12px}
 .tsm{font-size:.8rem}.tm{color:var(--text-muted)}.fw8{font-weight:800}
+
+/* Cal hint banner — shows after saving items with dates */
+.cal-hint{
+  background:var(--blue-lt);border:.5px solid #C8DCEF;
+  border-radius:var(--r-md);padding:11px 13px;
+  display:flex;align-items:center;gap:10px;margin-bottom:8px;
+}
+.cal-hint-text{font-size:.8rem;font-weight:700;color:var(--blue);flex:1;line-height:1.4}
 </style>
 </head>
 <body>
 <div id="app">
 
-<!-- WELCOME -->
 <div id="swelcome">
   <div class="wlogo">🐾</div>
   <div class="wtitle">Petvida</div>
@@ -237,10 +196,8 @@ img{max-width:100%}
   <button class="wbtn" onclick="startApp()">Comenzar →</button>
 </div>
 
-<!-- MAIN APP -->
 <div id="main-app" style="display:none">
 
-  <!-- HOME -->
   <div id="screen-home" class="screen active">
     <div class="home-hdr">
       <div class="home-brand">Petvida</div>
@@ -263,87 +220,69 @@ img{max-width:100%}
     </div>
   </div>
 
-  <!-- MASCOTAS -->
   <div id="screen-mascotas" class="screen">
     <div class="hdr"><div class="hdr-brand">Petvida</div><div class="hdr-title">Mis mascotas</div></div>
-    <div class="scroll-area">
-      <div id="pets-list"></div>
-      <button class="btn btn-p btn-f mt-8" onclick="openM('modal-pet')">+ Registrar mascota</button>
-    </div>
+    <div class="scroll-area"><div id="pets-list"></div><button class="btn btn-p btn-f mt-8" onclick="openM('modal-pet')">+ Registrar mascota</button></div>
   </div>
 
-  <!-- PET PROFILE -->
   <div id="screen-pet-profile" class="screen">
-    <div class="hdr" style="padding-top:44px">
-      <div class="hdr-back" onclick="goTo('mascotas')">← Mis mascotas</div>
-      <div class="hdr-title" id="ptitle">Perfil</div>
-    </div>
+    <div class="hdr" style="padding-top:44px"><div class="hdr-back" onclick="goTo('mascotas')">← Mis mascotas</div><div class="hdr-title" id="ptitle">Perfil</div></div>
     <div class="scroll-area" id="pcontent"></div>
   </div>
 
-  <!-- VACUNAS -->
   <div id="screen-vacunas" class="screen">
     <div class="hdr"><div class="hdr-brand">Petvida</div><div class="hdr-title" id="vtitle">Vacunas</div><div class="hdr-sub">Carnet digital</div></div>
     <div class="scroll-area" id="vlist"></div>
     <button class="fab" onclick="openM('modal-vax')">+</button>
   </div>
 
-  <!-- MEDICAMENTOS -->
   <div id="screen-medicamentos" class="screen">
     <div class="hdr"><div class="hdr-brand">Petvida</div><div class="hdr-title" id="medtitle">Medicamentos</div></div>
     <div class="scroll-area" id="medlist"></div>
     <button class="fab" onclick="openM('modal-med')">+</button>
   </div>
 
-  <!-- CITAS -->
   <div id="screen-citas" class="screen">
     <div class="hdr"><div class="hdr-brand">Petvida</div><div class="hdr-title" id="aptitle">Citas</div><div class="hdr-sub">Agenda veterinaria</div></div>
     <div class="scroll-area" id="aplist"></div>
     <button class="fab" onclick="openM('modal-appt')">+</button>
   </div>
 
-  <!-- CONSULTAS -->
   <div id="screen-consultas" class="screen">
     <div class="hdr" style="padding-top:44px"><div class="hdr-back" onclick="goTo('pet-profile')">← Perfil</div><div class="hdr-title" id="contitle">Consultas</div></div>
     <div class="scroll-area" id="conlist"></div>
     <button class="fab" onclick="openM('modal-consulta')">+</button>
   </div>
 
-  <!-- DESPARASITACION -->
   <div id="screen-desparasitacion" class="screen">
     <div class="hdr" style="padding-top:44px"><div class="hdr-back" onclick="goTo('pet-profile')">← Perfil</div><div class="hdr-title" id="dptitle">Desparasitación</div></div>
     <div class="scroll-area" id="dpcontent"></div>
     <button class="fab" onclick="openM('modal-despar')">+</button>
   </div>
 
-  <!-- PESO -->
   <div id="screen-peso" class="screen">
-    <div class="hdr" style="padding-top:44px"><div class="hdr-back" onclick="goTo('pet-profile')">← Perfil</div><div class="hdr-title" id="wtitle">Historial de peso</div></div>
+    <div class="hdr" style="padding-top:44px"><div class="hdr-back" onclick="goTo('pet-profile')">← Perfil</div><div class="hdr-title" id="wtitle2">Historial de peso</div></div>
     <div class="scroll-area" id="wcontent"></div>
     <button class="fab" onclick="openM('modal-peso')">+</button>
   </div>
 
-  <!-- EXAMENES -->
   <div id="screen-examenes" class="screen">
     <div class="hdr" style="padding-top:44px"><div class="hdr-back" onclick="goTo('pet-profile')">← Perfil</div><div class="hdr-title" id="extitle">Exámenes</div></div>
     <div class="scroll-area" id="exlist"></div>
     <button class="fab" onclick="openM('modal-examen')">+</button>
   </div>
 
-  <!-- ALIMENTACION -->
   <div id="screen-alimentacion" class="screen">
     <div class="hdr" style="padding-top:44px"><div class="hdr-back" onclick="goTo('pet-profile')">← Perfil</div><div class="hdr-title" id="ftitle">Alimentación</div></div>
     <div class="scroll-area" id="fcontent"></div>
   </div>
 
-  <!-- ENFERMEDADES -->
   <div id="screen-enfermedades" class="screen">
     <div class="hdr" style="padding-top:44px"><div class="hdr-back" onclick="goTo('pet-profile')">← Perfil</div><div class="hdr-title" id="entitle">Enfermedades crónicas</div></div>
     <div class="scroll-area" id="enlist"></div>
     <button class="fab" onclick="openM('modal-enfermedad')">+</button>
   </div>
 
-  <!-- BOTTOM NAV -->
   <nav class="bnav">
     <button class="nitem active" data-nav="home" onclick="navigate('home',this)"><span class="nicon">🏠</span><div class="nbar"></div><span>Inicio</span></button>
     <button class="nitem" data-nav="mascotas" onclick="navigate('mascotas',this)"><span class="nicon">🐾</span><div class="nbar"></div><span>Mascotas</span></button>
@@ -394,7 +333,7 @@ img{max-width:100%}
     <div class="fg"><label class="fl">Nombre *</label><input class="fi" id="v-name" placeholder="ej. Antirrábica, Bordetella"></div>
     <div class="fr">
       <div class="fg"><label class="fl">Fecha aplicación</label><input class="fi" id="v-date" type="date"></div>
-      <div class="fg"><label class="fl">Vence</label><input class="fi" id="v-expiry" type="date"></div>
+      <div class="fg"><label class="fl">Vence / próximo refuerzo</label><input class="fi" id="v-expiry" type="date"></div>
     </div>
     <div class="fg"><label class="fl">Veterinario que aplicó</label><input class="fi" id="v-vet" placeholder="Dr. García"></div>
     <div class="fg"><label class="fl">Lote / laboratorio</label><input class="fi" id="v-batch" placeholder="Opcional"></div>
@@ -421,7 +360,7 @@ img{max-width:100%}
       <div class="fg"><label class="fl">Fecha inicio</label><input class="fi" id="m-start" type="date"></div>
       <div class="fg"><label class="fl">Fecha fin</label><input class="fi" id="m-end" type="date"></div>
     </div>
-    <div class="fg"><label class="fl">Horario</label><input class="fi" id="m-time" type="time"></div>
+    <div class="fg"><label class="fl">Horario preferido</label><input class="fi" id="m-time" type="time"></div>
     <div class="fg"><label class="fl">Notas</label><input class="fi" id="m-notes" placeholder="ej. Con comida"></div>
     <div class="fg"><div class="tgl-wrap"><span class="fl" style="margin:0">Activo</span><label class="tgl"><input type="checkbox" id="m-active" checked><span class="tgl-sl"></span></label></div></div>
     <div class="mt-12 flex-c" style="gap:8px">
@@ -550,25 +489,143 @@ img{max-width:100%}
 <script>
 /* ================================================================
    DATA LAYER
-   Fase 2: reemplazar get/set con llamadas a API
    ================================================================ */
 const DB={
-  get pets(){return J('pv2_pets')},
-  get vax(){return J('pv2_vax')},
-  get meds(){return J('pv2_meds')},
-  get appts(){return J('pv2_appts')},
-  get cons(){return J('pv2_cons')},
-  get despar(){return J('pv2_despar')},
-  get pesos(){return J('pv2_pesos')},
-  get exams(){return J('pv2_exams')},
-  get foods(){return J('pv2_foods')},
-  get enfs(){return J('pv2_enfs')},
-  get aid(){return localStorage.getItem('pv2_aid')||''},
+  get pets(){return J('pv2_pets')},get vax(){return J('pv2_vax')},get meds(){return J('pv2_meds')},
+  get appts(){return J('pv2_appts')},get cons(){return J('pv2_cons')},get despar(){return J('pv2_despar')},
+  get pesos(){return J('pv2_pesos')},get exams(){return J('pv2_exams')},get foods(){return J('pv2_foods')},
+  get enfs(){return J('pv2_enfs')},get aid(){return localStorage.getItem('pv2_aid')||''},
   save(k,d){localStorage.setItem('pv2_'+k,JSON.stringify(d))},
   setAid(id){localStorage.setItem('pv2_aid',id)},
   uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
 };
 function J(k){return JSON.parse(localStorage.getItem(k)||'[]')}
+
+/* ================================================================
+   CALENDAR — .ics NATIVE
+   Generates a .ics file that opens the native calendar app on
+   iPhone (Calendar.app) and Android (Google Calendar / Samsung)
+   ================================================================ */
+function icsDate(dateStr, timeStr) {
+  // Returns YYYYMMDDTHHMMSS format
+  const d = dateStr.replace(/-/g,'');
+  if (!timeStr) return d; // all-day
+  return d + 'T' + timeStr.replace(':','') + '00';
+}
+
+function icsDateEnd(dateStr, timeStr, durationMins=60) {
+  if (!timeStr) return dateStr.replace(/-/g,'');
+  const [h,m] = timeStr.split(':').map(Number);
+  const total = h*60 + m + durationMins;
+  const eh = String(Math.floor(total/60)%24).padStart(2,'0');
+  const em = String(total%60).padStart(2,'0');
+  return dateStr.replace(/-/g,'') + 'T' + eh + em + '00';
+}
+
+function buildIcs(title, dateStr, timeStr, description='', location='', durationMins=60, alarm=true) {
+  const uid = Date.now() + '@petvida';
+  const dtstart = timeStr ? icsDate(dateStr, timeStr) : icsDate(dateStr);
+  const dtend   = timeStr ? icsDateEnd(dateStr, timeStr, durationMins) : icsDate(dateStr);
+  const allDay  = !timeStr;
+
+  let ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Petvida//ES',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    `UID:${uid}`,
+    `SUMMARY:${title}`,
+    allDay ? `DTSTART;VALUE=DATE:${dtstart}` : `DTSTART:${dtstart}`,
+    allDay ? `DTEND;VALUE=DATE:${dtend}`   : `DTEND:${dtend}`,
+    description ? `DESCRIPTION:${description.replace(/\n/g,'\\n')}` : '',
+    location ? `LOCATION:${location}` : '',
+    'STATUS:CONFIRMED',
+  ].filter(Boolean);
+
+  if (alarm) {
+    ics = ics.concat([
+      'BEGIN:VALARM',
+      'TRIGGER:-PT60M',   // 60 min before
+      'ACTION:DISPLAY',
+      `DESCRIPTION:Recordatorio: ${title}`,
+      'END:VALARM',
+      'BEGIN:VALARM',
+      'TRIGGER:-P1D',     // 1 day before
+      'ACTION:DISPLAY',
+      `DESCRIPTION:Mañana: ${title}`,
+      'END:VALARM',
+    ]);
+  }
+
+  ics = ics.concat(['END:VEVENT','END:VCALENDAR']);
+  return ics.join('\r\n');
+}
+
+function downloadIcs(title, dateStr, timeStr, description='', location='', durationMins=60) {
+  if (!dateStr) { showToast('No hay fecha para guardar'); return; }
+  const content = buildIcs(title, dateStr, timeStr, description, location, durationMins);
+  const blob    = new Blob([content], {type:'text/calendar;charset=utf-8'});
+  const url     = URL.createObjectURL(blob);
+  const a       = document.createElement('a');
+  a.href        = url;
+  a.download    = title.replace(/[^a-z0-9]/gi,'_').toLowerCase() + '.ics';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 1000);
+  showToast('📅 Abriendo tu calendario...');
+}
+
+// Convenience wrappers for each item type
+function calCita(a) {
+  const pet = getAP();
+  downloadIcs(
+    `🐾 Cita de ${pet?.name||'mascota'} — Dr. ${a.vet}`,
+    a.date, a.time,
+    [a.spec, a.reason, a.place].filter(Boolean).join(' · '),
+    a.place || ''
+  );
+}
+
+function calVax(v, petName) {
+  if (!v.expiry) { showToast('Agregá la fecha de vencimiento primero'); return; }
+  downloadIcs(
+    `💉 Refuerzo vacuna ${v.name} — ${petName}`,
+    v.expiry, null,
+    `Vacuna: ${v.name}\nVeterinario: ${v.vet||'—'}\nLote: ${v.batch||'—'}`,
+    '', 0, true
+  );
+}
+
+function calDespar(dp, petName) {
+  if (!dp.next) { showToast('No hay próxima fecha calculada'); return; }
+  downloadIcs(
+    `🪱 Desparasitación ${dp.type} — ${petName}`,
+    dp.next, null,
+    `Tipo: ${dp.type}\nProducto: ${dp.prod||'—'}\nFrecuencia: cada ${dp.freq} días`,
+    '', 0, true
+  );
+}
+
+function calMed(m, petName) {
+  if (!m.end) { showToast('Agregá una fecha de fin al medicamento'); return; }
+  downloadIcs(
+    `💊 Fin de ${m.name} — ${petName}`,
+    m.end, null,
+    `Medicamento: ${m.name}\nDosis: ${m.dose||'—'}\nFrecuencia: ${m.freq}`,
+    '', 0, true
+  );
+}
+
+function calFollowup(date, petName, vet) {
+  downloadIcs(
+    `🏥 Control de ${petName}${vet?' con Dr. '+vet:''}`,
+    date, null,
+    `Control de seguimiento veterinario\nVeterinario: ${vet||'—'}`,
+    '', 0, true
+  );
+}
 
 /* ================================================================
    BUSINESS LOGIC
@@ -703,8 +760,10 @@ function renderVax(pet){
   document.getElementById('vtitle').textContent='Vacunas de '+pet.name;
   const list=byPet(pet.id,DB.vax),el=document.getElementById('vlist');
   if(!list.length){el.innerHTML=empty('💉','Sin vacunas registradas',`Agregá la primera vacuna de ${pet.name}.`);return}
-  el.innerHTML=list.map(v=>{const s=vSt(v),bg=s==='ok'?'<span class="badge bok">✓ Al día</span>':s==='soon'?'<span class="badge bwarn">⚠ Por vencer</span>':'<span class="badge balert">✕ Vencida</span>';
-    return`<div class="litem"><div class="licon mi-g">${v.sticker?`<img src="${v.sticker}" style="width:38px;height:38px;border-radius:8px;object-fit:cover">`:' 💉'}</div><div class="lbody"><div class="ltitle">${v.name}</div><div class="lsub">Aplicada ${fD(v.date)}${v.expiry?' · Vence '+fD(v.expiry):''}${v.vet?`<br>Dr. ${v.vet}`:''}${v.batch?' · Lote: '+v.batch:''}</div></div><div class="lact">${bg}</div></div>`}).join('')
+  el.innerHTML=list.map(v=>{
+    const s=vSt(v),bg=s==='ok'?'<span class="badge bok">✓ Al día</span>':s==='soon'?'<span class="badge bwarn">⚠ Por vencer</span>':'<span class="badge balert">✕ Vencida</span>';
+    const calBtn=v.expiry?`<button class="btn-cal" onclick='calVax(${JSON.stringify(v).replace(/'/g,"&#39;")}, "${pet.name}")'>📅 Recordatorio</button>`:'';
+    return`<div class="litem"><div class="licon mi-g">${v.sticker?`<img src="${v.sticker}" style="width:38px;height:38px;border-radius:8px;object-fit:cover">`:' 💉'}</div><div class="lbody"><div class="ltitle">${v.name}</div><div class="lsub">Aplicada ${fD(v.date)}${v.expiry?' · Vence '+fD(v.expiry):''}${v.vet?`<br>Dr. ${v.vet}`:''}${v.batch?' · Lote: '+v.batch:''}</div>${calBtn?`<div style="margin-top:7px">${calBtn}</div>`:''}</div><div class="lact">${bg}</div></div>`}).join('')
 }
 
 /* ================================================================
@@ -717,11 +776,14 @@ function renderMeds(pet){
   if(!list.length){el.innerHTML=empty('💊','Sin medicamentos',`Registrá los remedios de ${pet.name}.`);return}
   const act=list.filter(m=>m.active),inact=list.filter(m=>!m.active);
   let h='';
-  if(act.length)h+=`<div class="stitle">Activos</div>`+act.map(mI).join('');
-  if(inact.length)h+=`<div class="stitle mt-12">Anteriores</div>`+inact.map(mI).join('');
+  if(act.length)h+=`<div class="stitle">Activos</div>`+act.map(m=>mI(m,pet.name)).join('');
+  if(inact.length)h+=`<div class="stitle mt-12">Anteriores</div>`+inact.map(m=>mI(m,pet.name)).join('');
   el.innerHTML=h
 }
-function mI(m){return`<div class="litem" style="${!m.active?'opacity:.55':''}"><div class="licon mi-g">💊</div><div class="lbody"><div class="ltitle">${m.name}</div><div class="lsub">${m.dose?m.dose+' · ':''}${m.freq}${m.time?' · '+m.time:''}${m.notes?'<br>'+m.notes:''}${m.end?'<br>Hasta '+fD(m.end):''}</div></div><div class="lact">${m.active?'<span class="badge bok">Activo</span>':'<span class="badge bgray">Inactivo</span>'}</div></div>`}
+function mI(m,petName){
+  const calBtn=m.end?`<button class="btn-cal" onclick='calMed(${JSON.stringify(m).replace(/'/g,"&#39;")}, "${petName}")'>📅 Fin del tratamiento</button>`:'';
+  return`<div class="litem" style="${!m.active?'opacity:.55':''}"><div class="licon mi-g">💊</div><div class="lbody"><div class="ltitle">${m.name}</div><div class="lsub">${m.dose?m.dose+' · ':''}${m.freq}${m.time?' · '+m.time:''}${m.notes?'<br>'+m.notes:''}${m.end?'<br>Hasta '+fD(m.end):''}</div>${calBtn?`<div style="margin-top:7px">${calBtn}</div>`:''}</div><div class="lact">${m.active?'<span class="badge bok">Activo</span>':'<span class="badge bgray">Inactivo</span>'}</div></div>`
+}
 
 /* ================================================================
    CITAS
@@ -738,20 +800,17 @@ function renderAppts(pet){
   if(pa.length)h+=`<div class="stitle mt-12">Anteriores</div>`+pa.map(a=>apI(a,true)).join('');
   el.innerHTML=h
 }
-function apI(a,past=false){const d=new Date(a.date+'T00:00:00');return`<div class="litem" style="${past?'opacity:.5':''}"><div class="adb"><div class="aday">${d.getDate()}</div><div class="amon">${d.toLocaleString('es',{month:'short'}).replace('.','')}</div></div><div class="lbody"><div class="ltitle">Dr. ${a.vet}</div><div class="lsub">${a.time}${a.spec?' · '+a.spec:''}${a.place?'<br>'+a.place:''}${a.reason?'<br>'+a.reason:''}</div></div><div class="lact">${!past?`<button class="btn btn-c btn-sm" onclick='addCal(${JSON.stringify(a).replace(/'/g,"&#39;")})'>📅</button>`:''}  <button onclick="delItem('appts','${a.id}',()=>renderAppts(getAP()))" style="color:var(--text-lt);padding:4px;font-size:1rem">✕</button></div></div>`}
-
-/* ================================================================
-   CALENDAR
-   ================================================================ */
-function addCal(a){
-  const pet=getAP(),title=encodeURIComponent(`Cita de ${pet?.name||'mascota'} con Dr. ${a.vet}`),det=encodeURIComponent([a.spec,a.reason].filter(Boolean).join(' · ')),loc=encodeURIComponent(a.place||''),ds=a.date.replace(/-/g,''),ts=a.time?(a.time.replace(':','')+'00'):'090000',start=ds+'T'+ts,eh=a.time?String(parseInt(a.time.split(':')[0])+1).padStart(2,'0'):'10',end=ds+'T'+eh+ts.slice(2);
-  window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${det}&location=${loc}`,'_blank');
-  showToast('Abriendo Google Calendar 📅')
-}
-function calDp(date,tipo,pname){
-  const title=encodeURIComponent(`Desparasitación ${tipo} de ${pname}`),ds=date.replace(/-/g,'');
-  window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${ds}/${ds}`,'_blank');
-  showToast('Abriendo Google Calendar 📅')
+function apI(a,past=false){
+  const d=new Date(a.date+'T00:00:00');
+  return`<div class="litem" style="${past?'opacity:.5':''}">
+    <div class="adb"><div class="aday">${d.getDate()}</div><div class="amon">${d.toLocaleString('es',{month:'short'}).replace('.','')}</div></div>
+    <div class="lbody">
+      <div class="ltitle">Dr. ${a.vet}</div>
+      <div class="lsub">${a.time}${a.spec?' · '+a.spec:''}${a.place?'<br>'+a.place:''}${a.reason?'<br>'+a.reason:''}</div>
+      ${!past?`<button class="btn-cal-full" onclick='calCita(${JSON.stringify(a).replace(/'/g,"&#39;")})'>📅 Guardar en mi calendario</button>`:''}
+    </div>
+    <div class="lact"><button onclick="delItem('appts','${a.id}',()=>renderAppts(getAP()))" style="color:var(--text-lt);padding:4px;font-size:1rem">✕</button></div>
+  </div>`
 }
 
 /* ================================================================
@@ -763,7 +822,21 @@ function renderCons(pid){
   const list=byPet(pid,DB.cons).sort((a,b)=>new Date(b.date)-new Date(a.date)),el=document.getElementById('conlist');
   if(!list.length){el.innerHTML=empty('🏥','Sin consultas registradas','Registrá cada visita al veterinario para tener el historial completo.');return}
   const tcol={Control:'bblue',Urgencia:'balert',Cirugía:'bpurple',Vacunación:'bok',Examen:'bgray',Otro:'bgray'};
-  el.innerHTML=list.map(c=>`<div class="ccard"><div class="chead"><div><div style="font-size:.88rem;font-weight:800">${c.vet}${c.place?' · '+c.place:''}</div><div class="tm tsm mt-8">${fD(c.date)}</div></div><span class="badge ${tcol[c.type]||'bgray'}">${c.type}</span></div><div class="cbody">${c.reason?`<div class="tsm tm">Motivo: ${c.reason}</div>`:''} ${c.diag?`<div class="cdiag"><div class="cdiag-lbl">Diagnóstico</div>${c.diag}</div>`:''} ${c.treat?`<div style="margin-top:6px;font-size:.8rem;color:var(--text-mid)"><span style="font-weight:800;color:var(--text-muted)">TRATAMIENTO</span><br>${c.treat}</div>`:''} ${c.follow?`<div style="margin-top:6px"><span class="badge bblue">Próximo control: ${fD(c.follow)}</span></div>`:''}<button onclick="delItem('cons','${c.id}',()=>renderCons('${pid}'))" style="margin-top:8px;font-size:.75rem;color:var(--text-lt);font-weight:600">Eliminar registro</button></div></div>`).join('')
+  el.innerHTML=list.map(c=>`<div class="ccard">
+    <div class="chead"><div><div style="font-size:.88rem;font-weight:800">${c.vet}${c.place?' · '+c.place:''}</div><div class="tm tsm mt-8">${fD(c.date)}</div></div><span class="badge ${tcol[c.type]||'bgray'}">${c.type}</span></div>
+    <div class="cbody">
+      ${c.reason?`<div class="tsm tm">Motivo: ${c.reason}</div>`:''}
+      ${c.diag?`<div class="cdiag"><div class="cdiag-lbl">Diagnóstico</div>${c.diag}</div>`:''}
+      ${c.treat?`<div style="margin-top:6px;font-size:.8rem;color:var(--text-mid)"><span style="font-weight:800;color:var(--text-muted)">TRATAMIENTO</span><br>${c.treat}</div>`:''}
+      ${c.follow?`<div style="margin-top:8px">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
+          <span class="badge bblue">Próximo control: ${fD(c.follow)}</span>
+          <button class="btn-cal" onclick="calFollowup('${c.follow}','${pet.name}','${c.vet}')">📅 Guardar en calendario</button>
+        </div>
+      </div>`:''}
+      <button onclick="delItem('cons','${c.id}',()=>renderCons('${pid}'))" style="margin-top:8px;font-size:.75rem;color:var(--text-lt);font-weight:600">Eliminar registro</button>
+    </div>
+  </div>`).join('')
 }
 
 /* ================================================================
@@ -775,7 +848,17 @@ function renderDespar(pid){
   const list=byPet(pid,DB.despar).sort((a,b)=>new Date(b.date)-new Date(a.date)),el=document.getElementById('dpcontent');
   const sec=(items,tipo,ico)=>{
     const last=items[0];let nb=`<span class="badge bgray">Sin registro</span>`,ni='';
-    if(last?.next){const d=dDiff(last.next);nb=d<0?`<span class="badge balert">Vencida hace ${Math.abs(d)} días</span>`:d===0?`<span class="badge bwarn">¡Hoy!</span>`:d<=15?`<span class="badge bwarn">En ${d} días</span>`:`<span class="badge bok">Al día</span>`;ni=`<div class="arow ${d<0?'urgent':d<=15?'warn':'ok'}" style="margin-bottom:10px"><span class="aicon">${ico}</span><div style="flex:1"><div class="atext">Próxima ${tipo.toLowerCase()}: ${fD(last.next)}</div><div class="ameta">${last.prod||''}</div></div><button class="btn btn-c btn-sm" onclick="calDp('${last.next}','${tipo}','${pet.name}')">📅</button></div>`}
+    if(last?.next){
+      const d=dDiff(last.next);
+      nb=d<0?`<span class="badge balert">Vencida hace ${Math.abs(d)} días</span>`:d===0?`<span class="badge bwarn">¡Hoy!</span>`:d<=15?`<span class="badge bwarn">En ${d} días</span>`:`<span class="badge bok">Al día</span>`;
+      ni=`<div class="arow ${d<0?'urgent':d<=15?'warn':'ok'}" style="margin-bottom:10px;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px;width:100%">
+          <span class="aicon">${ico}</span>
+          <div style="flex:1"><div class="atext">Próxima ${tipo.toLowerCase()}: ${fD(last.next)}</div><div class="ameta">${last.prod||''}</div></div>
+        </div>
+        <button class="btn-cal-full" onclick='calDespar(${JSON.stringify(last).replace(/'/g,"&#39;")}, "${pet.name}")'>📅 Guardar recordatorio en mi calendario</button>
+      </div>`;
+    }
     return`<div class="stitle">${ico} ${tipo}</div>${ni}${items.length?items.map(d=>`<div class="litem"><div class="licon mi-b">${ico}</div><div class="lbody"><div class="ltitle">${d.prod||tipo}</div><div class="lsub">Aplicada ${fD(d.date)} · Próxima ${fD(d.next)}${d.notes?'<br>'+d.notes:''}</div></div><button onclick="delItem('despar','${d.id}',()=>renderDespar('${pid}'))" style="color:var(--text-lt);padding:4px">✕</button></div>`).join(''):`<div class="tm tsm" style="padding:8px 0 12px">Sin registros de ${tipo.toLowerCase()}.</div>`}`
   };
   el.innerHTML=sec(list.filter(d=>d.type==='Interna'),'Interna','🪱')+sec(list.filter(d=>d.type==='Externa'),'Externa','🦟')
@@ -786,12 +869,12 @@ function renderDespar(pid){
    ================================================================ */
 function renderPeso(pid){
   if(!pid)return;const pet=DB.pets.find(p=>p.id===pid);if(!pet)return;
-  document.getElementById('wtitle').textContent='Peso de '+pet.name;
+  document.getElementById('wtitle2').textContent='Peso de '+pet.name;
   const list=byPet(pid,DB.pesos).sort((a,b)=>new Date(a.date)-new Date(b.date)),el=document.getElementById('wcontent');
   if(!list.length){el.innerHTML=empty('⚖️','Sin registros de peso','Registrá el peso de '+pet.name+' en cada control.');return}
   const max=Math.max(...list.map(p=>parseFloat(p.value))),min=Math.min(...list.map(p=>parseFloat(p.value)));
   const last=list[list.length-1],prev=list[list.length-2];
-  let tend='';if(prev){const df=(parseFloat(last.value)-parseFloat(prev.value)).toFixed(1);tend=df>0?`↑ +${df} kg desde último`:df<0?`↓ ${df} kg desde último`:'Sin cambio desde último'}
+  let tend='';if(prev){const df=(parseFloat(last.value)-parseFloat(prev.value)).toFixed(1);tend=df>0?`↑ +${df} kg`:df<0?`↓ ${df} kg`:'Sin cambio'}
   el.innerHTML=`<div class="card" style="margin-bottom:10px"><div style="display:flex;align-items:flex-start;justify-content:space-between"><div><div class="tm tsm">Último registro</div><div style="font-size:1.8rem;font-weight:900;color:var(--coral)">${last.value} <span style="font-size:1rem;font-weight:600">kg</span></div><div class="tm tsm">${fD(last.date)}</div></div>${tend?`<div class="badge bgray" style="align-self:flex-start">${tend}</div>`:''}</div>${last.bcs?`<div class="mt-8"><span class="badge bblue">BCS ${last.bcs}</span></div>`:''}</div><div class="stitle">Historial</div><div class="card">${list.slice().reverse().map(p=>{const pct=max===min?50:Math.round(((parseFloat(p.value)-min)/(max-min))*100);return`<div class="witem"><div style="min-width:68px;font-size:.78rem;color:var(--text-muted)">${fDs(p.date)}</div><div class="wbar-wrap"><div class="wbar" style="width:${pct}%"></div></div><div style="min-width:52px;text-align:right;font-size:.88rem;font-weight:800">${p.value} kg</div>${p.bcs?`<span class="badge bgray" style="font-size:.65rem">${p.bcs}</span>`:''}</div>`}).join('')}</div>`
 }
 
@@ -834,7 +917,7 @@ function renderEnfs(pid){
 function savePet(){
   const name=g('p-name');let species=g('p-species');
   if(species==='Otro'){species=g('p-sp-custom');if(!species){showToast('Escribí qué especie es');return}}
-  else species=species.split(' ')[0]; // remove emoji
+  else species=species.split(' ')[0];
   if(!name||!species){showToast('Completá nombre y especie');return}
   const pet={id:DB.uid(),name,species,breed:g('p-breed'),dob:g('p-dob'),weight:g('p-weight'),sex:g('p-sex'),neut:g('p-neut'),chip:g('p-chip'),allerg:g('p-allerg'),vet:g('p-vet'),vphone:g('p-vphone'),photo:document.getElementById('pp-pre').src||'',createdAt:new Date().toISOString()};
   const ps=DB.pets;ps.push(pet);DB.save('pets',ps);DB.setAid(pet.id);
