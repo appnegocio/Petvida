@@ -747,9 +747,149 @@ function renderProfile(pid){
       <div class="mrow" onclick="goTo('medicamentos')"><div class="micon mi-g">💊</div><div class="minfo"><div class="mname">Medicamentos</div><div class="msub">${byPet(pid,DB.meds).filter(m=>m.active).length?byPet(pid,DB.meds).filter(m=>m.active).length+' activo'+(byPet(pid,DB.meds).filter(m=>m.active).length>1?'s':''):'Sin medicamentos activos'}</div></div><span class="marrow">›</span></div>
       <div class="mrow" onclick="goTo('citas')"><div class="micon mi-b">📅</div><div class="minfo"><div class="mname">Citas veterinarias</div><div class="msub">${upAppts} próxima${upAppts!==1?'s':''}</div></div><span class="marrow">›</span></div>
     </div>
-    <div style="padding-bottom:8px"><button class="btn btn-d btn-sm btn-f" onclick="delPet('${pid}')">🗑 Eliminar mascota</button></div>`;
+    <div style="display:flex;gap:8px;padding-bottom:8px">
+      <button class="btn btn-p btn-sm" style="flex:2" onclick="sharePet('${pid}')">↗ Compartir ficha clínica</button>
+      <button class="btn btn-d btn-sm" style="flex:1" onclick="delPet('${pid}')">🗑</button>
+    </div>`;
 }
 function dr(l,v){return`<div class="drow"><span class="dlbl">${l}</span><span class="dval">${v}</span></div>`}
+
+/* ================================================================
+   SHARE FICHA CLÍNICA — Web Share API
+   Fase 2: reemplazar con share() nativo de Flutter/React Native
+   El texto generado es idéntico — solo cambia el método de envío
+   ================================================================ */
+function sharePet(pid) {
+  const pet = DB.pets.find(p=>p.id===pid);
+  if (!pet) return;
+
+  const age    = calcAge(pet.dob);
+  const vl     = byPet(pid, DB.vax);
+  const meds   = byPet(pid, DB.meds).filter(m=>m.active);
+  const cons   = byPet(pid, DB.cons).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const dps    = byPet(pid, DB.despar).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const pesos  = byPet(pid, DB.pesos).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const enfs   = byPet(pid, DB.enfs);
+  const food   = byPet(pid, DB.foods)[0];
+  const appts  = byPet(pid, DB.appts).filter(a=>dDiff(a.date)>=0).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const today  = new Date().toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'});
+
+  let txt = `🐾 FICHA CLÍNICA — ${pet.name.toUpperCase()}\n`;
+  txt += `Generada el ${today} desde Petvida\n`;
+  txt += `${'─'.repeat(36)}\n\n`;
+
+  // Datos básicos
+  txt += `📋 DATOS GENERALES\n`;
+  txt += `Especie: ${pet.species}${pet.breed?' · '+pet.breed:''}\n`;
+  if (age)      txt += `Edad: ${age}\n`;
+  if (pet.sex)  txt += `Sexo: ${pet.sex}${pet.neut?' · '+pet.neut:''}izado\n`;
+  if (pet.chip) txt += `Microchip: ${pet.chip}\n`;
+  if (pet.allerg) txt += `Alergias: ${pet.allerg}\n`;
+  if (pet.vet)  txt += `Veterinario de cabecera: Dr. ${pet.vet}${pet.vphone?' · '+pet.vphone:''}\n`;
+
+  // Peso actual
+  if (pesos.length) {
+    const lp = pesos[0];
+    txt += `Peso actual: ${lp.value} kg (${fD(lp.date)})`;
+    if (lp.bcs) txt += ` · BCS ${lp.bcs}`;
+    txt += '\n';
+  }
+
+  // Enfermedades crónicas
+  if (enfs.length) {
+    txt += `\n⚠️ ENFERMEDADES CRÓNICAS\n`;
+    enfs.forEach(e => {
+      txt += `• ${e.name}${e.date?' (desde '+fD(e.date)+')':''}\n`;
+      if (e.notes) txt += `  ${e.notes}\n`;
+    });
+  }
+
+  // Vacunas
+  if (vl.length) {
+    txt += `\n💉 VACUNAS\n`;
+    vl.forEach(v => {
+      const s = vSt(v);
+      const st = s==='ok'?'✓':s==='soon'?'⚠':' ✕';
+      txt += `${st} ${v.name}`;
+      if (v.date)   txt += ` · Aplicada ${fD(v.date)}`;
+      if (v.expiry) txt += ` · Vence ${fD(v.expiry)}`;
+      txt += '\n';
+    });
+  }
+
+  // Medicamentos activos
+  if (meds.length) {
+    txt += `\n💊 MEDICAMENTOS ACTUALES\n`;
+    meds.forEach(m => {
+      txt += `• ${m.name}`;
+      if (m.dose) txt += ` ${m.dose}`;
+      txt += ` — ${m.freq}`;
+      if (m.notes) txt += ` (${m.notes})`;
+      if (m.end)   txt += ` · Hasta ${fD(m.end)}`;
+      txt += '\n';
+    });
+  }
+
+  // Desparasitación
+  const dpI = dps.find(d=>d.type==='Interna');
+  const dpE = dps.find(d=>d.type==='Externa');
+  if (dpI || dpE) {
+    txt += `\n🪱 DESPARASITACIÓN\n`;
+    if (dpI) txt += `Interna: ${dpI.prod||'—'} · Próxima ${fD(dpI.next)}\n`;
+    if (dpE) txt += `Externa: ${dpE.prod||'—'} · Próxima ${fD(dpE.next)}\n`;
+  }
+
+  // Alimentación
+  if (food) {
+    txt += `\n🍽️ ALIMENTACIÓN\n`;
+    txt += `${food.brand} · ${food.type} · ${food.amount||''} · ${food.times}\n`;
+    if (food.notes) txt += `Notas: ${food.notes}\n`;
+  }
+
+  // Última consulta
+  if (cons.length) {
+    const lc = cons[0];
+    txt += `\n🏥 ÚLTIMA CONSULTA (${fD(lc.date)})\n`;
+    txt += `Veterinario: Dr. ${lc.vet}${lc.place?' · '+lc.place:''}\n`;
+    if (lc.reason) txt += `Motivo: ${lc.reason}\n`;
+    if (lc.diag)   txt += `Diagnóstico: ${lc.diag}\n`;
+    if (lc.treat)  txt += `Tratamiento: ${lc.treat}\n`;
+    if (lc.follow) txt += `Próximo control: ${fD(lc.follow)}\n`;
+    if (cons.length > 1) txt += `(+ ${cons.length-1} consulta${cons.length>2?'s':''} anterior${cons.length>2?'es':''})\n`;
+  }
+
+  // Próximas citas
+  if (appts.length) {
+    txt += `\n📅 PRÓXIMAS CITAS\n`;
+    appts.slice(0,3).forEach(a => {
+      txt += `• ${fD(a.date)} ${a.time} — Dr. ${a.vet}`;
+      if (a.spec)   txt += ` (${a.spec})`;
+      if (a.place)  txt += ` · ${a.place}`;
+      if (a.reason) txt += `\n  Motivo: ${a.reason}`;
+      txt += '\n';
+    });
+  }
+
+  txt += `\n${'─'.repeat(36)}\n`;
+  txt += `Enviado desde Petvida 🐾\n`;
+  txt += `Porque ${pet.name} se merece lo mejor.`;
+
+  // Web Share API — abre el menú nativo del teléfono
+  if (navigator.share) {
+    navigator.share({
+      title: `Ficha clínica de ${pet.name} — Petvida`,
+      text: txt
+    }).catch(()=>{});
+  } else {
+    // Fallback para escritorio: copiar al portapapeles
+    navigator.clipboard?.writeText(txt).then(()=>{
+      showToast('Ficha copiada al portapapeles 📋');
+    }).catch(()=>{
+      showToast('Tu navegador no soporta compartir');
+    });
+  }
+}
+
 function delPet(pid){if(!confirm('¿Eliminar esta mascota y todos sus datos?'))return;['pets','vax','meds','appts','cons','despar','pesos','exams','foods','enfs'].forEach(k=>{if(k==='pets')DB.save(k,DB.pets.filter(p=>p.id!==pid));else DB.save(k,DB[k].filter(x=>x.petId!==pid))});showToast('Mascota eliminada');goTo('mascotas')}
 
 /* ================================================================
