@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#E8845A">
+<meta name="theme-color" content="#1D9E8F">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Petvida">
@@ -14,7 +14,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --coral:#E8845A; --coral-dk:#D06B43; --coral-lt:#FFF0E8; --coral-bd:#F5C4A8;
+  --coral:#1D9E8F; --coral-dk:#128A7C; --coral-lt:#E8F5F3; --coral-bd:#A8DDD8;
   --green:#1D9E75; --green-lt:#E8F7F1; --green-bd:#B8E8D8;
   --orange:#F0A050; --orange-lt:#FFF5E0;
   --purple:#7F77DD; --purple-lt:#F0EDFF;
@@ -77,7 +77,7 @@ img{max-width:100%}
 .bblue{background:var(--blue-lt);color:var(--blue)}
 .bgray{background:var(--bg);color:var(--text-muted);border:.5px solid var(--border)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 22px;border-radius:var(--r-md);font-size:.88rem;font-weight:700;transition:all .15s}
-.btn-p{background:var(--coral);color:white;box-shadow:0 2px 10px rgba(232,132,90,.28)}
+.btn-p{background:var(--coral);color:white;box-shadow:0 2px 10px rgba(29,158,143,.28)}
 .btn-p:active{transform:scale(.97);background:var(--coral-dk)}
 .btn-g{background:var(--bg);color:var(--text-muted);border:.5px solid var(--border-md)}
 .btn-d{background:#FEE;color:#C0392B;border:.5px solid #FAD}
@@ -162,22 +162,61 @@ img{max-width:100%}
 .mtitle{font-size:1.05rem;font-weight:800;margin-bottom:14px}
 .toast{position:fixed;bottom:calc(var(--nav-h) + var(--safe) + 14px);left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);color:white;padding:11px 18px;border-radius:var(--r-sm);font-size:.85rem;font-weight:600;z-index:999;opacity:0;pointer-events:none;transition:all .25s;white-space:nowrap;max-width:88vw;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.fab{position:fixed;bottom:calc(var(--nav-h) + var(--safe) + 14px);right:18px;width:50px;height:50px;background:var(--coral);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:white;box-shadow:0 3px 14px rgba(232,132,90,.38);z-index:50;transition:transform .15s}
+.fab{position:fixed;bottom:calc(var(--nav-h) + var(--safe) + 14px);right:18px;width:50px;height:50px;background:var(--coral);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:white;box-shadow:0 3px 14px rgba(29,158,143,.38);z-index:50;transition:transform .15s}
 .fab:active{transform:scale(.91)}
 .empty{text-align:center;padding:36px 20px;color:var(--text-muted)}
 .eico{font-size:2.8rem;margin-bottom:10px}
 .etit{font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:5px}
 .esub{font-size:.82rem;line-height:1.5}
-#swelcome{background:var(--coral);color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 32px calc(32px + var(--safe));min-height:100dvh}
-.wlogo{font-size:3.8rem;margin-bottom:20px}
-.wtitle{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:700;margin-bottom:8px}
-.wsub{font-size:.95rem;opacity:.8;margin-bottom:40px;line-height:1.55;font-weight:500}
-.wbtn{background:white;color:var(--coral);border-radius:var(--r-lg);padding:15px 40px;font-size:.95rem;font-weight:800;box-shadow:0 4px 18px rgba(0,0,0,.15)}
+
+/* ── WELCOME SCREEN ── */
+#swelcome{
+  position:relative;overflow:hidden;
+  background:linear-gradient(160deg,#22A898 0%,#128A7C 55%,#0A6B5E 100%);
+  color:white;display:flex;flex-direction:column;
+  min-height:100dvh;padding:0;
+}
+.w-circle{position:absolute;border-radius:50%;pointer-events:none;}
+.w-top{padding:54px 28px 0;position:relative;z-index:1;}
+.w-name{
+  font-family:'Playfair Display',serif;
+  font-size:2rem;font-weight:700;color:white;letter-spacing:-.5px;
+  display:flex;align-items:center;gap:8px;
+}
+.w-name-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.45);flex-shrink:0;}
+.w-body{
+  flex:1;display:flex;flex-direction:column;
+  justify-content:flex-end;
+  padding:0 28px;position:relative;z-index:1;
+}
+.w-title{
+  font-family:'Playfair Display',serif;
+  font-size:2.4rem;font-weight:700;line-height:1.15;
+  margin-bottom:14px;letter-spacing:-.5px;
+}
+.w-line{width:36px;height:2.5px;background:rgba(255,255,255,.35);border-radius:2px;margin-bottom:16px;}
+.w-sub{font-size:.95rem;font-weight:500;opacity:.8;line-height:1.6;margin-bottom:36px;}
+.w-bottom{padding:0 28px calc(40px + var(--safe));position:relative;z-index:1;}
+.wbtn{
+  width:100%;padding:16px;
+  background:white;color:var(--coral);
+  border-radius:16px;font-size:1rem;font-weight:900;
+  box-shadow:0 6px 24px rgba(0,0,0,.18);
+  letter-spacing:.2px;transition:transform .15s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.wbtn:active{transform:scale(.97)}
+.w-note{
+  text-align:center;font-size:.7rem;opacity:.4;
+  font-weight:700;margin-top:14px;letter-spacing:.5px;
+  text-transform:uppercase;
+}
+
 .flex-c{display:flex;align-items:center;gap:8px}
 .mt-8{margin-top:8px}.mt-12{margin-top:12px}
 .tsm{font-size:.8rem}.tm{color:var(--text-muted)}.fw8{font-weight:800}
 
-/* Cal hint banner — shows after saving items with dates */
+/* Cal hint banner */
 .cal-hint{
   background:var(--blue-lt);border:.5px solid #C8DCEF;
   border-radius:var(--r-md);padding:11px 13px;
@@ -190,10 +229,31 @@ img{max-width:100%}
 <div id="app">
 
 <div id="swelcome">
-  <div class="wlogo">🐾</div>
-  <div class="wtitle">Petvida</div>
-  <div class="wsub">La salud y felicidad de tu mascota, siempre a mano</div>
-  <button class="wbtn" onclick="startApp()">Comenzar →</button>
+  <!-- Círculos decorativos de fondo -->
+  <div class="w-circle" style="width:340px;height:340px;top:-130px;right:-110px;background:rgba(255,255,255,.08)"></div>
+  <div class="w-circle" style="width:220px;height:220px;bottom:60px;left:-70px;background:rgba(255,255,255,.06)"></div>
+  <div class="w-circle" style="width:110px;height:110px;bottom:220px;right:10px;background:rgba(255,255,255,.04)"></div>
+
+  <!-- Nombre grande arriba -->
+  <div class="w-top">
+    <div class="w-name">Petvida <div class="w-name-dot"></div></div>
+  </div>
+
+  <!-- Frase central -->
+  <div class="w-body">
+    <div class="w-title">Ellos nos dan todo.<br>Nosotros los<br>cuidamos.</div>
+    <div class="w-line"></div>
+    <div class="w-sub">El historial clínico de tu mascota, siempre en tu bolsillo.</div>
+  </div>
+
+  <!-- Botón -->
+  <div class="w-bottom">
+    <button class="wbtn" onclick="startApp()">
+      <span>Empezar ahora</span>
+      <span style="font-size:1.1rem">→</span>
+    </button>
+    <div class="w-note">Gratis · Sin registro · Sin publicidad</div>
+  </div>
 </div>
 
 <div id="main-app" style="display:none">
