@@ -330,7 +330,7 @@ img{max-width:100%}
     <div class="fg"><label class="fl">Alergias</label><input class="fi" id="p-allerg" placeholder="ej. Pollo, Polen"></div>
     <div class="fsec">Veterinario de cabecera</div>
     <div class="fg"><label class="fl">Nombre</label><input class="fi" id="p-vet" placeholder="Dr. García"></div>
-    <div class="fg"><label class="fl">Teléfono clínica</label><input class="fi" id="p-vphone" type="tel" placeholder="+56 9 1234 5678"></div>
+    <div class="fg"><label class="fl">Teléfono clínica</label><input class="fi" id="p-vphone" type="tel" placeholder="ej. +1 555 123 4567"></div>
     <div class="mt-12 flex-c" style="gap:8px">
       <button class="btn btn-g" style="flex:1" onclick="closeM('modal-pet')">Cancelar</button>
       <button class="btn btn-p" style="flex:2" onclick="savePet()">Guardar mascota</button>
@@ -503,7 +503,7 @@ img{max-width:100%}
       <div class="fg"><label class="fl">Hasta</label><input class="fi" id="cg-to" type="date"></div>
     </div>
     <div class="fg"><label class="fl">Nombre del cuidador</label><input class="fi" id="cg-cname" placeholder="ej. María, mi mamá"></div>
-    <div class="fg"><label class="fl">Teléfono del cuidador</label><input class="fi" id="cg-cphone" type="tel" placeholder="+56 9 1234 5678"></div>
+    <div class="fg"><label class="fl">Teléfono del cuidador</label><input class="fi" id="cg-cphone" type="tel" placeholder="ej. +1 555 123 4567"></div>
     <div class="fsec">Alimentación</div>
     <div class="fg"><label class="fl">¿Qué come? (marca y tipo)</label><input class="fi" id="cg-food" placeholder="ej. Royal Canin adulto, croquetas"></div>
     <div class="fg"><label class="fl">¿Cuánto por vez?</label><input class="fi" id="cg-foodamt" placeholder="ej. 1 taza rasada (120g)"></div>
@@ -519,7 +519,7 @@ img{max-width:100%}
     <div class="fg"><label class="fl">¿Cuándo preocuparse?</label><textarea class="fi" id="cg-alert" rows="3" style="resize:none;line-height:1.5" placeholder="ej. Si no come en más de 24h&#10;Si vomita más de 2 veces&#10;Si no hace sus necesidades en el día"></textarea></div>
     <div class="fsec">Contactos de emergencia</div>
     <div class="fg"><label class="fl">Veterinario de emergencia</label><input class="fi" id="cg-vetname" placeholder="ej. Clínica Vetcare — Dr. García"></div>
-    <div class="fg"><label class="fl">Teléfono veterinario</label><input class="fi" id="cg-vetphone" type="tel" placeholder="+56 9 8765 4321"></div>
+    <div class="fg"><label class="fl">Teléfono veterinario</label><input class="fi" id="cg-vetphone" type="tel" placeholder="ej. +1 555 765 4321"></div>
     <div class="fg"><label class="fl">¿Dónde estará el dueño?</label><input class="fi" id="cg-owner" placeholder="ej. Santiago, disponible por WhatsApp"></div>
     <div class="fsec">Notas adicionales</div>
     <div class="fg"><label class="fl">Cualquier otra cosa importante</label><textarea class="fi" id="cg-extra" rows="3" style="resize:none;line-height:1.5" placeholder="ej. La llave está en el cajón de la cocina. El veterinario ya tiene toda su historia clínica."></textarea></div>
@@ -681,8 +681,8 @@ const getAP=()=>{const ps=DB.pets;if(!ps.length)return null;return ps.find(p=>p.
 const byPet=(pid,col)=>col.filter(x=>x.petId===pid);
 const pEmo=s=>({Perro:'🐶',Gato:'🐱',Conejo:'🐰',Ave:'🐦'}[s]||'🐾');
 function calcAge(dob){if(!dob)return null;const b=new Date(dob+'T00:00:00'),t=new Date();let y=t.getFullYear()-b.getFullYear(),m=t.getMonth()-b.getMonth();if(m<0){y--;m+=12}return y>0?(y===1?'1 año':`${y} años`):(m<=1?'1 mes':`${m} meses`)}
-function fD(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('es-CL',{day:'numeric',month:'short',year:'numeric'})}
-function fDs(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('es-CL',{day:'numeric',month:'short'})}
+function fD(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('es',{day:'numeric',month:'short',year:'numeric'})}
+function fDs(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('es',{day:'numeric',month:'short'})}
 function dDiff(ds){const t=new Date();t.setHours(0,0,0,0);return Math.round((new Date(ds+'T00:00:00')-t)/86400000)}
 function vSt(v){if(!v.expiry)return'ok';const d=dDiff(v.expiry);return d<0?'expired':d<=30?'soon':'ok'}
 
@@ -827,7 +827,7 @@ function sharePet(pid) {
   const enfs   = byPet(pid, DB.enfs);
   const food   = byPet(pid, DB.foods)[0];
   const appts  = byPet(pid, DB.appts).filter(a=>dDiff(a.date)>=0).sort((a,b)=>new Date(a.date)-new Date(b.date));
-  const today  = new Date().toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'});
+  const today  = new Date().toLocaleDateString('es',{day:'numeric',month:'long',year:'numeric'});
 
   let txt = `🐾 FICHA CLÍNICA — ${pet.name.toUpperCase()}\n`;
   txt += `Generada el ${today} desde Petvida\n`;
