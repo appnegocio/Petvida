@@ -278,9 +278,19 @@ img{max-width:100%}
   </div>
 
   <div id="screen-enfermedades" class="screen">
-    <div class="hdr" style="padding-top:44px"><div class="hdr-back" onclick="goTo('pet-profile')">← Perfil</div><div class="hdr-title" id="entitle">Enfermedades crónicas</div></div>
+    <div class="hdr" style="padding-top:44px"><div class="hdr-back" onclick="goTo('pet-profile')">&#8592; Perfil</div><div class="hdr-title" id="entitle">Enfermedades crónicas</div></div>
     <div class="scroll-area" id="enlist"></div>
     <button class="fab" onclick="openM('modal-enfermedad')">+</button>
+  </div>
+
+  <div id="screen-cuidador" class="screen">
+    <div class="hdr" style="padding-top:44px;background:#5B8FD4">
+      <div class="hdr-back" onclick="goTo('pet-profile')">&#8592; Perfil</div>
+      <div class="hdr-title" id="cuid-title">Guía del cuidador</div>
+      <div class="hdr-sub" id="cuid-sub">Para cuando viajás</div>
+    </div>
+    <div class="scroll-area" id="cuid-content"></div>
+    <button class="fab" style="background:#5B8FD4;box-shadow:0 3px 14px rgba(91,143,212,.38)" onclick="openM('modal-cuidador')">✏️</button>
   </div>
 
   <nav class="bnav">
@@ -484,6 +494,42 @@ img{max-width:100%}
   </div>
 </div>
 
+<div class="moverlay" id="modal-cuidador">
+  <div class="msheet"><div class="mhandle"></div><div class="mtitle">&#x1F9F3; Guía del cuidador</div>
+    <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:14px;line-height:1.5">Completá esta guía antes de viajar. La podés compartir por WhatsApp o correo con quien cuide a tu mascota.</p>
+    <div class="fsec">Fechas del viaje</div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Desde</label><input class="fi" id="cg-from" type="date"></div>
+      <div class="fg"><label class="fl">Hasta</label><input class="fi" id="cg-to" type="date"></div>
+    </div>
+    <div class="fg"><label class="fl">Nombre del cuidador</label><input class="fi" id="cg-cname" placeholder="ej. María, mi mamá"></div>
+    <div class="fg"><label class="fl">Teléfono del cuidador</label><input class="fi" id="cg-cphone" type="tel" placeholder="+56 9 1234 5678"></div>
+    <div class="fsec">Alimentación</div>
+    <div class="fg"><label class="fl">¿Qué come? (marca y tipo)</label><input class="fi" id="cg-food" placeholder="ej. Royal Canin adulto, croquetas"></div>
+    <div class="fg"><label class="fl">¿Cuánto por vez?</label><input class="fi" id="cg-foodamt" placeholder="ej. 1 taza rasada (120g)"></div>
+    <div class="fg"><label class="fl">Horarios de comida</label><input class="fi" id="cg-foodtime" placeholder="ej. 8:00 AM y 7:00 PM"></div>
+    <div class="fg"><label class="fl">Notas de alimentación</label><input class="fi" id="cg-foodnotes" placeholder="ej. No darle sobras, sin pollo"></div>
+    <div class="fsec">Medicamentos</div>
+    <div class="fg"><label class="fl">Medicamentos y horarios</label><textarea class="fi" id="cg-meds" rows="3" style="resize:none;line-height:1.5" placeholder="ej. Omeprazol 1 comprimido a las 8AM con desayuno&#10;Metacam 0.5ml a las 8PM con comida"></textarea></div>
+    <div class="fsec">Rutinas y cuidados</div>
+    <div class="fg"><label class="fl">Paseos (si aplica)</label><input class="fi" id="cg-walks" placeholder="ej. 2 paseos cortos, 8AM y 7PM"></div>
+    <div class="fg"><label class="fl">Lugar donde duerme</label><input class="fi" id="cg-sleep" placeholder="ej. Su cama en el dormitorio, no sale afuera"></div>
+    <div class="fg"><label class="fl">Comportamiento / personalidad</label><textarea class="fi" id="cg-behav" rows="2" style="resize:none;line-height:1.5" placeholder="ej. Es tímido los primeros días, no forzar contacto. Le gusta su juguete azul."></textarea></div>
+    <div class="fsec">Señales de alerta</div>
+    <div class="fg"><label class="fl">¿Cuándo preocuparse?</label><textarea class="fi" id="cg-alert" rows="3" style="resize:none;line-height:1.5" placeholder="ej. Si no come en más de 24h&#10;Si vomita más de 2 veces&#10;Si no hace sus necesidades en el día"></textarea></div>
+    <div class="fsec">Contactos de emergencia</div>
+    <div class="fg"><label class="fl">Veterinario de emergencia</label><input class="fi" id="cg-vetname" placeholder="ej. Clínica Vetcare — Dr. García"></div>
+    <div class="fg"><label class="fl">Teléfono veterinario</label><input class="fi" id="cg-vetphone" type="tel" placeholder="+56 9 8765 4321"></div>
+    <div class="fg"><label class="fl">¿Dónde estará el dueño?</label><input class="fi" id="cg-owner" placeholder="ej. Santiago, disponible por WhatsApp"></div>
+    <div class="fsec">Notas adicionales</div>
+    <div class="fg"><label class="fl">Cualquier otra cosa importante</label><textarea class="fi" id="cg-extra" rows="3" style="resize:none;line-height:1.5" placeholder="ej. La llave está en el cajón de la cocina. El veterinario ya tiene toda su historia clínica."></textarea></div>
+    <div class="mt-12 flex-c" style="gap:8px">
+      <button class="btn btn-g" style="flex:1" onclick="closeM('modal-cuidador')">Cancelar</button>
+      <button class="btn btn-p" style="flex:2" onclick="saveGuia()">Guardar guía</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -494,7 +540,8 @@ const DB={
   get pets(){return J('pv2_pets')},get vax(){return J('pv2_vax')},get meds(){return J('pv2_meds')},
   get appts(){return J('pv2_appts')},get cons(){return J('pv2_cons')},get despar(){return J('pv2_despar')},
   get pesos(){return J('pv2_pesos')},get exams(){return J('pv2_exams')},get foods(){return J('pv2_foods')},
-  get enfs(){return J('pv2_enfs')},get aid(){return localStorage.getItem('pv2_aid')||''},
+  get enfs(){return J('pv2_enfs')},get guides(){return J('pv2_guides')},
+  get aid(){return localStorage.getItem('pv2_aid')||''},
   save(k,d){localStorage.setItem('pv2_'+k,JSON.stringify(d))},
   setAid(id){localStorage.setItem('pv2_aid',id)},
   uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
@@ -678,7 +725,7 @@ function goTo(sid){navigate(sid,document.querySelector(`[data-nav="${sid}"]`))}
 function goSub(sid){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+sid).classList.add('active');renderS(sid)}
 function renderS(id){
   const pet=getAP();
-  ({home:renderHome,mascotas:renderPets,'pet-profile':()=>renderProfile(_pid),vacunas:()=>renderVax(pet),medicamentos:()=>renderMeds(pet),citas:()=>renderAppts(pet),consultas:()=>renderCons(_pid),desparasitacion:()=>renderDespar(_pid),peso:()=>renderPeso(_pid),examenes:()=>renderExams(_pid),alimentacion:()=>renderFood(_pid),enfermedades:()=>renderEnfs(_pid)})[id]?.()
+  ({home:renderHome,mascotas:renderPets,'pet-profile':()=>renderProfile(_pid),vacunas:()=>renderVax(pet),medicamentos:()=>renderMeds(pet),citas:()=>renderAppts(pet),consultas:()=>renderCons(_pid),desparasitacion:()=>renderDespar(_pid),peso:()=>renderPeso(_pid),examenes:()=>renderExams(_pid),alimentacion:()=>renderFood(_pid),enfermedades:()=>renderEnfs(_pid),cuidador:()=>renderCuidador(_pid)})[id]?.()
 }
 
 /* ================================================================
@@ -748,8 +795,16 @@ function renderProfile(pid){
       <div class="mrow" onclick="goTo('citas')"><div class="micon mi-b">📅</div><div class="minfo"><div class="mname">Citas veterinarias</div><div class="msub">${upAppts} próxima${upAppts!==1?'s':''}</div></div><span class="marrow">›</span></div>
     </div>
     <div style="display:flex;gap:8px;padding-bottom:8px">
-      <button class="btn btn-p btn-sm" style="flex:2" onclick="sharePet('${pid}')">↗ Compartir ficha clínica</button>
-      <button class="btn btn-d btn-sm" style="flex:1" onclick="delPet('${pid}')">🗑</button>
+      <button class="btn btn-p btn-sm" style="flex:2" onclick="sharePet('${pid}')">&#8599; Compartir ficha clínica</button>
+      <button class="btn btn-d btn-sm" style="flex:1" onclick="delPet('${pid}')">&#128465;</button>
+    </div>
+    <div style="background:#EBF3FF;border:.5px solid #C8DCEF;border-radius:var(--r-lg);padding:13px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="goSub('cuidador')">
+      <div class="micon" style="background:#D6E8FF;width:36px;height:36px;border-radius:10px;font-size:1.2rem">🧳</div>
+      <div style="flex:1">
+        <div style="font-size:.9rem;font-weight:800;color:#1A4A80">Guía del cuidador</div>
+        <div style="font-size:.75rem;color:#4A7AB0;margin-top:2px">${(()=>{const g=byPet(pid,DB.guides)[0];return g?'Guía lista para compartir':'Preparala antes de viajar'})()}</div>
+      </div>
+      <span style="color:#4A7AB0;font-size:1rem">›</span>
     </div>`;
 }
 function dr(l,v){return`<div class="drow"><span class="dlbl">${l}</span><span class="dval">${v}</span></div>`}
@@ -890,7 +945,7 @@ function sharePet(pid) {
   }
 }
 
-function delPet(pid){if(!confirm('¿Eliminar esta mascota y todos sus datos?'))return;['pets','vax','meds','appts','cons','despar','pesos','exams','foods','enfs'].forEach(k=>{if(k==='pets')DB.save(k,DB.pets.filter(p=>p.id!==pid));else DB.save(k,DB[k].filter(x=>x.petId!==pid))});showToast('Mascota eliminada');goTo('mascotas')}
+function delPet(pid){if(!confirm('¿Eliminar esta mascota y todos sus datos?'))return;['pets','vax','meds','appts','cons','despar','pesos','exams','foods','enfs','guides'].forEach(k=>{if(k==='pets')DB.save(k,DB.pets.filter(p=>p.id!==pid));else DB.save(k,DB[k].filter(x=>x.petId!==pid))});showToast('Mascota eliminada');goTo('mascotas')}
 
 /* ================================================================
    VACUNAS
@@ -1126,8 +1181,173 @@ function saveEnfermedad(){
 }
 
 /* ================================================================
-   UTILS
+   GUÍA DEL CUIDADOR
+   Fase 2: reemplazar con link/token compartible + checklist en tiempo real
    ================================================================ */
+function renderCuidador(pid) {
+  if (!pid) return;
+  const pet = DB.pets.find(p=>p.id===pid);
+  if (!pet) return;
+  document.getElementById('cuid-title').textContent = 'Guía de ' + pet.name;
+  document.getElementById('cuid-sub').textContent = 'Para cuando viajás';
+  const guide = byPet(pid, DB.guides)[0];
+  const el = document.getElementById('cuid-content');
+
+  if (!guide) {
+    el.innerHTML = `
+      <div style="background:#EBF3FF;border-radius:var(--r-lg);padding:20px;text-align:center;margin-bottom:14px">
+        <div style="font-size:2.4rem;margin-bottom:10px">🧳</div>
+        <div style="font-size:.95rem;font-weight:800;color:#1A4A80;margin-bottom:6px">Sin guía creada aún</div>
+        <div style="font-size:.82rem;color:#4A7AB0;line-height:1.5;margin-bottom:16px">Creá la guía antes de viajar para que quien cuide a ${pet.name} sepa exactamente qué hacer cada día.</div>
+        <button class="btn" style="background:#5B8FD4;color:white;font-size:.88rem;font-weight:800;padding:11px 24px;border-radius:var(--r-md)" onclick="openM('modal-cuidador')">+ Crear guía del cuidador</button>
+      </div>`;
+    return;
+  }
+
+  // Build checklist-style view
+  const row = (ico, label, val) => val ? `
+    <div style="display:flex;gap:10px;padding:10px 0;border-bottom:.5px solid #D6E8FF">
+      <span style="font-size:1rem;flex-shrink:0">${ico}</span>
+      <div style="flex:1">
+        <div style="font-size:.7rem;font-weight:800;color:#4A7AB0;text-transform:uppercase;letter-spacing:.3px">${label}</div>
+        <div style="font-size:.88rem;font-weight:600;color:#1A4A80;margin-top:2px;line-height:1.45;white-space:pre-line">${val}</div>
+      </div>
+    </div>` : '';
+
+  el.innerHTML = `
+    <div style="background:#EBF3FF;border-radius:var(--r-lg);padding:14px;margin-bottom:10px;border:.5px solid #C8DCEF">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <div style="font-size:.9rem;font-weight:800;color:#1A4A80">Guía activa</div>
+        <button class="btn-cal btn-sm" onclick="openM('modal-cuidador')">✏️ Editar</button>
+      </div>
+      ${guide.from&&guide.to?`<div style="font-size:.8rem;color:#4A7AB0;font-weight:600">${fD(guide.from)} → ${fD(guide.to)}</div>`:''}
+      ${guide.cname?`<div style="font-size:.8rem;color:#4A7AB0;margin-top:2px">Cuidador: ${guide.cname}${guide.cphone?' · '+guide.cphone:''}</div>`:''}
+    </div>
+
+    <div style="background:white;border-radius:var(--r-lg);border:.5px solid #C8DCEF;padding:14px;margin-bottom:10px">
+      <div style="font-size:.75rem;font-weight:800;color:#4A7AB0;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">🍽️ Alimentación</div>
+      ${row('🥣','Qué come',guide.food)}
+      ${row('📏','Cantidad por vez',guide.foodamt)}
+      ${row('⏰','Horarios',guide.foodtime)}
+      ${row('📝','Notas',guide.foodnotes)}
+    </div>
+
+    ${guide.meds?`<div style="background:white;border-radius:var(--r-lg);border:.5px solid #C8DCEF;padding:14px;margin-bottom:10px">
+      <div style="font-size:.75rem;font-weight:800;color:#4A7AB0;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">💊 Medicamentos</div>
+      <div style="font-size:.88rem;font-weight:600;color:#1A4A80;white-space:pre-line;line-height:1.6">${guide.meds}</div>
+    </div>`:''}
+
+    ${guide.walks||guide.sleep||guide.behav?`<div style="background:white;border-radius:var(--r-lg);border:.5px solid #C8DCEF;padding:14px;margin-bottom:10px">
+      <div style="font-size:.75rem;font-weight:800;color:#4A7AB0;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">🐾 Rutinas</div>
+      ${row('🦮','Paseos',guide.walks)}
+      ${row('🛏️','Dónde duerme',guide.sleep)}
+      ${row('💬','Comportamiento',guide.behav)}
+    </div>`:''}
+
+    ${guide.alert?`<div style="background:#FFF5F5;border-radius:var(--r-lg);border:.5px solid #FDBDBD;padding:14px;margin-bottom:10px">
+      <div style="font-size:.75rem;font-weight:800;color:#C0392B;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">⚠️ Señales de alerta — cuándo llamar al veterinario</div>
+      <div style="font-size:.88rem;font-weight:600;color:#8B1A1A;white-space:pre-line;line-height:1.6">${guide.alert}</div>
+    </div>`:''}
+
+    <div style="background:white;border-radius:var(--r-lg);border:.5px solid #C8DCEF;padding:14px;margin-bottom:10px">
+      <div style="font-size:.75rem;font-weight:800;color:#4A7AB0;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">📞 Contactos de emergencia</div>
+      ${row('🏥','Veterinario',guide.vetname+(guide.vetphone?' — '+guide.vetphone:''))}
+      ${row('✈️','Dónde está el dueño',guide.owner)}
+    </div>
+
+    ${guide.extra?`<div style="background:white;border-radius:var(--r-lg);border:.5px solid #C8DCEF;padding:14px;margin-bottom:10px">
+      <div style="font-size:.75rem;font-weight:800;color:#4A7AB0;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">📋 Notas adicionales</div>
+      <div style="font-size:.88rem;color:#1A4A80;white-space:pre-line;line-height:1.5">${guide.extra}</div>
+    </div>`:''}
+
+    <button class="btn btn-f" style="background:#5B8FD4;color:white;font-weight:800;margin-bottom:8px" onclick="shareGuia('${pid}')">
+      ↗ Enviar guía al cuidador
+    </button>
+    <button class="btn btn-g btn-sm btn-f" onclick="if(confirm('¿Eliminar esta guía?')){delItem('guides','${guide.id}',()=>renderCuidador('${pid}'))}">Eliminar guía</button>`;
+}
+
+function saveGuia() {
+  if (!_pid) return;
+  const guide = {
+    id: DB.uid(), petId: _pid,
+    from: g('cg-from'), to: g('cg-to'),
+    cname: g('cg-cname'), cphone: g('cg-cphone'),
+    food: g('cg-food'), foodamt: g('cg-foodamt'),
+    foodtime: g('cg-foodtime'), foodnotes: g('cg-foodnotes'),
+    meds: g('cg-meds'), walks: g('cg-walks'),
+    sleep: g('cg-sleep'), behav: g('cg-behav'),
+    alert: g('cg-alert'), vetname: g('cg-vetname'),
+    vetphone: g('cg-vetphone'), owner: g('cg-owner'),
+    extra: g('cg-extra'), createdAt: new Date().toISOString()
+  };
+  // replace existing guide for this pet
+  const arr = DB.guides.filter(x=>x.petId!==_pid);
+  arr.push(guide);
+  DB.save('guides', arr);
+  closeM('modal-cuidador');
+  resetF(['cg-from','cg-to','cg-cname','cg-cphone','cg-food','cg-foodamt','cg-foodtime','cg-foodnotes','cg-meds','cg-walks','cg-sleep','cg-behav','cg-alert','cg-vetname','cg-vetphone','cg-owner','cg-extra']);
+  showToast('Guía del cuidador guardada 🧳');
+  renderCuidador(_pid);
+  renderProfile(_pid);
+}
+
+function shareGuia(pid) {
+  const pet = DB.pets.find(p=>p.id===pid);
+  const guide = byPet(pid, DB.guides)[0];
+  if (!pet || !guide) return;
+
+  let txt = `🧳 GUÍA PARA CUIDAR A ${pet.name.toUpperCase()}\n`;
+  txt += `${pEmo(pet.species)} ${pet.species}${pet.breed?' · '+pet.breed:''}\n`;
+  if (guide.from && guide.to) txt += `Fechas: ${fD(guide.from)} al ${fD(guide.to)}\n`;
+  txt += `${'─'.repeat(36)}\n\n`;
+
+  if (guide.food || guide.foodamt || guide.foodtime) {
+    txt += `🍽️ ALIMENTACIÓN\n`;
+    if (guide.food)      txt += `Comida: ${guide.food}\n`;
+    if (guide.foodamt)   txt += `Cantidad: ${guide.foodamt}\n`;
+    if (guide.foodtime)  txt += `Horarios: ${guide.foodtime}\n`;
+    if (guide.foodnotes) txt += `Importante: ${guide.foodnotes}\n`;
+    txt += '\n';
+  }
+
+  if (guide.meds) {
+    txt += `💊 MEDICAMENTOS\n${guide.meds}\n\n`;
+  }
+
+  if (guide.walks || guide.sleep || guide.behav) {
+    txt += `🐾 RUTINAS\n`;
+    if (guide.walks) txt += `Paseos: ${guide.walks}\n`;
+    if (guide.sleep) txt += `Dónde duerme: ${guide.sleep}\n`;
+    if (guide.behav) txt += `Comportamiento: ${guide.behav}\n`;
+    txt += '\n';
+  }
+
+  if (guide.alert) {
+    txt += `⚠️ CUÁNDO LLAMAR AL VETERINARIO\n${guide.alert}\n\n`;
+  }
+
+  txt += `📞 CONTACTOS\n`;
+  if (guide.vetname)  txt += `Veterinario: ${guide.vetname}${guide.vetphone?' — '+guide.vetphone:''}\n`;
+  if (guide.owner)    txt += `Dueño/a: ${guide.owner}\n`;
+  txt += '\n';
+
+  if (guide.extra) txt += `📋 NOTAS ADICIONALES\n${guide.extra}\n\n`;
+
+  txt += `${'─'.repeat(36)}\n`;
+  txt += `Enviado desde Petvida 🐾\n`;
+  txt += `Porque ${pet.name} se merece lo mejor — incluso cuando el dueño no está.`;
+
+  if (navigator.share) {
+    navigator.share({
+      title: `Cómo cuidar a ${pet.name}`,
+      text: txt
+    }).catch(()=>{});
+  } else {
+    navigator.clipboard?.writeText(txt).then(()=>{
+      showToast('Guía copiada al portapapeles 📋');
+    });
+  }
+}
 function g(id){return(document.getElementById(id)?.value||'').trim()}
 function resetF(ids){ids.forEach(id=>{const el=document.getElementById(id);if(!el)return;el.tagName==='SELECT'?el.selectedIndex=0:el.value=''})}
 function delItem(col,id,cb){if(!confirm('¿Eliminar este registro?'))return;DB.save(col,DB[col].filter(x=>x.id!==id));if(cb)cb();showToast('Eliminado')}
