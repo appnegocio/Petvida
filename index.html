@@ -367,7 +367,7 @@ img{max-width:100%}
 <div class="moverlay" id="modal-pet">
   <div class="msheet"><div class="mhandle"></div><div class="mtitle">Registrar mascota</div>
     <div class="fsec">Foto</div>
-    <div class="pup" id="pp-drop" onclick="document.getElementById('pp-inp').click()">📷 Toca para agregar foto</div>
+    <div class="pup" id="pp-drop" onclick="document.getElementById('pp-inp').click()">📷 Toca para agregar una foto</div>
     <input type="file" id="pp-inp" accept="image/*" style="display:none" onchange="prevPhoto(this,'pp-pre','pp-drop')">
     <img class="ppre" id="pp-pre">
     <div class="fsec">Datos generales</div>
@@ -556,7 +556,7 @@ img{max-width:100%}
 
 <div class="moverlay" id="modal-cuidador">
   <div class="msheet"><div class="mhandle"></div><div class="mtitle">&#x1F9F3; Guía del cuidador</div>
-    <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:14px;line-height:1.5">Completá esta guía antes de viajar. La podés compartir por WhatsApp o correo con quien cuide a tu mascota.</p>
+    <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:14px;line-height:1.5">Completa esta guía antes de viajar. Puedes compartirla por WhatsApp o correo con quien cuide a tu mascota.</p>
     <div class="fsec">Fechas del viaje</div>
     <div class="fr">
       <div class="fg"><label class="fl">Desde</label><input class="fi" id="cg-from" type="date"></div>
@@ -696,7 +696,7 @@ function calCita(a) {
 }
 
 function calVax(v, petName) {
-  if (!v.expiry) { showToast('Agregá la fecha de vencimiento primero'); return; }
+  if (!v.expiry) { showToast('Agrega la fecha de vencimiento primero'); return; }
   downloadIcs(
     `💉 Refuerzo vacuna ${v.name} — ${petName}`,
     v.expiry, null,
@@ -716,7 +716,7 @@ function calDespar(dp, petName) {
 }
 
 function calMed(m, petName) {
-  if (!m.end) { showToast('Agregá una fecha de fin al medicamento'); return; }
+  if (!m.end) { showToast('Agrega una fecha de fin al medicamento'); return; }
   downloadIcs(
     `💊 Fin de ${m.name} — ${petName}`,
     m.end, null,
@@ -794,10 +794,10 @@ function renderS(id){
 function renderHome(){
   const pet=getAP(),pets=DB.pets;
   document.getElementById('home-sub').textContent=pet?`Porque ${pet.name} se merece lo mejor 🐾`:'Bienvenido a Petvida';
-  document.getElementById('home-name').textContent=pet?'¡Hola! 👋':'Registrá tu primera mascota';
+  document.getElementById('home-name').textContent=pet?'¡Hola! 👋':'Registra tu primera mascota';
   document.getElementById('pet-pills').innerHTML=pets.map(p=>`<div class="pet-pill ${p.id===DB.aid?'active':''}" onclick="setAP('${p.id}')">${pEmo(p.species)} ${p.name}</div>`).join('');
   const spEl=document.getElementById('home-spill');
-  if(!pet){spEl.innerHTML='';document.getElementById('home-alerts').innerHTML=empty('🐾','Sin mascotas aún','Registrá a tu compañero para empezar.');document.getElementById('home-upcoming').innerHTML='';return}
+  if(!pet){spEl.innerHTML='';document.getElementById('home-alerts').innerHTML=empty('🐾','Sin mascotas aún','Registra a tu compañero para empezar.');document.getElementById('home-upcoming').innerHTML='';return}
   const{urgent,upcoming}=buildAlerts(pet.id);
   const hasU=urgent.filter(a=>a.type==='urgent').length;
   spEl.innerHTML=`<div class="status-pill"><div class="sd ${hasU?'sd-urgent':urgent.length?'sd-warn':'sd-ok'}"></div>${hasU?`${hasU} alerta${hasU>1?'s':''} urgente${hasU>1?'s':''}`:urgent.length===0&&upcoming.length===0?`${pet.name} está perfecto hoy ✓`:upcoming.length&&!urgent.length?`${pet.name} está bien · ${upcoming.length} cita${upcoming.length>1?'s':''} próxima${upcoming.length>1?'s':''}` :'Recordatorios pendientes'}</div>`;
@@ -812,7 +812,7 @@ function setAP(id){DB.setAid(id);renderHome()}
    ================================================================ */
 function renderPets(){
   const ps=DB.pets,el=document.getElementById('pets-list');
-  if(!ps.length){el.innerHTML=empty('🐾','Sin mascotas registradas','Agregá a tu compañero para cuidar su salud.');return}
+  if(!ps.length){el.innerHTML=empty('🐾','Sin mascotas registradas','Agrega a tu compañero para cuidar su salud.');return}
   el.innerHTML=ps.map(p=>{const age=calcAge(p.dob);return`<div class="card" style="display:flex;align-items:center;gap:12px;cursor:pointer;margin-bottom:8px" onclick="showP('${p.id}')"><div class="ava">${p.photo?`<img src="${p.photo}" alt="${p.name}">`:pEmo(p.species)}</div><div style="flex:1"><div style="font-size:.95rem;font-weight:800">${p.name}</div><div class="tm tsm">${p.species}${p.breed?' · '+p.breed:''}${age?' · '+age:''}</div></div><span style="color:var(--text-lt);font-size:1.1rem">›</span></div>`}).join('')
 }
 
@@ -862,7 +862,7 @@ function renderProfile(pid){
       <div class="micon" style="background:#D6E8FF;width:36px;height:36px;border-radius:10px;font-size:1.2rem">🧳</div>
       <div style="flex:1">
         <div style="font-size:.9rem;font-weight:800;color:#1A4A80">Guía del cuidador</div>
-        <div style="font-size:.75rem;color:#4A7AB0;margin-top:2px">${(()=>{const g=byPet(pid,DB.guides)[0];return g?'Guía lista para compartir':'Preparala antes de viajar'})()}</div>
+        <div style="font-size:.75rem;color:#4A7AB0;margin-top:2px">${(()=>{const g=byPet(pid,DB.guides)[0];return g?'Guía lista para compartir':'Prepárala antes de viajar'})()}</div>
       </div>
       <span style="color:#4A7AB0;font-size:1rem">›</span>
     </div>`;
@@ -1014,7 +1014,7 @@ function renderVax(pet){
   if(!pet){document.getElementById('vlist').innerHTML=noP();return}
   document.getElementById('vtitle').textContent='Vacunas de '+pet.name;
   const list=byPet(pet.id,DB.vax),el=document.getElementById('vlist');
-  if(!list.length){el.innerHTML=empty('💉','Sin vacunas registradas',`Agregá la primera vacuna de ${pet.name}.`);return}
+  if(!list.length){el.innerHTML=empty('💉','Sin vacunas registradas',`Agrega la primera vacuna de ${pet.name}.`);return}
   el.innerHTML=list.map(v=>{
     const s=vSt(v),bg=s==='ok'?'<span class="badge bok">✓ Al día</span>':s==='soon'?'<span class="badge bwarn">⚠ Por vencer</span>':'<span class="badge balert">✕ Vencida</span>';
     const calBtn=v.expiry?`<button class="btn-cal" onclick='calVax(${JSON.stringify(v).replace(/'/g,"&#39;")}, "${pet.name}")'>📅 Recordatorio</button>`:'';
@@ -1028,7 +1028,7 @@ function renderMeds(pet){
   if(!pet){document.getElementById('medlist').innerHTML=noP();return}
   document.getElementById('medtitle').textContent='Remedios de '+pet.name;
   const list=byPet(pet.id,DB.meds),el=document.getElementById('medlist');
-  if(!list.length){el.innerHTML=empty('💊','Sin medicamentos',`Registrá los remedios de ${pet.name}.`);return}
+  if(!list.length){el.innerHTML=empty('💊','Sin medicamentos',`Registra los remedios de ${pet.name}.`);return}
   const act=list.filter(m=>m.active),inact=list.filter(m=>!m.active);
   let h='';
   if(act.length)h+=`<div class="stitle">Activos</div>`+act.map(m=>mI(m,pet.name)).join('');
@@ -1075,7 +1075,7 @@ function renderCons(pid){
   if(!pid)return;const pet=DB.pets.find(p=>p.id===pid);if(!pet)return;
   document.getElementById('contitle').textContent='Consultas de '+pet.name;
   const list=byPet(pid,DB.cons).sort((a,b)=>new Date(b.date)-new Date(a.date)),el=document.getElementById('conlist');
-  if(!list.length){el.innerHTML=empty('🏥','Sin consultas registradas','Registrá cada visita al veterinario para tener el historial completo.');return}
+  if(!list.length){el.innerHTML=empty('🏥','Sin consultas registradas','Registra cada visita al veterinario para tener el historial completo.');return}
   const tcol={Control:'bblue',Urgencia:'balert',Cirugía:'bpurple',Vacunación:'bok',Examen:'bgray',Otro:'bgray'};
   el.innerHTML=list.map(c=>`<div class="ccard">
     <div class="chead"><div><div style="font-size:.88rem;font-weight:800">${c.vet}${c.place?' · '+c.place:''}</div><div class="tm tsm mt-8">${fD(c.date)}</div></div><span class="badge ${tcol[c.type]||'bgray'}">${c.type}</span></div>
@@ -1126,7 +1126,7 @@ function renderPeso(pid){
   if(!pid)return;const pet=DB.pets.find(p=>p.id===pid);if(!pet)return;
   document.getElementById('wtitle2').textContent='Peso de '+pet.name;
   const list=byPet(pid,DB.pesos).sort((a,b)=>new Date(a.date)-new Date(b.date)),el=document.getElementById('wcontent');
-  if(!list.length){el.innerHTML=empty('⚖️','Sin registros de peso','Registrá el peso de '+pet.name+' en cada control.');return}
+  if(!list.length){el.innerHTML=empty('⚖️','Sin registros de peso','Registra el peso de '+pet.name+' en cada control.');return}
   const max=Math.max(...list.map(p=>parseFloat(p.value))),min=Math.min(...list.map(p=>parseFloat(p.value)));
   const last=list[list.length-1],prev=list[list.length-2];
   let tend='';if(prev){const df=(parseFloat(last.value)-parseFloat(prev.value)).toFixed(1);tend=df>0?`↑ +${df} kg`:df<0?`↓ ${df} kg`:'Sin cambio'}
@@ -1140,7 +1140,7 @@ function renderExams(pid){
   if(!pid)return;const pet=DB.pets.find(p=>p.id===pid);if(!pet)return;
   document.getElementById('extitle').textContent='Exámenes de '+pet.name;
   const list=byPet(pid,DB.exams).sort((a,b)=>new Date(b.date)-new Date(a.date)),el=document.getElementById('exlist');
-  if(!list.length){el.innerHTML=empty('🧪','Sin exámenes registrados','Agregá hemogramas, ecografías y otros resultados.');return}
+  if(!list.length){el.innerHTML=empty('🧪','Sin exámenes registrados','Agrega hemogramas, ecografías y otros resultados.');return}
   el.innerHTML=list.map(e=>`<div class="litem"><div class="licon mi-p">🧪</div><div class="lbody"><div class="ltitle">${e.type}</div><div class="lsub">${fD(e.date)}${e.lab?' · '+e.lab:''}${e.result?'<br>'+e.result:''}</div>${e.photo?`<img src="${e.photo}" style="margin-top:6px;width:100%;border-radius:8px;max-height:120px;object-fit:cover">`:''}</div><button onclick="delItem('exams','${e.id}',()=>renderExams('${pid}'))" style="color:var(--text-lt);padding:4px">✕</button></div>`).join('')
 }
 
@@ -1151,7 +1151,7 @@ function renderFood(pid){
   if(!pid)return;const pet=DB.pets.find(p=>p.id===pid);if(!pet)return;
   document.getElementById('ftitle').textContent='Alimentación de '+pet.name;
   const food=byPet(pid,DB.foods)[0],el=document.getElementById('fcontent');
-  if(!food){el.innerHTML=empty('🍽️','Sin dieta registrada','Registrá qué come '+pet.name+' para tener la info siempre a mano.')+`<div style="padding:0 0 8px"><button class="btn btn-p btn-f" onclick="openM('modal-alimento')">+ Registrar alimentación</button></div>`;return}
+  if(!food){el.innerHTML=empty('🍽️','Sin dieta registrada','Registra qué come '+pet.name+' para tener la info siempre a mano.')+`<div style="padding:0 0 8px"><button class="btn btn-p btn-f" onclick="openM('modal-alimento')">+ Registrar alimentación</button></div>`;return}
   el.innerHTML=`<div class="card"><div class="stitle" style="margin-top:0">Dieta actual</div>${dr('Alimento',food.brand)}${dr('Tipo',food.type)}${dr('Cantidad diaria',food.amount||'—')}${dr('Frecuencia',food.times)}${food.notes?`<div style="margin-top:10px;padding:10px;background:var(--bg);border-radius:var(--r-sm);font-size:.85rem;color:var(--text-mid);border-left:2.5px solid var(--coral)">${food.notes}</div>`:''}</div><button class="btn btn-g btn-f btn-sm mt-8" onclick="delItem('foods','${food.id}',()=>renderFood('${pid}'));openM('modal-alimento')">✏️ Actualizar dieta</button>`
 }
 
@@ -1162,7 +1162,7 @@ function renderEnfs(pid){
   if(!pid)return;const pet=DB.pets.find(p=>p.id===pid);if(!pet)return;
   document.getElementById('entitle').textContent='Condiciones de '+pet.name;
   const list=byPet(pid,DB.enfs),el=document.getElementById('enlist');
-  if(!list.length){el.innerHTML=empty('🦠','Sin condiciones registradas','Registrá enfermedades crónicas o condiciones permanentes.');return}
+  if(!list.length){el.innerHTML=empty('🦠','Sin condiciones registradas','Registra enfermedades crónicas o condiciones permanentes.');return}
   el.innerHTML=list.map(e=>`<div class="ccard"><div class="chead"><div><div style="font-size:.92rem;font-weight:800">${e.name}</div>${e.date?`<div class="tm tsm mt-8">Desde ${fD(e.date)}</div>`:''}</div><span class="badge balert">Crónica</span></div>${e.vet||e.notes?`<div class="cbody">${e.vet?`<div class="tsm tm">Diagnosticó: Dr. ${e.vet}</div>`:''} ${e.notes?`<div class="cdiag"><div class="cdiag-lbl">Notas / tratamiento</div>${e.notes}</div>`:''}<button onclick="delItem('enfs','${e.id}',()=>renderEnfs('${pid}'))" style="margin-top:8px;font-size:.75rem;color:var(--text-lt);font-weight:600">Eliminar</button></div>`:''}</div>`).join('')
 }
 
@@ -1171,9 +1171,9 @@ function renderEnfs(pid){
    ================================================================ */
 function savePet(){
   const name=g('p-name');let species=g('p-species');
-  if(species==='Otro'){species=g('p-sp-custom');if(!species){showToast('Escribí qué especie es');return}}
+  if(species==='Otro'){species=g('p-sp-custom');if(!species){showToast('Escribe qué especie es');return}}
   else species=species.split(' ')[0];
-  if(!name||!species){showToast('Completá nombre y especie');return}
+  if(!name||!species){showToast('Completa el nombre y la especie');return}
   const pet={id:DB.uid(),name,species,breed:g('p-breed'),dob:g('p-dob'),weight:g('p-weight'),sex:g('p-sex'),neut:g('p-neut'),chip:g('p-chip'),allerg:g('p-allerg'),vet:g('p-vet'),vphone:g('p-vphone'),photo:document.getElementById('pp-pre').src||'',createdAt:new Date().toISOString()};
   const ps=DB.pets;ps.push(pet);DB.save('pets',ps);DB.setAid(pet.id);
   closeM('modal-pet');resetF(['p-name','p-species','p-breed','p-dob','p-weight','p-sex','p-neut','p-chip','p-allerg','p-vet','p-vphone','p-sp-custom']);
@@ -1181,60 +1181,60 @@ function savePet(){
   showToast(`¡${pet.name} registrado/a! 🐾`);renderHome();renderPets()
 }
 function saveVax(){
-  const name=g('v-name');if(!name){showToast('Ingresá el nombre');return}
-  const pet=getAP();if(!pet){showToast('Seleccioná una mascota');return}
+  const name=g('v-name');if(!name){showToast('Ingresa el nombre');return}
+  const pet=getAP();if(!pet){showToast('Selecciona una mascota');return}
   const item={id:DB.uid(),petId:pet.id,name,date:g('v-date'),expiry:g('v-expiry'),vet:g('v-vet'),batch:g('v-batch'),sticker:document.getElementById('vs-pre').src||'',createdAt:new Date().toISOString()};
   const arr=DB.vax;arr.push(item);DB.save('vax',arr);closeM('modal-vax');resetF(['v-name','v-date','v-expiry','v-vet','v-batch']);document.getElementById('vs-pre').style.display='none';
   showToast(`Un paso más para la salud de ${pet.name} 💉`);renderVax(pet)
 }
 function saveMed(){
-  const name=g('m-name');if(!name){showToast('Ingresá el nombre');return}
-  const pet=getAP();if(!pet){showToast('Seleccioná una mascota');return}
+  const name=g('m-name');if(!name){showToast('Ingresa el nombre');return}
+  const pet=getAP();if(!pet){showToast('Selecciona una mascota');return}
   const item={id:DB.uid(),petId:pet.id,name,dose:g('m-dose'),freq:g('m-freq'),start:g('m-start'),end:g('m-end'),time:g('m-time'),notes:g('m-notes'),active:document.getElementById('m-active').checked,createdAt:new Date().toISOString()};
   const arr=DB.meds;arr.push(item);DB.save('meds',arr);closeM('modal-med');resetF(['m-name','m-dose','m-time','m-notes','m-start','m-end']);document.getElementById('m-active').checked=true;
   showToast(`Listo — ${pet.name} está cada vez mejor 💊`);renderMeds(pet)
 }
 function saveAppt(){
-  const vet=g('a-vet'),date=g('a-date'),time=g('a-time');if(!vet||!date||!time){showToast('Completá veterinario, fecha y hora');return}
-  const pet=getAP();if(!pet){showToast('Seleccioná una mascota');return}
+  const vet=g('a-vet'),date=g('a-date'),time=g('a-time');if(!vet||!date||!time){showToast('Completa veterinario, fecha y hora');return}
+  const pet=getAP();if(!pet){showToast('Selecciona una mascota');return}
   const item={id:DB.uid(),petId:pet.id,vet,spec:g('a-spec'),date,time,place:g('a-place'),reason:g('a-reason'),createdAt:new Date().toISOString()};
   const arr=DB.appts;arr.push(item);DB.save('appts',arr);closeM('modal-appt');resetF(['a-vet','a-spec','a-date','a-time','a-place','a-reason']);
   showToast('Cita guardada 📅');renderAppts(pet)
 }
 function saveConsulta(){
-  const date=g('c-date'),vet=g('c-vet');if(!date||!vet){showToast('Completá fecha y veterinario');return}
+  const date=g('c-date'),vet=g('c-vet');if(!date||!vet){showToast('Completa la fecha y el veterinario');return}
   if(!_pid)return;const item={id:DB.uid(),petId:_pid,date,type:g('c-type')||'Control',vet,place:g('c-place'),reason:g('c-reason'),diag:g('c-diag'),treat:g('c-treat'),follow:g('c-follow'),createdAt:new Date().toISOString()};
   const arr=DB.cons;arr.push(item);DB.save('cons',arr);closeM('modal-consulta');resetF(['c-date','c-vet','c-place','c-reason','c-diag','c-treat','c-follow']);
   const pet=DB.pets.find(p=>p.id===_pid);showToast(`Consulta de ${pet?.name||''} guardada 🏥`);renderCons(_pid)
 }
 function saveDespar(){
-  const date=g('dp-date');if(!date){showToast('Ingresá la fecha');return}
+  const date=g('dp-date');if(!date){showToast('Ingresa la fecha');return}
   if(!_pid)return;const item={id:DB.uid(),petId:_pid,type:g('dp-type')||'Interna',prod:g('dp-prod'),date,freq:g('dp-freq'),next:g('dp-next'),notes:g('dp-notes'),createdAt:new Date().toISOString()};
   const arr=DB.despar;arr.push(item);DB.save('despar',arr);closeM('modal-despar');resetF(['dp-prod','dp-date','dp-notes','dp-next']);
   const pet=DB.pets.find(p=>p.id===_pid);showToast(`Desparasitación de ${pet?.name||''} registrada 🪱`);renderDespar(_pid)
 }
 function savePeso(){
-  const val=g('w-val'),date=g('w-date');if(!val||!date){showToast('Ingresá peso y fecha');return}
+  const val=g('w-val'),date=g('w-date');if(!val||!date){showToast('Ingresa el peso y la fecha');return}
   if(!_pid)return;const item={id:DB.uid(),petId:_pid,value:parseFloat(val).toFixed(1),date,bcs:g('w-bcs'),notes:g('w-notes'),createdAt:new Date().toISOString()};
   const arr=DB.pesos;arr.push(item);DB.save('pesos',arr);closeM('modal-peso');resetF(['w-val','w-date','w-notes']);document.getElementById('w-bcs').selectedIndex=0;
   showToast('Peso registrado ⚖️');renderPeso(_pid)
 }
 function saveExamen(){
-  const date=g('ex-date');if(!date){showToast('Ingresá la fecha');return}
+  const date=g('ex-date');if(!date){showToast('Ingresa la fecha');return}
   if(!_pid)return;let type=g('ex-type');if(type==='Otro')type=g('ex-custom')||'Otro';
   const item={id:DB.uid(),petId:_pid,type,date,lab:g('ex-lab'),result:g('ex-result'),photo:document.getElementById('ex-pre').src||'',createdAt:new Date().toISOString()};
   const arr=DB.exams;arr.push(item);DB.save('exams',arr);closeM('modal-examen');resetF(['ex-date','ex-lab','ex-result','ex-custom']);document.getElementById('ex-pre').style.display='none';
   showToast('Examen guardado 🧪');renderExams(_pid)
 }
 function saveAlimento(){
-  const brand=g('f-brand');if(!brand){showToast('Ingresá el alimento');return}
+  const brand=g('f-brand');if(!brand){showToast('Ingresa el alimento');return}
   if(!_pid)return;const arr=DB.foods.filter(x=>x.petId!==_pid);
   arr.push({id:DB.uid(),petId:_pid,brand,type:g('f-type'),amount:g('f-amount'),times:g('f-times'),notes:g('f-notes'),createdAt:new Date().toISOString()});
   DB.save('foods',arr);closeM('modal-alimento');resetF(['f-brand','f-amount','f-notes']);
   showToast('Dieta registrada 🍽️');renderFood(_pid)
 }
 function saveEnfermedad(){
-  const name=g('en-name');if(!name){showToast('Ingresá el nombre');return}
+  const name=g('en-name');if(!name){showToast('Ingresa el nombre');return}
   if(!_pid)return;const item={id:DB.uid(),petId:_pid,name,date:g('en-date'),vet:g('en-vet'),notes:g('en-notes'),createdAt:new Date().toISOString()};
   const arr=DB.enfs;arr.push(item);DB.save('enfs',arr);closeM('modal-enfermedad');resetF(['en-name','en-date','en-vet','en-notes']);
   showToast('Condición registrada 🦠');renderEnfs(_pid)
@@ -1258,7 +1258,7 @@ function renderCuidador(pid) {
       <div style="background:#EBF3FF;border-radius:var(--r-lg);padding:20px;text-align:center;margin-bottom:14px">
         <div style="font-size:2.4rem;margin-bottom:10px">🧳</div>
         <div style="font-size:.95rem;font-weight:800;color:#1A4A80;margin-bottom:6px">Sin guía creada aún</div>
-        <div style="font-size:.82rem;color:#4A7AB0;line-height:1.5;margin-bottom:16px">Creá la guía antes de viajar para que quien cuide a ${pet.name} sepa exactamente qué hacer cada día.</div>
+        <div style="font-size:.82rem;color:#4A7AB0;line-height:1.5;margin-bottom:16px">Crea la guía antes de viajar para que quien cuide a ${pet.name} sepa exactamente qué hacer cada día.</div>
         <button class="btn" style="background:#5B8FD4;color:white;font-size:.88rem;font-weight:800;padding:11px 24px;border-radius:var(--r-md)" onclick="openM('modal-cuidador')">+ Crear guía del cuidador</button>
       </div>`;
     return;
@@ -1412,7 +1412,7 @@ function g(id){return(document.getElementById(id)?.value||'').trim()}
 function resetF(ids){ids.forEach(id=>{const el=document.getElementById(id);if(!el)return;el.tagName==='SELECT'?el.selectedIndex=0:el.value=''})}
 function delItem(col,id,cb){if(!confirm('¿Eliminar este registro?'))return;DB.save(col,DB[col].filter(x=>x.id!==id));if(cb)cb();showToast('Eliminado')}
 function empty(ico,tit,sub){return`<div class="empty"><div class="eico">${ico}</div><div class="etit">${tit}</div><div class="esub">${sub}</div></div>`}
-function noP(){return empty('🐾','Sin mascota seleccionada','Registrá una mascota primero desde la sección Mascotas.')}
+function noP(){return empty('🐾','Sin mascota seleccionada','Registra una mascota primero desde la sección Mascotas.')}
 function toggleSp(val){const w=document.getElementById('p-sp-wrap'),i=document.getElementById('p-sp-custom');w.style.display=val==='Otro'?'block':'none';if(val==='Otro')i.focus();else i.value=''}
 function prevPhoto(inp,preId,dropId){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{const img=document.getElementById(preId);img.src=e.target.result;img.style.display='block';if(dropId)document.getElementById(dropId).style.display='none'};r.readAsDataURL(f)}
 function calcNextDp(){const date=g('dp-date'),freq=parseInt(g('dp-freq'))||90;if(!date)return;const d=new Date(date+'T00:00:00');d.setDate(d.getDate()+freq);document.getElementById('dp-next').value=d.toISOString().split('T')[0]}
