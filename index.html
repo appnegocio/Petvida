@@ -365,32 +365,32 @@ img{max-width:100%}
 
 <!-- MODALS -->
 <div class="moverlay" id="modal-pet">
-  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Registrar mascota</div>
+  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Agregar mascota</div>
     <div class="fsec">Foto</div>
     <div class="pup" id="pp-drop" onclick="document.getElementById('pp-inp').click()">📷 Toca para agregar una foto</div>
     <input type="file" id="pp-inp" accept="image/*" style="display:none" onchange="prevPhoto(this,'pp-pre','pp-drop')">
     <img class="ppre" id="pp-pre">
-    <div class="fsec">Datos generales</div>
+    <div class="fsec">¿Quién es tu mascota?</div>
     <div class="fg"><label class="fl">Nombre *</label><input class="fi" id="p-name" placeholder="ej. Max" maxlength="30"></div>
     <div class="fr">
-      <div class="fg"><label class="fl">Especie *</label><select class="fi" id="p-species" onchange="toggleSp(this.value)"><option value="">Elegir</option><option>Perro 🐶</option><option>Gato 🐱</option><option>Conejo 🐰</option><option>Ave 🐦</option><option value="Otro">Otro 🐾</option></select></div>
+      <div class="fg"><label class="fl">¿Qué es? *</label><select class="fi" id="p-species" onchange="toggleSp(this.value)"><option value="">Elegir</option><option>Perro 🐶</option><option>Gato 🐱</option><option>Conejo 🐰</option><option>Ave 🐦</option><option value="Otro">Otro 🐾</option></select></div>
       <div class="fg"><label class="fl">Raza</label><input class="fi" id="p-breed" placeholder="ej. Labrador"></div>
     </div>
     <div class="fg" id="p-sp-wrap" style="display:none"><label class="fl">¿Qué especie? *</label><input class="fi" id="p-sp-custom" placeholder="ej. Tortuga, Hamster..."></div>
     <div class="fr">
-      <div class="fg"><label class="fl">Fecha nac.</label><input class="fi" id="p-dob" type="date"></div>
-      <div class="fg"><label class="fl">Peso (kg)</label><input class="fi" id="p-weight" type="number" step="0.1" placeholder="8.5"></div>
+      <div class="fg"><label class="fl">Fecha de nacimiento</label><input class="fi" id="p-dob" type="date"></div>
+      <div class="fg"><label class="fl">Peso actual (kg)</label><input class="fi" id="p-weight" type="number" step="0.1" placeholder="8.5"></div>
     </div>
     <div class="fr">
-      <div class="fg"><label class="fl">Sexo</label><select class="fi" id="p-sex"><option value="">N/A</option><option>Macho</option><option>Hembra</option></select></div>
-      <div class="fg"><label class="fl">Esterilizado</label><select class="fi" id="p-neut"><option value="">N/A</option><option value="Sí">Sí</option><option>No</option></select></div>
+      <div class="fg"><label class="fl">Sexo</label><select class="fi" id="p-sex"><option value="">No sé</option><option>Macho</option><option>Hembra</option></select></div>
+      <div class="fg"><label class="fl">¿Está esterilizado/a?</label><select class="fi" id="p-neut"><option value="">No sé</option><option value="Sí">Sí</option><option>No</option></select></div>
     </div>
-    <div class="fsec">Salud</div>
-    <div class="fg"><label class="fl">Microchip</label><input class="fi" id="p-chip" placeholder="Número de microchip"></div>
-    <div class="fg"><label class="fl">Alergias</label><input class="fi" id="p-allerg" placeholder="ej. Pollo, Polen"></div>
-    <div class="fsec">Veterinario de cabecera</div>
-    <div class="fg"><label class="fl">Nombre</label><input class="fi" id="p-vet" placeholder="Dr. García"></div>
-    <div class="fg"><label class="fl">Teléfono clínica</label><input class="fi" id="p-vphone" type="tel" placeholder="ej. +1 555 123 4567"></div>
+    <div class="fsec">Datos importantes</div>
+    <div class="fg"><label class="fl">Número de microchip</label><input class="fi" id="p-chip" placeholder="Si tiene, anótalo aquí"></div>
+    <div class="fg"><label class="fl">¿Tiene alergias conocidas?</label><input class="fi" id="p-allerg" placeholder="ej. Pollo, Polen, ninguna"></div>
+    <div class="fsec">Tu veterinario</div>
+    <div class="fg"><label class="fl">Nombre del veterinario</label><input class="fi" id="p-vet" placeholder="ej. Dr. García"></div>
+    <div class="fg"><label class="fl">Teléfono de la clínica</label><input class="fi" id="p-vphone" type="tel" placeholder="ej. +56 9 1234 5678"></div>
     <div class="mt-12 flex-c" style="gap:8px">
       <button class="btn btn-g" style="flex:1" onclick="closeM('modal-pet')">Cancelar</button>
       <button class="btn btn-p" style="flex:2" onclick="savePet()">Guardar mascota</button>
@@ -399,16 +399,16 @@ img{max-width:100%}
 </div>
 
 <div class="moverlay" id="modal-vax">
-  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Nueva vacuna</div>
-    <div class="fg"><label class="fl">Nombre *</label><input class="fi" id="v-name" placeholder="ej. Antirrábica, Bordetella"></div>
+  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Registrar vacuna</div>
+    <div class="fg"><label class="fl">Nombre de la vacuna *</label><input class="fi" id="v-name" placeholder="ej. Antirrábica, Séxtuple"></div>
     <div class="fr">
-      <div class="fg"><label class="fl">Fecha aplicación</label><input class="fi" id="v-date" type="date"></div>
-      <div class="fg"><label class="fl">Vence / próximo refuerzo</label><input class="fi" id="v-expiry" type="date"></div>
+      <div class="fg"><label class="fl">¿Cuándo la pusieron?</label><input class="fi" id="v-date" type="date"></div>
+      <div class="fg"><label class="fl">¿Cuándo vence?</label><input class="fi" id="v-expiry" type="date"></div>
     </div>
-    <div class="fg"><label class="fl">Veterinario que aplicó</label><input class="fi" id="v-vet" placeholder="Dr. García"></div>
-    <div class="fg"><label class="fl">Lote / laboratorio</label><input class="fi" id="v-batch" placeholder="Opcional"></div>
-    <div class="fg"><label class="fl">Foto del sticker (opcional)</label>
-      <div class="pup" onclick="document.getElementById('vs-inp').click()">📷 Subir foto del sticker</div>
+    <div class="fg"><label class="fl">Veterinario que la aplicó</label><input class="fi" id="v-vet" placeholder="ej. Dr. García"></div>
+    <div class="fg"><label class="fl">Número de lote (del sticker)</label><input class="fi" id="v-batch" placeholder="Opcional — está en el sticker de la vacuna"></div>
+    <div class="fg"><label class="fl">📷 Foto del sticker de la vacuna</label>
+      <div class="pup" onclick="document.getElementById('vs-inp').click()">📷 Sacar foto al sticker — así nunca lo pierdes</div>
       <input type="file" id="vs-inp" accept="image/*" style="display:none" onchange="prevPhoto(this,'vs-pre',null)">
       <img class="ppre" id="vs-pre">
     </div>
@@ -420,19 +420,19 @@ img{max-width:100%}
 </div>
 
 <div class="moverlay" id="modal-med">
-  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Nuevo medicamento</div>
-    <div class="fg"><label class="fl">Nombre *</label><input class="fi" id="m-name" placeholder="ej. Omeprazol"></div>
+  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Agregar remedio</div>
+    <div class="fg"><label class="fl">Nombre del remedio *</label><input class="fi" id="m-name" placeholder="ej. Omeprazol, Metacam"></div>
     <div class="fr">
-      <div class="fg"><label class="fl">Dosis</label><input class="fi" id="m-dose" placeholder="5mg"></div>
-      <div class="fg"><label class="fl">Frecuencia</label><select class="fi" id="m-freq"><option>Cada 8 horas</option><option>Cada 12 horas</option><option>1 vez al día</option><option>Cada 24 horas</option><option>Semanal</option><option>Mensual</option><option>Cuando necesite</option></select></div>
+      <div class="fg"><label class="fl">Dosis</label><input class="fi" id="m-dose" placeholder="ej. 5mg, 1 comprimido"></div>
+      <div class="fg"><label class="fl">¿Cada cuánto?</label><select class="fi" id="m-freq"><option>Cada 8 horas</option><option>Cada 12 horas</option><option>1 vez al día</option><option>Cada 24 horas</option><option>Semanal</option><option>Mensual</option><option>Cuando necesite</option></select></div>
     </div>
     <div class="fr">
-      <div class="fg"><label class="fl">Fecha inicio</label><input class="fi" id="m-start" type="date"></div>
-      <div class="fg"><label class="fl">Fecha fin</label><input class="fi" id="m-end" type="date"></div>
+      <div class="fg"><label class="fl">¿Desde cuándo?</label><input class="fi" id="m-start" type="date"></div>
+      <div class="fg"><label class="fl">¿Hasta cuándo?</label><input class="fi" id="m-end" type="date"></div>
     </div>
-    <div class="fg"><label class="fl">Horario preferido</label><input class="fi" id="m-time" type="time"></div>
-    <div class="fg"><label class="fl">Notas</label><input class="fi" id="m-notes" placeholder="ej. Con comida"></div>
-    <div class="fg"><div class="tgl-wrap"><span class="fl" style="margin:0">Activo</span><label class="tgl"><input type="checkbox" id="m-active" checked><span class="tgl-sl"></span></label></div></div>
+    <div class="fg"><label class="fl">Horario</label><input class="fi" id="m-time" type="time"></div>
+    <div class="fg"><label class="fl">¿Algo importante a tener en cuenta?</label><input class="fi" id="m-notes" placeholder="ej. Con comida, en ayunas"></div>
+    <div class="fg"><div class="tgl-wrap"><span class="fl" style="margin:0">¿Lo está tomando ahora?</span><label class="tgl"><input type="checkbox" id="m-active" checked><span class="tgl-sl"></span></label></div></div>
     <div class="mt-12 flex-c" style="gap:8px">
       <button class="btn btn-g" style="flex:1" onclick="closeM('modal-med')">Cancelar</button>
       <button class="btn btn-p" style="flex:2" onclick="saveMed()">Guardar</button>
@@ -441,53 +441,53 @@ img{max-width:100%}
 </div>
 
 <div class="moverlay" id="modal-appt">
-  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Nueva cita</div>
-    <div class="fg"><label class="fl">Veterinario *</label><input class="fi" id="a-vet" placeholder="Dr. García"></div>
-    <div class="fg"><label class="fl">Especialidad</label><input class="fi" id="a-spec" placeholder="ej. Dermatología"></div>
+  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Agendar cita</div>
+    <div class="fg"><label class="fl">Veterinario *</label><input class="fi" id="a-vet" placeholder="ej. Dr. García"></div>
+    <div class="fg"><label class="fl">Tipo de consulta</label><input class="fi" id="a-spec" placeholder="ej. Control, Vacuna, Revisión de piel"></div>
     <div class="fr">
       <div class="fg"><label class="fl">Fecha *</label><input class="fi" id="a-date" type="date"></div>
       <div class="fg"><label class="fl">Hora *</label><input class="fi" id="a-time" type="time"></div>
     </div>
-    <div class="fg"><label class="fl">Lugar / clínica</label><input class="fi" id="a-place" placeholder="Clínica Vetcare"></div>
-    <div class="fg"><label class="fl">Motivo</label><input class="fi" id="a-reason" placeholder="ej. Control anual"></div>
+    <div class="fg"><label class="fl">¿Dónde es?</label><input class="fi" id="a-place" placeholder="ej. Clínica Vetcare, Santiago"></div>
+    <div class="fg"><label class="fl">¿Por qué vas?</label><input class="fi" id="a-reason" placeholder="ej. Control anual, le vi algo raro en la piel"></div>
     <div class="mt-12 flex-c" style="gap:8px">
       <button class="btn btn-g" style="flex:1" onclick="closeM('modal-appt')">Cancelar</button>
-      <button class="btn btn-p" style="flex:2" onclick="saveAppt()">Guardar</button>
+      <button class="btn btn-p" style="flex:2" onclick="saveAppt()">Guardar cita</button>
     </div>
   </div>
 </div>
 
 <div class="moverlay" id="modal-consulta">
-  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Registrar consulta</div>
+  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Registrar visita al veterinario</div>
     <div class="fr">
-      <div class="fg"><label class="fl">Fecha *</label><input class="fi" id="c-date" type="date"></div>
-      <div class="fg"><label class="fl">Tipo</label><select class="fi" id="c-type"><option>Control</option><option>Urgencia</option><option>Cirugía</option><option>Vacunación</option><option>Examen</option><option>Otro</option></select></div>
+      <div class="fg"><label class="fl">¿Cuándo fue? *</label><input class="fi" id="c-date" type="date"></div>
+      <div class="fg"><label class="fl">Tipo de consulta</label><select class="fi" id="c-type"><option>Control</option><option>Urgencia</option><option>Cirugía</option><option>Vacunación</option><option>Examen</option><option>Otro</option></select></div>
     </div>
     <div class="fg"><label class="fl">Veterinario *</label><input class="fi" id="c-vet" placeholder="Dr. García"></div>
-    <div class="fg"><label class="fl">Clínica / lugar</label><input class="fi" id="c-place" placeholder="Clínica Vetcare"></div>
-    <div class="fg"><label class="fl">Motivo de consulta</label><input class="fi" id="c-reason" placeholder="ej. Vómitos frecuentes"></div>
-    <div class="fg"><label class="fl">Diagnóstico</label><textarea class="fi" id="c-diag" rows="3" style="resize:none;line-height:1.5" placeholder="ej. Gastroenteritis aguda. Dieta blanda 3 días."></textarea></div>
-    <div class="fg"><label class="fl">Tratamiento indicado</label><textarea class="fi" id="c-treat" rows="2" style="resize:none;line-height:1.5" placeholder="ej. Metronidazol 250mg cada 12h por 5 días"></textarea></div>
-    <div class="fg"><label class="fl">Próximo control</label><input class="fi" id="c-follow" type="date"></div>
+    <div class="fg"><label class="fl">¿Dónde fue?</label><input class="fi" id="c-place" placeholder="Clínica Vetcare"></div>
+    <div class="fg"><label class="fl">¿Por qué fueron?</label><input class="fi" id="c-reason" placeholder="ej. Vómitos, no quería comer, control rutinario"></div>
+    <div class="fg"><label class="fl">¿Qué dijo el veterinario?</label><textarea class="fi" id="c-diag" rows="3" style="resize:none;line-height:1.5" placeholder="ej. Dijo que tenía gastroenteritis, que le diera dieta blanda 3 días"></textarea></div>
+    <div class="fg"><label class="fl">¿Qué tratamiento le indicaron?</label><textarea class="fi" id="c-treat" rows="2" style="resize:none;line-height:1.5" placeholder="ej. Omeprazol 1 comprimido cada 12h por 5 días"></textarea></div>
+    <div class="fg"><label class="fl">¿Cuándo es el próximo control?</label><input class="fi" id="c-follow" type="date"></div>
     <div class="fg"><label class="fl">Foto de la receta o indicación (opcional)</label>
-      <div class="pup" onclick="document.getElementById('c-photo-inp').click()">📷 Sacar foto a la receta del veterinario</div>
+      <div class="pup" onclick="document.getElementById('c-photo-inp').click()">📷 📷 Sacar foto a la receta — así no pierdes nada</div>
       <input type="file" id="c-photo-inp" accept="image/*" style="display:none" onchange="prevPhoto(this,'c-photo-pre',null)">
       <img class="ppre" id="c-photo-pre">
     </div>
     <div class="mt-12 flex-c" style="gap:8px">
       <button class="btn btn-g" style="flex:1" onclick="closeM('modal-consulta')">Cancelar</button>
-      <button class="btn btn-p" style="flex:2" onclick="saveConsulta()">Guardar consulta</button>
+      <button class="btn btn-p" style="flex:2" onclick="saveConsulta()">Guardar visita</button>
     </div>
   </div>
 </div>
 
 <div class="moverlay" id="modal-despar">
   <div class="msheet"><div class="mhandle"></div><div class="mtitle">Registrar desparasitación</div>
-    <div class="fg"><label class="fl">Tipo *</label><select class="fi" id="dp-type"><option value="Interna">Interna (antiparasitario oral)</option><option value="Externa">Externa (antipulgas / garrapatas)</option></select></div>
-    <div class="fg"><label class="fl">Producto usado</label><input class="fi" id="dp-prod" placeholder="ej. Drontal Plus, Frontline, Bravecto"></div>
-    <div class="fg"><label class="fl">Fecha aplicación *</label><input class="fi" id="dp-date" type="date" oninput="calcNextDp()"></div>
-    <div class="fg"><label class="fl">Frecuencia</label><select class="fi" id="dp-freq" onchange="calcNextDp()"><option value="30">Mensual (30 días)</option><option value="90" selected>Trimestral (90 días)</option><option value="180">Semestral (180 días)</option></select></div>
-    <div class="fg"><label class="fl">Próxima aplicación (calculada)</label><input class="fi" id="dp-next" type="date" readonly style="background:#f5f5f3;color:var(--text-muted)"></div>
+    <div class="fg"><label class="fl">¿Qué tipo? *</label><select class="fi" id="dp-type"><option value="Interna">Interna — pastilla o jarabe antiparásitos</option><option value="Externa">Externa — antipulgas o antigarrapatas</option></select></div>
+    <div class="fg"><label class="fl">¿Qué producto usaron?</label><input class="fi" id="dp-prod" placeholder="ej. Drontal Plus, Frontline, Bravecto"></div>
+    <div class="fg"><label class="fl">¿Cuándo se la dieron? *</label><input class="fi" id="dp-date" type="date" oninput="calcNextDp()"></div>
+    <div class="fg"><label class="fl">¿Cada cuánto hay que repetirla?</label><select class="fi" id="dp-freq" onchange="calcNextDp()"><option value="30">Cada mes (30 días)</option><option value="90" selected>Cada 3 meses (90 días)</option><option value="180">Cada 6 meses (180 días)</option></select></div>
+    <div class="fg"><label class="fl">Próxima aplicación (se calcula sola)</label><input class="fi" id="dp-next" type="date" readonly style="background:#f5f5f3;color:var(--text-muted)"></div>
     <div class="fg"><label class="fl">Notas</label><input class="fi" id="dp-notes" placeholder="Opcional"></div>
     <div class="mt-12 flex-c" style="gap:8px">
       <button class="btn btn-g" style="flex:1" onclick="closeM('modal-despar')">Cancelar</button>
@@ -500,10 +500,10 @@ img{max-width:100%}
   <div class="msheet"><div class="mhandle"></div><div class="mtitle">Registrar peso</div>
     <div class="fr">
       <div class="fg"><label class="fl">Peso (kg) *</label><input class="fi" id="w-val" type="number" step="0.1" placeholder="8.5"></div>
-      <div class="fg"><label class="fl">Fecha *</label><input class="fi" id="w-date" type="date"></div>
+      <div class="fg"><label class="fl">¿Cuándo lo pesaron?</label><input class="fi" id="w-date" type="date"></div>
     </div>
-    <div class="fg"><label class="fl">Condición corporal (BCS 1–9)</label><select class="fi" id="w-bcs"><option value="">No evaluado</option><option value="1-3">1-3 · Bajo peso</option><option value="4-5">4-5 · Ideal</option><option value="6-7">6-7 · Sobrepeso</option><option value="8-9">8-9 · Obesidad</option></select></div>
-    <div class="fg"><label class="fl">Notas</label><input class="fi" id="w-notes" placeholder="ej. Pesado en clínica Vetcare"></div>
+    <div class="fg"><label class="fl">¿Cómo está su peso según el vet?</label><select class="fi" id="w-bcs"><option value="">No me lo dijeron</option><option value="1-3">Bajo peso — hay que engordar</option><option value="4-5">Peso ideal — perfecto</option><option value="6-7">Sobrepeso — hay que bajar</option><option value="8-9">Obesidad — control urgente</option></select></div>
+    <div class="fg"><label class="fl">Notas</label><input class="fi" id="w-notes" placeholder="ej. Pesado en la clínica antes de la consulta"></div>
     <div class="mt-12 flex-c" style="gap:8px">
       <button class="btn btn-g" style="flex:1" onclick="closeM('modal-peso')">Cancelar</button>
       <button class="btn btn-p" style="flex:2" onclick="savePeso()">Guardar</button>
@@ -512,14 +512,14 @@ img{max-width:100%}
 </div>
 
 <div class="moverlay" id="modal-examen">
-  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Nuevo examen</div>
-    <div class="fg"><label class="fl">Tipo de examen *</label><select class="fi" id="ex-type" onchange="document.getElementById('ex-cw').style.display=this.value==='Otro'?'block':'none'"><option>Hemograma</option><option>Perfil bioquímico</option><option>Orina</option><option>Radiografía</option><option>Ecografía</option><option>Cultivo</option><option value="Otro">Otro</option></select></div>
-    <div class="fg" id="ex-cw" style="display:none"><label class="fl">Especificar</label><input class="fi" id="ex-custom" placeholder="Nombre del examen"></div>
-    <div class="fg"><label class="fl">Fecha *</label><input class="fi" id="ex-date" type="date"></div>
-    <div class="fg"><label class="fl">Laboratorio / clínica</label><input class="fi" id="ex-lab" placeholder="ej. Labovets"></div>
-    <div class="fg"><label class="fl">Resultado / observación</label><textarea class="fi" id="ex-result" rows="3" style="resize:none;line-height:1.5" placeholder="ej. Valores dentro de rango normal"></textarea></div>
+  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Registrar examen</div>
+    <div class="fg"><label class="fl">¿Qué tipo de examen? *</label><select class="fi" id="ex-type" onchange="document.getElementById('ex-cw').style.display=this.value==='Otro'?'block':'none'"><option>Examen de sangre</option><option>Examen de sangre completo</option><option>Examen de orina</option><option>Radiografía</option><option>Ecografía</option><option>Cultivo</option><option value="Otro">Otro</option></select></div>
+    <div class="fg" id="ex-cw" style="display:none"><label class="fl">¿Cuál?</label><input class="fi" id="ex-custom" placeholder="ej. Ecocardiograma"></div>
+    <div class="fg"><label class="fl">¿Cuándo fue? *</label><input class="fi" id="ex-date" type="date"></div>
+    <div class="fg"><label class="fl">¿Dónde lo hicieron?</label><input class="fi" id="ex-lab" placeholder="ej. Labovets"></div>
+    <div class="fg"><label class="fl">¿Qué dijeron los resultados?</label><textarea class="fi" id="ex-result" rows="3" style="resize:none;line-height:1.5" placeholder="ej. Todo normal, o lo que te explicaron"></textarea></div>
     <div class="fg"><label class="fl">Foto del resultado (opcional)</label>
-      <div class="pup" onclick="document.getElementById('ex-inp').click()">📷 Subir foto del resultado</div>
+      <div class="pup" onclick="document.getElementById('ex-inp').click()">📷 📷 Sacar foto al resultado — así siempre lo tienes</div>
       <input type="file" id="ex-inp" accept="image/*" style="display:none" onchange="prevPhoto(this,'ex-pre',null)">
       <img class="ppre" id="ex-pre">
     </div>
@@ -531,14 +531,14 @@ img{max-width:100%}
 </div>
 
 <div class="moverlay" id="modal-alimento">
-  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Alimentación</div>
-    <div class="fg"><label class="fl">Marca / alimento *</label><input class="fi" id="f-brand" placeholder="ej. Royal Canin, Hills, BARF"></div>
-    <div class="fg"><label class="fl">Tipo</label><select class="fi" id="f-type"><option>Seco (croquetas)</option><option>Húmedo (lata/sobre)</option><option>BARF (crudo)</option><option>Casero</option><option>Mixto</option></select></div>
+  <div class="msheet"><div class="mhandle"></div><div class="mtitle">¿Qué come tu mascota?</div>
+    <div class="fg"><label class="fl">Marca o tipo de alimento *</label><input class="fi" id="f-brand" placeholder="ej. Royal Canin, Hills, BARF"></div>
+    <div class="fg"><label class="fl">¿En qué formato?</label><select class="fi" id="f-type"><option>Seco (croquetas)</option><option>Húmedo (lata o sobre)</option><option>BARF (comida cruda)</option><option>Casero</option><option>Mixto</option></select></div>
     <div class="fr">
-      <div class="fg"><label class="fl">Cantidad diaria</label><input class="fi" id="f-amount" placeholder="250g"></div>
-      <div class="fg"><label class="fl">Veces al día</label><select class="fi" id="f-times"><option>1 vez</option><option selected>2 veces</option><option>3 veces</option><option>A libre demanda</option></select></div>
+      <div class="fg"><label class="fl">¿Cuánto come por día?</label><input class="fi" id="f-amount" placeholder="250g"></div>
+      <div class="fg"><label class="fl">¿Cuántas veces?</label><select class="fi" id="f-times"><option>1 vez al día</option><option selected>2 veces al día</option><option>3 veces al día</option><option>Come cuando quiere</option></select></div>
     </div>
-    <div class="fg"><label class="fl">Notas / restricciones</label><textarea class="fi" id="f-notes" rows="2" style="resize:none;line-height:1.5" placeholder="ej. Sin pollo por alergia"></textarea></div>
+    <div class="fg"><label class="fl">¿Algo importante sobre su alimentación?</label><textarea class="fi" id="f-notes" rows="2" style="resize:none;line-height:1.5" placeholder="ej. No puede comer pollo, le dieron dieta especial"></textarea></div>
     <div class="mt-12 flex-c" style="gap:8px">
       <button class="btn btn-g" style="flex:1" onclick="closeM('modal-alimento')">Cancelar</button>
       <button class="btn btn-p" style="flex:2" onclick="saveAlimento()">Guardar</button>
@@ -548,10 +548,10 @@ img{max-width:100%}
 
 <div class="moverlay" id="modal-enfermedad">
   <div class="msheet"><div class="mhandle"></div><div class="mtitle">Enfermedad crónica</div>
-    <div class="fg"><label class="fl">Nombre / diagnóstico *</label><input class="fi" id="en-name" placeholder="ej. Diabetes, Epilepsia, Displasia de cadera"></div>
-    <div class="fg"><label class="fl">Fecha de diagnóstico</label><input class="fi" id="en-date" type="date"></div>
-    <div class="fg"><label class="fl">Veterinario que diagnosticó</label><input class="fi" id="en-vet" placeholder="Dr. García"></div>
-    <div class="fg"><label class="fl">Notas / tratamiento base</label><textarea class="fi" id="en-notes" rows="3" style="resize:none;line-height:1.5" placeholder="ej. Insulina 2 UI cada 12h, controles cada 3 meses"></textarea></div>
+    <div class="fg"><label class="fl">¿Qué condición tiene? *</label><input class="fi" id="en-name" placeholder="ej. Diabetes, Epilepsia, Displasia de cadera"></div>
+    <div class="fg"><label class="fl">¿Cuándo se lo diagnosticaron?</label><input class="fi" id="en-date" type="date"></div>
+    <div class="fg"><label class="fl">¿Qué veterinario lo diagnosticó?</label><input class="fi" id="en-vet" placeholder="Dr. García"></div>
+    <div class="fg"><label class="fl">¿Cómo se trata o qué hay que tener en cuenta?</label><textarea class="fi" id="en-notes" rows="3" style="resize:none;line-height:1.5" placeholder="ej. Toma insulina dos veces al día, no puede comer azúcar"></textarea></div>
     <div class="mt-12 flex-c" style="gap:8px">
       <button class="btn btn-g" style="flex:1" onclick="closeM('modal-enfermedad')">Cancelar</button>
       <button class="btn btn-p" style="flex:2" onclick="saveEnfermedad()">Guardar</button>
