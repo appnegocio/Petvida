@@ -216,6 +216,50 @@ img{max-width:100%}
 .mt-8{margin-top:8px}.mt-12{margin-top:12px}
 .tsm{font-size:.8rem}.tm{color:var(--text-muted)}.fw8{font-weight:800}
 
+/* Emergency vet button */
+.emer-btn-wrap{
+  margin:8px 16px 0;
+  background:#FEF2F2;border:.5px solid #FDBDBD;
+  border-radius:var(--r-md);padding:11px 13px;
+  display:flex;align-items:center;gap:10px;
+  flex-shrink:0;
+}
+.emer-ico{font-size:1.2rem;flex-shrink:0}
+.emer-info{flex:1}
+.emer-title{font-size:.82rem;font-weight:800;color:#C0392B}
+.emer-sub{font-size:.72rem;color:#E07070;margin-top:2px}
+.emer-call{
+  background:#C0392B;color:white;
+  border-radius:var(--r-sm);padding:8px 13px;
+  font-size:.75rem;font-weight:800;
+  flex-shrink:0;white-space:nowrap;
+  text-decoration:none;display:inline-flex;
+  align-items:center;gap:4px;
+}
+.emer-call:active{opacity:.85}
+
+/* Direct action rows */
+.action-row{
+  display:flex;align-items:center;gap:11px;
+  padding:11px 13px;
+  background:var(--card);
+  border-radius:var(--r-lg);
+  border:.5px solid var(--border);
+  margin-bottom:7px;
+  cursor:pointer;
+  transition:background .12s;
+}
+.action-row:active{background:var(--bg)}
+.action-icon{
+  width:38px;height:38px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;flex-shrink:0;
+}
+.action-body{flex:1}
+.action-title{font-size:.9rem;font-weight:700}
+.action-sub{font-size:.74rem;color:var(--text-muted);margin-top:2px}
+.action-arrow{color:var(--text-lt);font-size:1rem}
+
 /* Cal hint banner */
 .cal-hint{
   background:var(--blue-lt);border:.5px solid #C8DCEF;
@@ -266,15 +310,10 @@ img{max-width:100%}
       <div id="home-spill"></div>
     </div>
     <div class="pet-pills" id="pet-pills"></div>
+    <div id="home-emer"></div>
     <div class="scroll-area">
-      <div class="stitle">Acceso rápido</div>
-      <div class="qgrid">
-        <div class="qitem" onclick="goTo('vacunas')"><span class="qico">💉</span>Vacunas</div>
-        <div class="qitem" onclick="goTo('medicamentos')"><span class="qico">💊</span>Remedios</div>
-        <div class="qitem" onclick="goTo('citas')"><span class="qico">📅</span>Citas</div>
-        <div class="qitem" onclick="goTo('mascotas')"><span class="qico">🐾</span>Mascotas</div>
-      </div>
-      <div class="stitle">Hoy</div>
+      <div id="home-actions"></div>
+      <div class="stitle" id="home-alert-title">Recordatorios de hoy</div>
       <div id="home-alerts"></div>
       <div id="home-upcoming"></div>
     </div>
@@ -802,10 +841,66 @@ function renderHome(){
   document.getElementById('home-name').textContent=pet?'¡Hola! 👋':'Registra tu primera mascota';
   document.getElementById('pet-pills').innerHTML=pets.map(p=>`<div class="pet-pill ${p.id===DB.aid?'active':''}" onclick="setAP('${p.id}')">${pEmo(p.species)} ${p.name}</div>`).join('');
   const spEl=document.getElementById('home-spill');
-  if(!pet){spEl.innerHTML='';document.getElementById('home-alerts').innerHTML=empty('🐾','Sin mascotas aún','Registra a tu compañero para empezar.');document.getElementById('home-upcoming').innerHTML='';return}
+  const emerEl=document.getElementById('home-emer');
+  const actionsEl=document.getElementById('home-actions');
+
+  if(!pet){
+    spEl.innerHTML='';emerEl.innerHTML='';actionsEl.innerHTML='';
+    document.getElementById('home-alerts').innerHTML=empty('🐾','Sin mascotas aún','Registra a tu compañero para empezar.');
+    document.getElementById('home-upcoming').innerHTML='';
+    return;
+  }
+
+  // Status pill
   const{urgent,upcoming}=buildAlerts(pet.id);
   const hasU=urgent.filter(a=>a.type==='urgent').length;
   spEl.innerHTML=`<div class="status-pill"><div class="sd ${hasU?'sd-urgent':urgent.length?'sd-warn':'sd-ok'}"></div>${hasU?`${hasU} alerta${hasU>1?'s':''} urgente${hasU>1?'s':''}`:urgent.length===0&&upcoming.length===0?`${pet.name} está perfecto hoy ✓`:upcoming.length&&!urgent.length?`${pet.name} está bien · ${upcoming.length} cita${upcoming.length>1?'s':''} próxima${upcoming.length>1?'s':''}` :'Recordatorios pendientes'}</div>`;
+
+  // Emergency vet button — only show if vet phone is registered
+  if(pet.vphone){
+    emerEl.innerHTML=`<div class="emer-btn-wrap">
+      <span class="emer-ico">🚨</span>
+      <div class="emer-info">
+        <div class="emer-title">Veterinario de ${pet.name}</div>
+        <div class="emer-sub">${pet.vet?pet.vet+' · ':''}${pet.vphone}</div>
+      </div>
+      <a class="emer-call" href="tel:${pet.vphone}">📞 Llamar</a>
+    </div>`;
+  } else if(pet.vet) {
+    emerEl.innerHTML=`<div class="emer-btn-wrap">
+      <span class="emer-ico">🏥</span>
+      <div class="emer-info">
+        <div class="emer-title">Veterinario de ${pet.name}</div>
+        <div class="emer-sub">${pet.vet} · Agrega el teléfono para llamar directo</div>
+      </div>
+    </div>`;
+  } else {
+    emerEl.innerHTML='';
+  }
+
+  // Direct action rows
+  const meds=byPet(pet.id,DB.meds).filter(m=>m.active);
+  const medSub=meds.length?meds.slice(0,2).map(m=>m.name).join(' · ')+(meds.length>2?` +${meds.length-2} más`:''):'Sin remedios activos';
+  actionsEl.innerHTML=`
+    <div class="stitle" style="margin-top:4px">Acciones rápidas</div>
+    <div class="action-row" onclick="_pid='${pet.id}';goSub('consultas');setTimeout(()=>openM('modal-consulta'),200)">
+      <div class="action-icon mi-c">🏥</div>
+      <div class="action-body">
+        <div class="action-title">Anotar visita al veterinario</div>
+        <div class="action-sub">Guarda lo que te dijeron hoy</div>
+      </div>
+      <span class="action-arrow">›</span>
+    </div>
+    <div class="action-row" onclick="goTo('medicamentos')">
+      <div class="action-icon mi-g">💊</div>
+      <div class="action-body">
+        <div class="action-title">Remedios de ${pet.name}</div>
+        <div class="action-sub">${medSub}</div>
+      </div>
+      <span class="action-arrow">›</span>
+    </div>`;
+
+  // Alerts
   document.getElementById('home-alerts').innerHTML=urgent.length?urgent.map(aRow).join(''):`<div class="arow ok"><span class="aicon">✓</span><div><div class="atext">${pet.name} tiene todo bajo control hoy — disfruten su día juntos</div></div></div>`;
   document.getElementById('home-upcoming').innerHTML=upcoming.length?`<div class="stitle mt-8">📅 Próximas citas</div>`+upcoming.map(a=>`<div class="arow ok" style="cursor:pointer" onclick="goTo('citas')"><span class="aicon">📅</span><div style="flex:1"><div class="atext">${a.text}</div>${a.meta?`<div class="ameta">${a.meta}</div>`:''}<div class="adays">Faltan ${a.dU} días</div></div><span style="color:var(--text-lt)">›</span></div>`).join(''):'';
 }
