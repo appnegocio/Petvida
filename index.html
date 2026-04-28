@@ -469,6 +469,11 @@ img{max-width:100%}
     <div class="fg"><label class="fl">Diagnóstico</label><textarea class="fi" id="c-diag" rows="3" style="resize:none;line-height:1.5" placeholder="ej. Gastroenteritis aguda. Dieta blanda 3 días."></textarea></div>
     <div class="fg"><label class="fl">Tratamiento indicado</label><textarea class="fi" id="c-treat" rows="2" style="resize:none;line-height:1.5" placeholder="ej. Metronidazol 250mg cada 12h por 5 días"></textarea></div>
     <div class="fg"><label class="fl">Próximo control</label><input class="fi" id="c-follow" type="date"></div>
+    <div class="fg"><label class="fl">Foto de la receta o indicación (opcional)</label>
+      <div class="pup" onclick="document.getElementById('c-photo-inp').click()">📷 Sacar foto a la receta del veterinario</div>
+      <input type="file" id="c-photo-inp" accept="image/*" style="display:none" onchange="prevPhoto(this,'c-photo-pre',null)">
+      <img class="ppre" id="c-photo-pre">
+    </div>
     <div class="mt-12 flex-c" style="gap:8px">
       <button class="btn btn-g" style="flex:1" onclick="closeM('modal-consulta')">Cancelar</button>
       <button class="btn btn-p" style="flex:2" onclick="saveConsulta()">Guardar consulta</button>
@@ -1089,6 +1094,7 @@ function renderCons(pid){
           <button class="btn-cal" onclick="calFollowup('${c.follow}','${pet.name}','${c.vet}')">📅 Guardar en calendario</button>
         </div>
       </div>`:''}
+      ${c.photo?`<div style="margin-top:8px"><div style="font-size:.68rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">📋 Receta / indicación del veterinario</div><img src="${c.photo}" style="width:100%;border-radius:8px;object-fit:cover;max-height:200px;cursor:pointer" onclick="this.style.maxHeight=this.style.maxHeight==='none'?'200px':'none'"></div>`:''}
       <button onclick="delItem('cons','${c.id}',()=>renderCons('${pid}'))" style="margin-top:8px;font-size:.75rem;color:var(--text-lt);font-weight:600">Eliminar registro</button>
     </div>
   </div>`).join('')
@@ -1203,8 +1209,8 @@ function saveAppt(){
 }
 function saveConsulta(){
   const date=g('c-date'),vet=g('c-vet');if(!date||!vet){showToast('Completa la fecha y el veterinario');return}
-  if(!_pid)return;const item={id:DB.uid(),petId:_pid,date,type:g('c-type')||'Control',vet,place:g('c-place'),reason:g('c-reason'),diag:g('c-diag'),treat:g('c-treat'),follow:g('c-follow'),createdAt:new Date().toISOString()};
-  const arr=DB.cons;arr.push(item);DB.save('cons',arr);closeM('modal-consulta');resetF(['c-date','c-vet','c-place','c-reason','c-diag','c-treat','c-follow']);
+  if(!_pid)return;const item={id:DB.uid(),petId:_pid,date,type:g('c-type')||'Control',vet,place:g('c-place'),reason:g('c-reason'),diag:g('c-diag'),treat:g('c-treat'),follow:g('c-follow'),photo:document.getElementById('c-photo-pre').src||'',createdAt:new Date().toISOString()};
+  const arr=DB.cons;arr.push(item);DB.save('cons',arr);closeM('modal-consulta');resetF(['c-date','c-vet','c-place','c-reason','c-diag','c-treat','c-follow']);document.getElementById('c-photo-pre').style.display='none';
   const pet=DB.pets.find(p=>p.id===_pid);showToast(`Consulta de ${pet?.name||''} guardada 🏥`);renderCons(_pid)
 }
 function saveDespar(){
