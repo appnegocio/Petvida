@@ -260,6 +260,59 @@ img{max-width:100%}
 .action-sub{font-size:.74rem;color:var(--text-muted);margin-top:2px}
 .action-arrow{color:var(--text-lt);font-size:1rem}
 
+/* ONBOARDING */
+#screen-onboarding{
+  background:linear-gradient(160deg,#22A898 0%,#128A7C 55%,#0A6B5E 100%);
+  color:white;min-height:100dvh;display:flex;flex-direction:column;
+  position:relative;overflow:hidden;
+}
+.onb-circle{position:absolute;border-radius:50%;pointer-events:none}
+.onb-inner{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;padding:54px 28px 28px}
+.onb-step{font-size:.7rem;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px}
+.onb-dots{display:flex;gap:6px;margin-bottom:28px}
+.onb-dot{height:3px;border-radius:2px;background:rgba(255,255,255,.25);transition:all .3s}
+.onb-dot.act{background:white;width:28px}
+.onb-dot:not(.act){width:20px}
+.onb-ico{font-size:2.8rem;margin-bottom:16px}
+.onb-title{font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:700;color:white;line-height:1.2;margin-bottom:12px}
+.onb-sub{font-size:.88rem;color:rgba(255,255,255,.78);line-height:1.65;margin-bottom:auto}
+.onb-bottom{padding:0 28px calc(32px + var(--safe));position:relative;z-index:2}
+.onb-btn{width:100%;padding:15px;background:white;color:#128A7C;border-radius:14px;font-size:.95rem;font-weight:900;text-align:center;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 18px rgba(0,0,0,.15);transition:transform .15s}
+.onb-btn:active{transform:scale(.97)}
+.onb-skip{text-align:center;font-size:.72rem;color:rgba(255,255,255,.38);font-weight:600;margin-top:12px;cursor:pointer}
+
+/* WOW CELEBRATION MODAL */
+.wow-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.5);z-index:300;
+  align-items:flex-end;justify-content:center;
+}
+.wow-overlay.open{display:flex;animation:oIn .2s ease}
+.wow-sheet{
+  background:white;border-radius:var(--r-xl) var(--r-xl) 0 0;
+  width:100%;max-width:430px;
+  padding:24px 24px calc(36px + var(--safe));
+  text-align:center;animation:sUp .25s ease;
+}
+.wow-emoji{font-size:3rem;margin-bottom:12px;display:block}
+.wow-title{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;color:var(--text);line-height:1.25;margin-bottom:8px}
+.wow-msg{font-size:.85rem;color:var(--text-muted);line-height:1.6;margin-bottom:22px}
+.wow-btn{width:100%;padding:14px;background:linear-gradient(135deg,#22A898,#128A7C);color:white;border-radius:var(--r-md);font-size:.9rem;font-weight:800;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:7px}
+.wow-share{width:100%;padding:12px;background:var(--bg);border:.5px solid var(--border);color:var(--text-muted);border-radius:var(--r-md);font-size:.84rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:7px}
+
+/* PROGRESS CARD */
+.prog-card{background:var(--card);border-radius:var(--r-lg);border:.5px solid var(--border);padding:13px;margin-bottom:10px}
+.prog-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.prog-label{font-size:.8rem;font-weight:800;color:var(--text)}
+.prog-pct{font-size:.8rem;font-weight:800;color:var(--coral)}
+.prog-bar-wrap{height:5px;background:var(--border);border-radius:3px;margin-bottom:10px}
+.prog-bar{height:5px;border-radius:3px;background:linear-gradient(90deg,#22A898,#128A7C);transition:width .5s ease}
+.prog-tasks{display:flex;flex-direction:column;gap:6px}
+.prog-task{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--text-muted)}
+.prog-task.done{color:var(--green)}
+.prog-check{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.6rem}
+.prog-check.ok{background:var(--green-lt);border-color:var(--green);color:var(--green)}
+
 /* Cal hint banner */
 .cal-hint{
   background:var(--blue-lt);border:.5px solid #C8DCEF;
@@ -301,6 +354,28 @@ img{max-width:100%}
 </div>
 
 <div id="main-app" style="display:none">
+
+  <!-- ONBOARDING SCREEN -->
+  <div id="screen-onboarding" style="display:none">
+    <div class="onb-circle" style="width:320px;height:320px;top:-120px;right:-100px;background:rgba(255,255,255,.08)"></div>
+    <div class="onb-circle" style="width:200px;height:200px;bottom:80px;left:-60px;background:rgba(255,255,255,.05)"></div>
+    <div class="onb-inner" id="onb-inner"></div>
+    <div class="onb-bottom">
+      <button class="onb-btn" id="onb-btn" onclick="onbNext()">Agregar mi primera mascota →</button>
+      <div class="onb-skip" onclick="skipOnb()">Saltar por ahora</div>
+    </div>
+  </div>
+
+  <!-- WOW CELEBRATION -->
+  <div class="wow-overlay" id="wow-modal">
+    <div class="wow-sheet">
+      <span class="wow-emoji" id="wow-emoji">🐾</span>
+      <div class="wow-title" id="wow-title">—</div>
+      <div class="wow-msg" id="wow-msg">—</div>
+      <button class="wow-btn" onclick="closeWow()">Ver su perfil →</button>
+      <button class="wow-share" onclick="closeWow();setTimeout(()=>sharePet(_pid),300)">↗ Compartir con quien lo cuida</button>
+    </div>
+  </div>
 
   <div id="screen-home" class="screen active">
     <div class="home-hdr">
@@ -815,6 +890,95 @@ function buildAlerts(pid){
 }
 
 /* ================================================================
+   ONBOARDING
+   ================================================================ */
+const ONB_STEPS = [
+  {
+    ico: '🐾',
+    title: 'Un lugar para todas tus mascotas',
+    sub: 'Agrega a todas tus mascotas. Cada una con su propio perfil, historial médico y recordatorios.',
+    btn: 'Agregar mi primera mascota →'
+  },
+  {
+    ico: '💉',
+    title: 'Nunca más pierdas una vacuna o un remedio',
+    sub: 'La app te avisa cuando vence una vacuna, cuándo toca desparasitar y te recuerda los remedios del día.',
+    btn: 'Entendido →'
+  },
+  {
+    ico: '🧳',
+    title: 'Viaja tranquilo/a — quien cuide a tu mascota tendrá todo claro',
+    sub: 'Crea la guía del cuidador y compártela por WhatsApp. Horarios, remedios, señales de alerta — todo en un mensaje.',
+    btn: 'Empezar ahora →'
+  }
+];
+let _onbStep = 0;
+
+function showOnboarding() {
+  document.getElementById('screen-onboarding').style.display = 'flex';
+  renderOnbStep(0);
+}
+
+function renderOnbStep(step) {
+  _onbStep = step;
+  const s = ONB_STEPS[step];
+  const dots = ONB_STEPS.map((_,i) => `<div class="onb-dot ${i===step?'act':''}"></div>`).join('');
+  document.getElementById('onb-inner').innerHTML = `
+    <div class="onb-step">Paso ${step+1} de ${ONB_STEPS.length}</div>
+    <div class="onb-dots">${dots}</div>
+    <div class="onb-ico">${s.ico}</div>
+    <div class="onb-title">${s.title}</div>
+    <div class="onb-sub">${s.sub}</div>`;
+  document.getElementById('onb-btn').textContent = s.btn;
+}
+
+function onbNext() {
+  if (_onbStep < ONB_STEPS.length - 1) {
+    renderOnbStep(_onbStep + 1);
+  } else {
+    skipOnb();
+  }
+}
+
+function skipOnb() {
+  document.getElementById('screen-onboarding').style.display = 'none';
+  localStorage.setItem('pv2_onb', '1');
+  openM('modal-pet');
+}
+
+/* ================================================================
+   WOW CELEBRATION
+   ================================================================ */
+function showWow(petName) {
+  document.getElementById('wow-emoji').textContent = '🐾';
+  document.getElementById('wow-title').textContent = `${petName} tiene exactamente lo que merece`;
+  document.getElementById('wow-msg').textContent = 'Su historial está listo para cuando más lo necesites.';
+  document.getElementById('wow-modal').classList.add('open');
+}
+
+function closeWow() {
+  document.getElementById('wow-modal').classList.remove('open');
+}
+
+/* ================================================================
+   PROGRESS CALCULATION
+   ================================================================ */
+function calcProgress(petId) {
+  const pet = DB.pets.find(p=>p.id===petId);
+  if (!pet) return { pct:0, tasks:[] };
+  const tasks = [
+    { label:'Datos básicos guardados', done: !!(pet.name && pet.species) },
+    { label:'Foto agregada', done: !!pet.photo },
+    { label:'Veterinario guardado', done: !!pet.vet },
+    { label:'Primera vacuna registrada', done: byPet(petId,DB.vax).length > 0 },
+    { label:'Desparasitación registrada', done: byPet(petId,DB.despar).length > 0 },
+    { label:'Primera visita al vet anotada', done: byPet(petId,DB.cons).length > 0 },
+  ];
+  const done = tasks.filter(t=>t.done).length;
+  return { pct: Math.round((done/tasks.length)*100), tasks };
+}
+
+/* ================================================================
    NAVIGATION
    ================================================================ */
 let _pid=null;
@@ -881,8 +1045,27 @@ function renderHome(){
   // Direct action rows
   const meds=byPet(pet.id,DB.meds).filter(m=>m.active);
   const medSub=meds.length?meds.slice(0,2).map(m=>m.name).join(' · ')+(meds.length>2?` +${meds.length-2} más`:''):'Sin remedios activos';
+
+  // Progress card
+  const prog = calcProgress(pet.id);
+  const progHTML = prog.pct < 100 ? `
+    <div class="prog-card">
+      <div class="prog-header">
+        <span class="prog-label">Perfil de ${pet.name}</span>
+        <span class="prog-pct">${prog.pct}% completo</span>
+      </div>
+      <div class="prog-bar-wrap"><div class="prog-bar" style="width:${prog.pct}%"></div></div>
+      <div class="prog-tasks">
+        ${prog.tasks.map(t=>`<div class="prog-task ${t.done?'done':''}">
+          <div class="prog-check ${t.done?'ok':''}">${t.done?'✓':''}</div>
+          ${t.label}
+        </div>`).join('')}
+      </div>
+    </div>` : '';
+
   actionsEl.innerHTML=`
-    <div class="stitle" style="margin-top:4px">Acciones rápidas</div>
+    ${progHTML}
+    <div class="stitle" style="margin-top:${prog.pct<100?'4':'4'}px">Acciones rápidas</div>
     <div class="action-row" onclick="_pid='${pet.id}';goSub('consultas');setTimeout(()=>openM('modal-consulta'),200)">
       <div class="action-icon mi-c">🏥</div>
       <div class="action-body">
@@ -1279,7 +1462,10 @@ function savePet(){
   const ps=DB.pets;ps.push(pet);DB.save('pets',ps);DB.setAid(pet.id);
   closeM('modal-pet');resetF(['p-name','p-species','p-breed','p-dob','p-weight','p-sex','p-neut','p-chip','p-allerg','p-vet','p-vphone','p-sp-custom']);
   document.getElementById('pp-pre').style.display='none';document.getElementById('pp-drop').style.display='block';document.getElementById('p-sp-wrap').style.display='none';
-  showToast(`¡${pet.name} registrado/a! 🐾`);renderHome();renderPets()
+  showToast(`¡${pet.name} agregado/a! 🐾`);
+  renderHome();renderPets();
+  // Show wow celebration
+  setTimeout(()=>{ _pid=pet.id; showWow(pet.name); }, 400);
 }
 function saveVax(){
   const name=g('v-name');if(!name){showToast('Ingresa el nombre');return}
@@ -1525,8 +1711,24 @@ function showToast(msg){const el=document.getElementById('toast');el.textContent
 /* ================================================================
    INIT
    ================================================================ */
-function startApp(){document.getElementById('swelcome').style.display='none';document.getElementById('main-app').style.display='block';localStorage.setItem('pv2_ok','1');renderHome();renderPets()}
-function init(){if(localStorage.getItem('pv2_ok')){document.getElementById('swelcome').style.display='none';document.getElementById('main-app').style.display='block';renderHome();renderPets();const pet=getAP();renderVax(pet);renderMeds(pet);renderAppts(pet)}}
+function startApp(){
+  document.getElementById('swelcome').style.display='none';
+  document.getElementById('main-app').style.display='block';
+  localStorage.setItem('pv2_ok','1');
+  renderHome();renderPets();
+  // Show onboarding for new users
+  if(!localStorage.getItem('pv2_onb') && !DB.pets.length) {
+    setTimeout(()=>showOnboarding(), 300);
+  }
+}
+function init(){
+  if(localStorage.getItem('pv2_ok')){
+    document.getElementById('swelcome').style.display='none';
+    document.getElementById('main-app').style.display='block';
+    renderHome();renderPets();
+    const pet=getAP();renderVax(pet);renderMeds(pet);renderAppts(pet);
+  }
+}
 if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 init();
 </script>
