@@ -465,6 +465,59 @@ img{max-width:100%}
     <button class="fab" onclick="openM('modal-enfermedad')">+</button>
   </div>
 
+  <!-- SCREEN: AJUSTES -->
+  <div id="screen-ajustes" class="screen">
+    <div class="hdr"><div class="hdr-brand">Pawvida</div><div class="hdr-title">Ajustes</div></div>
+    <div class="scroll-area">
+
+      <div class="stitle">Mis datos</div>
+      <div class="card-flush">
+        <div class="mrow" onclick="exportData()">
+          <div class="micon mi-g">💾</div>
+          <div class="minfo">
+            <div class="mname">Exportar mis datos</div>
+            <div class="msub">Descarga un archivo con toda la información — guárdalo como respaldo o úsalo en otro teléfono</div>
+          </div>
+          <span class="marrow">↓</span>
+        </div>
+        <div class="mrow" onclick="document.getElementById('import-inp').click()">
+          <div class="micon mi-b">📂</div>
+          <div class="minfo">
+            <div class="mname">Importar datos</div>
+            <div class="msub">Restaura un respaldo guardado anteriormente</div>
+          </div>
+          <span class="marrow">↑</span>
+        </div>
+        <input type="file" id="import-inp" accept=".json" style="display:none" onchange="importData(this)">
+      </div>
+
+      <div class="card" style="background:#FFF0E8;border-color:var(--coral-bd)">
+        <div style="font-size:.8rem;color:var(--coral);font-weight:700;margin-bottom:4px">⚠️ Importante</div>
+        <div style="font-size:.78rem;color:var(--text-mid);line-height:1.55">Pawvida guarda los datos en tu teléfono. Si cambias de dispositivo o borras la app, <strong>exporta primero tus datos</strong> para no perder nada. En la próxima versión tendremos sincronización automática.</div>
+      </div>
+
+      <div class="stitle">Acerca de</div>
+      <div class="card-flush">
+        <div class="mrow">
+          <div class="micon mi-gr">🐾</div>
+          <div class="minfo">
+            <div class="mname">Pawvida</div>
+            <div class="msub">Versión 1.0 · Porque tu mascota se merece lo mejor</div>
+          </div>
+        </div>
+        <div class="mrow">
+          <div class="micon mi-gr">✉️</div>
+          <div class="minfo">
+            <div class="mname">¿Tienes sugerencias?</div>
+            <div class="msub">Nos ayuda mucho saber qué mejorar</div>
+          </div>
+          <span class="marrow">›</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <div id="screen-cuidador" class="screen">
     <div class="hdr" style="padding-top:44px;background:#5B8FD4">
       <div class="hdr-back" onclick="goTo('pet-profile')">&#8592; Perfil</div>
@@ -480,7 +533,7 @@ img{max-width:100%}
     <button class="nitem" data-nav="mascotas" onclick="navigate('mascotas',this)"><span class="nicon">🐾</span><div class="nbar"></div><span>Mascotas</span></button>
     <button class="nitem" data-nav="vacunas" onclick="navigate('vacunas',this)"><span class="nicon">💉</span><div class="nbar"></div><span>Vacunas</span></button>
     <button class="nitem" data-nav="medicamentos" onclick="navigate('medicamentos',this)"><span class="nicon">💊</span><div class="nbar"></div><span>Remedios</span></button>
-    <button class="nitem" data-nav="citas" onclick="navigate('citas',this)"><span class="nicon">📅</span><div class="nbar"></div><span>Citas</span></button>
+    <button class="nitem" data-nav="ajustes" onclick="navigate('ajustes',this)"><span class="nicon">⚙️</span><div class="nbar"></div><span>Ajustes</span></button>
   </nav>
 </div>
 </div>
@@ -1001,7 +1054,7 @@ function goTo(sid){navigate(sid,document.querySelector(`[data-nav="${sid}"]`))}
 function goSub(sid){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+sid).classList.add('active');renderS(sid)}
 function renderS(id){
   const pet=getAP();
-  ({home:renderHome,mascotas:renderPets,'pet-profile':()=>renderProfile(_pid),vacunas:()=>renderVax(pet),medicamentos:()=>renderMeds(pet),citas:()=>renderAppts(pet),consultas:()=>renderCons(_pid),desparasitacion:()=>renderDespar(_pid),peso:()=>renderPeso(_pid),examenes:()=>renderExams(_pid),alimentacion:()=>renderFood(_pid),enfermedades:()=>renderEnfs(_pid),cuidador:()=>renderCuidador(_pid)})[id]?.()
+  ({home:renderHome,mascotas:renderPets,'pet-profile':()=>renderProfile(_pid),vacunas:()=>renderVax(pet),medicamentos:()=>renderMeds(pet),citas:()=>renderAppts(pet),consultas:()=>renderCons(_pid),desparasitacion:()=>renderDespar(_pid),peso:()=>renderPeso(_pid),examenes:()=>renderExams(_pid),alimentacion:()=>renderFood(_pid),enfermedades:()=>renderEnfs(_pid),cuidador:()=>renderCuidador(_pid),ajustes:()=>{}})[id]?.()
 }
 
 /* ================================================================
@@ -1703,6 +1756,42 @@ function shareGuia(pid) {
     });
   }
 }
+/* ================================================================
+   EXPORT / IMPORT DATA
+   Fase 2: reemplazar con sincronización automática en la nube
+   ================================================================ */
+function exportData(){
+  const keys=['pets','vax','meds','appts','cons','despar','pesos','exams','foods','enfs','guides'];
+  const data={};keys.forEach(k=>data[k]=DB[k]);
+  data._version='1.0';data._exported=new Date().toISOString();data._app='Pawvida';
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  const date=new Date().toLocaleDateString('es',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'-');
+  a.href=url;a.download=`pawvida-respaldo-${date}.json`;
+  document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(url);a.remove()},1000);
+  showToast('Datos exportados correctamente 💾');
+}
+
+function importData(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(data._app!=='Pawvida'){showToast('El archivo no es un respaldo de Pawvida');return}
+      if(!confirm(`¿Restaurar los datos de este respaldo? Esto reemplazará todos tus datos actuales.`))return;
+      const keys=['pets','vax','meds','appts','cons','despar','pesos','exams','foods','enfs','guides'];
+      keys.forEach(k=>{if(data[k])DB.save(k,data[k])});
+      if(data.pets?.length)DB.setAid(data.pets[0].id);
+      showToast('Datos restaurados correctamente ✓');
+      renderHome();renderPets();const pet=getAP();
+      if(pet){renderVax(pet);renderMeds(pet);renderAppts(pet)}
+    }catch{showToast('No se pudo leer el archivo')}
+  };
+  reader.readAsText(file);input.value='';
+}
+
 function g(id){return(document.getElementById(id)?.value||'').trim()}
 function resetF(ids){ids.forEach(id=>{const el=document.getElementById(id);if(!el)return;el.tagName==='SELECT'?el.selectedIndex=0:el.value=''})}
 function delItem(col,id,cb){if(!confirm('¿Eliminar este registro?'))return;DB.save(col,DB[col].filter(x=>x.id!==id));if(cb)cb();showToast('Eliminado')}
