@@ -6,10 +6,10 @@
 <meta name="theme-color" content="#1D9E8F">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Petvida">
-<meta name="description" content="Porque tu mascota se merece lo mejor">
+<meta name="apple-mobile-web-app-title" content="Pawvida">
+<meta name="description" content="Porque tu mascota se merece lo mejor — Pawvida">
 <link rel="manifest" href="manifest.json">
-<title>Petvida 🐾</title>
+<title>Pawvida 🐾</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 <style>
@@ -333,7 +333,15 @@ img{max-width:100%}
 
   <!-- Nombre grande arriba -->
   <div class="w-top">
-    <div class="w-name">Petvida <div class="w-name-dot"></div></div>
+    <div class="w-name">Pawvida
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;margin-left:2px">
+        <ellipse cx="12" cy="17" rx="5" ry="4" fill="rgba(255,255,255,.9)"/>
+        <ellipse cx="7" cy="12" rx="2.5" ry="3" fill="rgba(255,255,255,.9)" transform="rotate(-20 7 12)"/>
+        <ellipse cx="17" cy="12" rx="2.5" ry="3" fill="rgba(255,255,255,.9)" transform="rotate(20 17 12)"/>
+        <ellipse cx="9.5" cy="8.5" rx="2" ry="2.5" fill="rgba(255,255,255,.9)" transform="rotate(-10 9.5 8.5)"/>
+        <ellipse cx="14.5" cy="8.5" rx="2" ry="2.5" fill="rgba(255,255,255,.9)" transform="rotate(10 14.5 8.5)"/>
+      </svg>
+    </div>
   </div>
 
   <!-- Frase central -->
@@ -379,7 +387,7 @@ img{max-width:100%}
 
   <div id="screen-home" class="screen active">
     <div class="home-hdr">
-      <div class="home-brand">Petvida</div>
+      <div class="home-brand">Pawvida</div>
       <div class="home-sub" id="home-sub">Bienvenido</div>
       <div class="home-name" id="home-name">—</div>
       <div id="home-spill"></div>
@@ -395,7 +403,7 @@ img{max-width:100%}
   </div>
 
   <div id="screen-mascotas" class="screen">
-    <div class="hdr"><div class="hdr-brand">Petvida</div><div class="hdr-title">Mis mascotas</div></div>
+    <div class="hdr"><div class="hdr-brand">Pawvida</div><div class="hdr-title">Mis mascotas</div></div>
     <div class="scroll-area"><div id="pets-list"></div><button class="btn btn-p btn-f mt-8" onclick="openM('modal-pet')">+ Registrar mascota</button></div>
   </div>
 
@@ -405,19 +413,19 @@ img{max-width:100%}
   </div>
 
   <div id="screen-vacunas" class="screen">
-    <div class="hdr"><div class="hdr-brand">Petvida</div><div class="hdr-title" id="vtitle">Vacunas</div><div class="hdr-sub">Carnet digital</div></div>
+    <div class="hdr"><div class="hdr-brand">Pawvida</div><div class="hdr-title" id="vtitle">Vacunas</div><div class="hdr-sub">Carnet digital</div></div>
     <div class="scroll-area" id="vlist"></div>
     <button class="fab" onclick="openM('modal-vax')">+</button>
   </div>
 
   <div id="screen-medicamentos" class="screen">
-    <div class="hdr"><div class="hdr-brand">Petvida</div><div class="hdr-title" id="medtitle">Medicamentos</div></div>
+    <div class="hdr"><div class="hdr-brand">Pawvida</div><div class="hdr-title" id="medtitle">Medicamentos</div></div>
     <div class="scroll-area" id="medlist"></div>
     <button class="fab" onclick="openM('modal-med')">+</button>
   </div>
 
   <div id="screen-citas" class="screen">
-    <div class="hdr"><div class="hdr-brand">Petvida</div><div class="hdr-title" id="aptitle">Citas</div><div class="hdr-sub">Agenda veterinaria</div></div>
+    <div class="hdr"><div class="hdr-brand">Pawvida</div><div class="hdr-title" id="aptitle">Citas</div><div class="hdr-sub">Agenda veterinaria</div></div>
     <div class="scroll-area" id="aplist"></div>
     <button class="fab" onclick="openM('modal-appt')">+</button>
   </div>
@@ -749,7 +757,7 @@ function icsDateEnd(dateStr, timeStr, durationMins=60) {
 }
 
 function buildIcs(title, dateStr, timeStr, description='', location='', durationMins=60, alarm=true) {
-  const uid = Date.now() + '@petvida';
+  const uid = Date.now() + '@pawvida';
   const dtstart = timeStr ? icsDate(dateStr, timeStr) : icsDate(dateStr);
   const dtend   = timeStr ? icsDateEnd(dateStr, timeStr, durationMins) : icsDate(dateStr);
   const allDay  = !timeStr;
@@ -757,7 +765,7 @@ function buildIcs(title, dateStr, timeStr, description='', location='', duration
   let ics = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Petvida//ES',
+    'PRODID:-//Pawvida//ES',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',
@@ -1001,7 +1009,7 @@ function renderS(id){
    ================================================================ */
 function renderHome(){
   const pet=getAP(),pets=DB.pets;
-  document.getElementById('home-sub').textContent=pet?`Porque ${pet.name} se merece lo mejor 🐾`:'Bienvenido a Petvida';
+  document.getElementById('home-sub').textContent=pet?`Porque ${pet.name} se merece lo mejor 🐾`:'Bienvenido a Pawvida';
   document.getElementById('home-name').textContent=pet?'¡Hola! 👋':'Registra tu primera mascota';
   document.getElementById('pet-pills').innerHTML=pets.map(p=>`<div class="pet-pill ${p.id===DB.aid?'active':''}" onclick="setAP('${p.id}')">${pEmo(p.species)} ${p.name}</div>`).join('');
   const spEl=document.getElementById('home-spill');
@@ -1173,7 +1181,7 @@ function sharePet(pid) {
   const today  = new Date().toLocaleDateString('es',{day:'numeric',month:'long',year:'numeric'});
 
   let txt = `🐾 FICHA CLÍNICA — ${pet.name.toUpperCase()}\n`;
-  txt += `Generada el ${today} desde Petvida\n`;
+  txt += `Generada el ${today} desde Pawvida\n`;
   txt += `${'─'.repeat(36)}\n\n`;
 
   // Datos básicos
@@ -1269,13 +1277,13 @@ function sharePet(pid) {
   }
 
   txt += `\n${'─'.repeat(36)}\n`;
-  txt += `Enviado desde Petvida 🐾\n`;
+  txt += `Enviado desde Pawvida 🐾\n`;
   txt += `Porque ${pet.name} se merece lo mejor.`;
 
   // Web Share API — abre el menú nativo del teléfono
   if (navigator.share) {
     navigator.share({
-      title: `Ficha clínica de ${pet.name} — Petvida`,
+      title: `Ficha clínica de ${pet.name} — Pawvida`,
       text: txt
     }).catch(()=>{});
   } else {
@@ -1681,7 +1689,7 @@ function shareGuia(pid) {
   if (guide.extra) txt += `📋 NOTAS ADICIONALES\n${guide.extra}\n\n`;
 
   txt += `${'─'.repeat(36)}\n`;
-  txt += `Enviado desde Petvida 🐾\n`;
+  txt += `Enviado desde Pawvida 🐾\n`;
   txt += `Porque ${pet.name} se merece lo mejor — incluso cuando el dueño no está.`;
 
   if (navigator.share) {
