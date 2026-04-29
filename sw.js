@@ -1,11 +1,11 @@
 /*
- * PETVIDA — Service Worker
+ * PAWVIDA — Service Worker
  * Fase 1: Cache-first para funcionar offline.
  * Fase 2 (nativo): Este archivo no se necesita en Flutter/React Native.
  *                  El caché nativo lo maneja el framework.
  */
 
-const CACHE_NAME = 'petvida-v1.0.0';
+const CACHE_NAME = 'pawvida-v1.0.0';
 
 // Recursos a cachear al instalar
 const STATIC_ASSETS = [
@@ -76,11 +76,11 @@ self.addEventListener('fetch', event => {
 self.addEventListener('push', event => {
   if (!event.data) return;
   const data = event.data.json();
-  self.registration.showNotification(data.title || 'Petvida', {
+  self.registration.showNotification(data.title || 'Pawvida', {
     body: data.body || '',
     icon: './icon-192.png',
     badge: './icon-192.png',
-    tag: data.tag || 'petvida',
+    tag: data.tag || 'pawvida',
     data: data.url || '/'
   });
 });
