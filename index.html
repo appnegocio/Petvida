@@ -2218,69 +2218,227 @@ function checkBirthdays(pets) {
 }
 
 /* ================================================================
-   VISUAL SHARE — genera una tarjeta HTML y la comparte
+   VISUAL SHARE — genera imagen PNG con Canvas y la comparte
+   Un toque → imagen lista → menú nativo del teléfono
    ================================================================ */
 function sharePetVisual(pid) {
   const pet = DB.pets.find(p=>p.id===pid);
   if (!pet) return;
 
-  const age    = calcAge(pet.dob);
-  const meds   = byPet(pid, DB.meds).filter(m=>m.active);
-  const vl     = byPet(pid, DB.vax);
-  const vok    = vl.filter(v=>vSt(v)==='ok').length;
-  const enfs   = byPet(pid, DB.enfs);
-  const pesos  = byPet(pid, DB.pesos).sort((a,b)=>new Date(b.date)-new Date(a.date));
-  const lp     = pesos[0];
-  const dps    = byPet(pid, DB.despar).sort((a,b)=>new Date(b.date)-new Date(a.date));
-  const ldp    = dps[0];
-  const today  = new Date().toLocaleDateString('es',{day:'numeric',month:'long',year:'numeric'});
+  const meds  = byPet(pid, DB.meds).filter(m=>m.active);
+  const vl    = byPet(pid, DB.vax);
+  const vok   = vl.filter(v=>vSt(v)==='ok').length;
+  const vwarn = vl.filter(v=>vSt(v)!=='ok').length;
+  const enfs  = byPet(pid, DB.enfs);
+  const pesos = byPet(pid, DB.pesos).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const lp    = pesos[0];
+  const dps   = byPet(pid, DB.despar).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const ldpI  = dps.find(d=>d.type==='Interna');
+  const ldpE  = dps.find(d=>d.type==='Externa');
+  const age   = calcAge(pet.dob);
+  const today = new Date().toLocaleDateString('es',{day:'numeric',month:'long',year:'numeric'});
 
-  // Build a visually rich text that looks great in WhatsApp
-  const line = '─'.repeat(30);
-  let msg = '';
-  msg += `🐾 *${pet.name.toUpperCase()}*\n`;
-  msg += `${pEmo(pet.species)} ${pet.species}${pet.breed?' · '+pet.breed:''}${age?' · '+age:''}\n`;
-  if (lp) msg += `⚖️ ${lp.value} kg\n`;
-  msg += `\n`;
+  // Build sections dynamically
+  const sections = [];
 
-  if (enfs.length) {
-    msg += `⚠️ *CONDICIONES CRÓNICAS*\n`;
-    enfs.forEach(e => msg += `• ${e.name}\n`);
-    msg += `\n`;
+  // Tags row
+  const tags = [];
+  if (vl.length) tags.push({ text: vwarn ? `⚠ ${vwarn} vacuna${vwarn>1?'s':''} por vencer` : '✓ Vacunas al día', color: vwarn?'#FFF5E0':'#E8F7F1', textColor: vwarn?'#C05A00':'#1D9E75' });
+  if (meds.length) tags.push({ text: `💊 ${meds.length} remedio${meds.length>1?'s':''} activo${meds.length>1?'s':''}`, color: '#EBF4FF', textColor: '#1A5FA0' });
+  if (ldpI || ldpE) {
+    const dpOk = [ldpI,ldpE].filter(d=>d&&dDiff(d.next)>=0).length;
+    tags.push({ text: dpOk ? '✓ Desparasitado' : '⚠ Desparasitación vencida', color: dpOk?'#E8F7F1':'#FEF2F2', textColor: dpOk?'#1D9E75':'#C0392B' });
   }
+  if (tags.length) sections.push({ type:'tags', tags });
 
-  if (pet.allerg) {
-    msg += `⚠️ *ALERGIAS:* ${pet.allerg}\n\n`;
-  }
+  // Alerts
+  if (enfs.length) sections.push({ type:'alert', title:'⚠️ Condiciones crónicas', items: enfs.map(e=>e.name) });
+  if (pet.allerg) sections.push({ type:'alert', title:'⚠️ Alergias', items:[pet.allerg] });
 
-  msg += `💉 *VACUNAS:* ${vok} al día${vl.length-vok>0?' · '+(vl.length-vok)+' requieren atención':''}\n`;
+  // Meds
+  if (meds.length) sections.push({ type:'rows', title:'💊 Medicamentos activos', rows: meds.map(m=>({ label:m.name, value:(m.dose||'')+(m.freq?' · '+m.freq:'') })) });
 
-  if (meds.length) {
-    msg += `💊 *MEDICAMENTOS ACTIVOS*\n`;
-    meds.forEach(m => msg += `• ${m.name}${m.dose?' '+m.dose:''} — ${m.freq}\n`);
-    msg += `\n`;
-  }
+  // Weight
+  if (lp) sections.push({ type:'rows', title:'⚖️ Peso', rows:[{ label:'Último registro', value:`${lp.value} kg · ${fDs(lp.date)}` }] });
 
-  if (ldp) {
-    msg += `🪱 *DESPARASITACIÓN:* ${ldp.type} · Próxima ${fD(ldp.next)}\n`;
-  }
+  // Vet
+  if (pet.vet||pet.vphone) sections.push({ type:'rows', title:'🏥 Veterinario', rows:[{ label:pet.vet?'Dr. '+pet.vet:'—', value:pet.vphone||'' }] });
 
-  if (pet.vet) msg += `🏥 *Vet:* Dr. ${pet.vet}${pet.vphone?' · '+pet.vphone:''}\n`;
+  // === DRAW ON CANVAS ===
+  const W = 600;
+  const HEADER_H = 130;
+  const SECTION_TITLE_H = 32;
+  const TAG_H = 44;
+  const ROW_H = 28;
+  const ALERT_H = 28;
+  const PAD = 24;
+  const FOOTER_H = 44;
 
-  msg += `\n${line}\n`;
-  msg += `_Generado con Pawvida 🐾_\n`;
-  msg += `_Porque ${pet.name} se merece lo mejor_`;
+  // Calculate total height
+  let bodyH = 16;
+  sections.forEach(s => {
+    if (s.type==='tags') { bodyH += TAG_H + 12; }
+    else if (s.type==='rows') { bodyH += SECTION_TITLE_H + s.rows.length * ROW_H + 8; }
+    else if (s.type==='alert') { bodyH += SECTION_TITLE_H + s.items.length * ALERT_H + 8; }
+    bodyH += 1; // separator
+  });
+  bodyH += 8;
+  const TOTAL_H = HEADER_H + bodyH + FOOTER_H;
 
-  if (navigator.share) {
-    navigator.share({
-      title: `Ficha de ${pet.name} — Pawvida`,
-      text: msg
-    }).catch(()=>{});
-  } else {
-    navigator.clipboard?.writeText(msg).then(()=>{
-      showToast('Ficha copiada — pégala en WhatsApp 📋');
-    });
-  }
+  const canvas = document.createElement('canvas');
+  canvas.width = W * 2; canvas.height = TOTAL_H * 2;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(2, 2);
+
+  // --- HEADER ---
+  const grad = ctx.createLinearGradient(0,0,W,HEADER_H);
+  grad.addColorStop(0,'#22A898');
+  grad.addColorStop(0.55,'#128A7C');
+  grad.addColorStop(1,'#0A6B5E');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.roundRect(0,0,W,HEADER_H,16);
+  ctx.fill();
+
+  // decorative circles
+  ctx.fillStyle = 'rgba(255,255,255,0.07)';
+  ctx.beginPath(); ctx.arc(W-40, -30, 100, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(-20, HEADER_H+20, 80, 0, Math.PI*2); ctx.fill();
+
+  // avatar box
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.beginPath(); ctx.roundRect(PAD, 24, 60, 60, 14); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.roundRect(PAD, 24, 60, 60, 14); ctx.stroke();
+  ctx.font = '32px serif'; ctx.textAlign='center';
+  ctx.fillText(pEmo(pet.species), PAD+30, 64);
+
+  // name
+  ctx.textAlign = 'left';
+  ctx.fillStyle = 'white';
+  ctx.font = 'bold 22px Nunito, sans-serif';
+  ctx.fillText(pet.name, PAD+72, 52);
+
+  // subtitle
+  ctx.fillStyle = 'rgba(255,255,255,0.72)';
+  ctx.font = '13px Nunito, sans-serif';
+  const sub = [pet.species, pet.breed, age, lp?lp.value+' kg':null].filter(Boolean).join(' · ');
+  ctx.fillText(sub, PAD+72, 72);
+
+  // brand
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.font = 'bold 10px Nunito, sans-serif';
+  ctx.fillText('PAWVIDA 🐾 · FICHA CLÍNICA', PAD+72, 96);
+
+  // --- BODY ---
+  ctx.fillStyle = 'white';
+  ctx.beginPath();
+  ctx.roundRect(0, HEADER_H-8, W, bodyH+8+FOOTER_H, [0,0,16,16]);
+  ctx.fill();
+
+  let y = HEADER_H + 14;
+
+  sections.forEach((s, idx) => {
+    if (idx > 0) {
+      // separator line
+      ctx.strokeStyle = '#F0F0EE'; ctx.lineWidth = 0.5;
+      ctx.beginPath(); ctx.moveTo(PAD,y-4); ctx.lineTo(W-PAD,y-4); ctx.stroke();
+    }
+
+    if (s.type === 'tags') {
+      let tx = PAD;
+      s.tags.forEach(tag => {
+        const tw = ctx.measureText(tag.text).width + 20;
+        ctx.fillStyle = tag.color;
+        ctx.beginPath(); ctx.roundRect(tx, y, tw+2, 24, 12); ctx.fill();
+        ctx.fillStyle = tag.textColor;
+        ctx.font = 'bold 11px Nunito, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(tag.text, tx+10, y+16);
+        tx += tw + 8;
+      });
+      y += TAG_H;
+
+    } else if (s.type === 'rows') {
+      ctx.fillStyle = '#8E8E93';
+      ctx.font = 'bold 9px Nunito, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(s.title.toUpperCase(), PAD, y+12);
+      y += SECTION_TITLE_H - 4;
+      s.rows.forEach(row => {
+        ctx.fillStyle = '#8E8E93';
+        ctx.font = '12px Nunito, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(row.label, PAD, y+12);
+        ctx.fillStyle = '#1C1C1E';
+        ctx.font = 'bold 12px Nunito, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText(row.value, W-PAD, y+12);
+        y += ROW_H;
+      });
+      y += 8;
+
+    } else if (s.type === 'alert') {
+      ctx.fillStyle = '#C0392B';
+      ctx.font = 'bold 9px Nunito, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(s.title.toUpperCase(), PAD, y+12);
+      y += SECTION_TITLE_H - 4;
+      s.items.forEach(item => {
+        ctx.fillStyle = '#FEF2F2';
+        ctx.beginPath(); ctx.roundRect(PAD, y, W-PAD*2, 22, 6); ctx.fill();
+        ctx.fillStyle = '#C0392B';
+        ctx.font = 'bold 12px Nunito, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(item, PAD+10, y+15);
+        y += ALERT_H;
+      });
+      y += 8;
+    }
+  });
+
+  // --- FOOTER ---
+  const fy = HEADER_H + bodyH;
+  ctx.fillStyle = '#F8F8F7';
+  ctx.beginPath(); ctx.roundRect(0, fy, W, FOOTER_H, [0,0,16,16]); ctx.fill();
+  ctx.strokeStyle = '#ECECEA'; ctx.lineWidth = 0.5;
+  ctx.beginPath(); ctx.moveTo(0,fy); ctx.lineTo(W,fy); ctx.stroke();
+
+  ctx.fillStyle = '#C0C0BC';
+  ctx.font = '10px Nunito, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText(today, PAD, fy+16);
+
+  ctx.fillStyle = '#1D9E8F';
+  ctx.font = 'bold 10px Nunito, sans-serif';
+  ctx.textAlign = 'right';
+  ctx.fillText('🐾 Pawvida', W-PAD, fy+16);
+
+  // === SHARE ===
+  canvas.toBlob(async blob => {
+    const file = new File([blob], `ficha-${pet.name.toLowerCase()}.png`, {type:'image/png'});
+    if (navigator.share && navigator.canShare && navigator.canShare({files:[file]})) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: `Ficha de ${pet.name} — Pawvida`,
+          text: `Ficha clínica de ${pet.name} 🐾`
+        });
+      } catch(e) { fallbackShare(canvas, pet.name); }
+    } else {
+      fallbackShare(canvas, pet.name);
+    }
+  }, 'image/png');
+}
+
+function fallbackShare(canvas, name) {
+  // Download as image if share not supported
+  const a = document.createElement('a');
+  a.href = canvas.toDataURL('image/png');
+  a.download = `ficha-${name.toLowerCase()}.png`;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>a.remove(), 500);
+  showToast('Imagen descargada — compártela desde tu galería 📷');
 }
    Fase 2: reemplazar con sincronización automática en la nube
    ================================================================ */
