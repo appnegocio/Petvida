@@ -320,6 +320,84 @@ img{max-width:100%}
   display:flex;align-items:center;gap:10px;margin-bottom:8px;
 }
 .cal-hint-text{font-size:.8rem;font-weight:700;color:var(--blue);flex:1;line-height:1.4}
+
+/* EMERGENCY MODE */
+.emer-mode-overlay{
+  display:none;position:fixed;inset:0;
+  background:#C0392B;z-index:400;
+  flex-direction:column;overflow-y:auto;
+  animation:sIn .2s ease;
+}
+.emer-mode-overlay.open{display:flex}
+.emer-mode-header{
+  padding:52px 20px 20px;
+  display:flex;align-items:flex-start;justify-content:space-between;
+  flex-shrink:0;
+}
+.emer-mode-title{
+  font-family:'Playfair Display',serif;
+  font-size:1.6rem;font-weight:700;color:white;line-height:1.2;
+}
+.emer-close{
+  background:rgba(255,255,255,.2);border:none;
+  color:white;font-size:1.2rem;font-weight:700;
+  width:36px;height:36px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;cursor:pointer;
+}
+.emer-section{
+  background:rgba(255,255,255,.12);
+  border-radius:var(--r-lg);margin:0 16px 12px;padding:14px;
+  border:.5px solid rgba(255,255,255,.2);
+}
+.emer-section-title{
+  font-size:.68rem;font-weight:800;color:rgba(255,255,255,.6);
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;
+}
+.emer-row{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 0;border-bottom:.5px solid rgba(255,255,255,.1);
+}
+.emer-row:last-child{border-bottom:none}
+.emer-row-label{font-size:.78rem;color:rgba(255,255,255,.65);flex-shrink:0;min-width:90px;}
+.emer-row-value{font-size:.88rem;font-weight:700;color:white;flex:1;}
+.emer-call-btn{
+  background:white;color:#C0392B;
+  border-radius:var(--r-md);padding:14px;
+  font-size:1rem;font-weight:900;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  margin:0 16px 12px;text-decoration:none;
+  box-shadow:0 4px 18px rgba(0,0,0,.2);
+}
+.emer-tag{
+  background:rgba(255,255,255,.15);color:white;
+  padding:4px 10px;border-radius:20px;
+  font-size:.72rem;font-weight:700;
+  display:inline-flex;margin:2px;
+}
+
+/* BIRTHDAY BANNER */
+.bday-banner{
+  background:linear-gradient(135deg,#FF9A3C,#FF6B35);
+  border-radius:var(--r-lg);padding:13px 14px;
+  display:flex;align-items:center;gap:10px;
+  margin:8px 16px 0;flex-shrink:0;
+}
+.bday-text{font-size:.88rem;font-weight:800;color:white;flex:1;line-height:1.35}
+.bday-sub{font-size:.72rem;color:rgba(255,255,255,.8);margin-top:2px}
+
+/* VISUAL SHARE CARD */
+.share-card-preview{
+  background:linear-gradient(160deg,#22A898,#0A6B5E);
+  border-radius:var(--r-lg);overflow:hidden;
+  margin-bottom:12px;color:white;
+}
+.share-card-header{padding:16px 16px 12px;border-bottom:.5px solid rgba(255,255,255,.15)}
+.share-card-body{padding:12px 16px 16px}
+.share-card-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:.5px solid rgba(255,255,255,.1);font-size:.82rem}
+.share-card-row:last-child{border-bottom:none}
+.share-card-label{color:rgba(255,255,255,.65)}
+.share-card-value{font-weight:700;text-align:right;max-width:60%}
 </style>
 </head>
 <body>
@@ -385,6 +463,19 @@ img{max-width:100%}
     </div>
   </div>
 
+  <!-- EMERGENCY MODE -->
+  <div class="emer-mode-overlay" id="emer-mode">
+    <div class="emer-mode-header">
+      <div>
+        <div style="font-size:.72rem;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">🚨 Emergencia</div>
+        <div class="emer-mode-title" id="emer-pet-name">—</div>
+      </div>
+      <button class="emer-close" onclick="closeEmer()">✕</button>
+    </div>
+    <div id="emer-content"></div>
+    <div style="height:32px"></div>
+  </div>
+
   <div id="screen-home" class="screen active">
     <div class="home-hdr">
       <div class="home-brand">Pawvida</div>
@@ -393,6 +484,7 @@ img{max-width:100%}
       <div id="home-spill"></div>
     </div>
     <div class="pet-pills" id="pet-pills"></div>
+    <div id="home-bday"></div>
     <div id="home-emer"></div>
     <div class="scroll-area">
       <div id="home-actions"></div>
@@ -1103,24 +1195,42 @@ function renderHome(){
   const hasU=urgent.filter(a=>a.type==='urgent').length;
   spEl.innerHTML=`<div class="status-pill"><div class="sd ${hasU?'sd-urgent':urgent.length?'sd-warn':'sd-ok'}"></div>${hasU?`${hasU} alerta${hasU>1?'s':''} urgente${hasU>1?'s':''}`:urgent.length===0&&upcoming.length===0?`${pet.name} está perfecto hoy ✓`:upcoming.length&&!urgent.length?`${pet.name} está bien · ${upcoming.length} cita${upcoming.length>1?'s':''} próxima${upcoming.length>1?'s':''}` :'Recordatorios pendientes'}</div>`;
 
-  // Emergency vet button — only show if vet phone is registered
-  if(pet.vphone){
-    emerEl.innerHTML=`<div class="emer-btn-wrap">
-      <span class="emer-ico">🚨</span>
-      <div class="emer-info">
-        <div class="emer-title">Veterinario de ${pet.name}</div>
-        <div class="emer-sub">${pet.vet?pet.vet+' · ':''}${pet.vphone}</div>
+  // Birthday check
+  const bdayEl = document.getElementById('home-bday');
+  const bday = checkBirthdays(pets);
+  if (bday && bday.pet) {
+    const isTomorrow = bday.tomorrow;
+    bdayEl.innerHTML = `<div class="bday-banner">
+      <span style="font-size:1.6rem">${isTomorrow?'🎂':'🎉'}</span>
+      <div>
+        <div class="bday-text">${isTomorrow?`¡Mañana es el cumpleaños de ${bday.pet.name}!`:`¡Hoy es el cumpleaños de ${bday.pet.name}! 🎂`}</div>
+        <div class="bday-sub">${bday.age?`Cumple ${bday.age} — ¡feliz cumpleaños, ${bday.pet.name}!`:'Un día muy especial 🐾'}</div>
       </div>
-      <a class="emer-call" href="tel:${pet.vphone}">📞 Llamar</a>
     </div>`;
-  } else if(pet.vet) {
-    emerEl.innerHTML=`<div class="emer-btn-wrap">
+  } else {
+    bdayEl.innerHTML = '';
+  }
+
+  // Emergency vet button
+  if (pet.vphone) {
+    emerEl.innerHTML=`<div style="display:flex;gap:8px;margin:8px 16px 0">
+      <div class="emer-btn-wrap" style="flex:1;cursor:pointer" onclick="openEmer()">
+        <span class="emer-ico">🚨</span>
+        <div class="emer-info">
+          <div class="emer-title">Emergencia — ${pet.name}</div>
+          <div class="emer-sub">${pet.vet?pet.vet+' · ':''}${pet.vphone}</div>
+        </div>
+        <span style="color:#C0392B;font-size:.9rem;font-weight:700">›</span>
+      </div>
+    </div>`;
+  } else if (pet.vet) {
+    emerEl.innerHTML=`<div style="margin:8px 16px 0"><div class="emer-btn-wrap" onclick="openEmer()" style="cursor:pointer">
       <span class="emer-ico">🏥</span>
       <div class="emer-info">
         <div class="emer-title">Veterinario de ${pet.name}</div>
         <div class="emer-sub">${pet.vet} · Agrega el teléfono para llamar directo</div>
       </div>
-    </div>`;
+    </div></div>`;
   } else {
     emerEl.innerHTML='';
   }
@@ -1222,8 +1332,9 @@ function renderProfile(pid){
       <div class="mrow" onclick="goTo('citas')"><div class="micon mi-b">📅</div><div class="minfo"><div class="mname">Citas veterinarias</div><div class="msub">${upAppts} próxima${upAppts!==1?'s':''}</div></div><span class="marrow">›</span></div>
     </div>
     <div style="display:flex;gap:8px;padding-bottom:8px">
-      <button class="btn btn-p btn-sm" style="flex:2" onclick="sharePet('${pid}')">&#8599; Compartir ficha clínica</button>
-      <button class="btn btn-d btn-sm" style="flex:1" onclick="delPet('${pid}')">&#128465;</button>
+      <button class="btn btn-p btn-sm" style="flex:2" onclick="sharePetVisual('${pid}')">↗ Compartir ficha</button>
+      <button class="btn" style="flex:1;background:#FEF2F2;color:#C0392B;border:.5px solid #FAD;font-size:.78rem;font-weight:800" onclick="openEmer()">🚨</button>
+      <button class="btn btn-d btn-sm" style="flex:0 0 38px;padding:8px" onclick="delPet('${pid}')">🗑</button>
     </div>
     <div style="background:#EBF3FF;border:.5px solid #C8DCEF;border-radius:var(--r-lg);padding:13px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="goSub('cuidador')">
       <div class="micon" style="background:#D6E8FF;width:36px;height:36px;border-radius:10px;font-size:1.2rem">🧳</div>
@@ -2002,7 +2113,175 @@ function shareGuia(pid) {
   }
 }
 /* ================================================================
-   EXPORT / IMPORT DATA
+   EMERGENCY MODE
+   ================================================================ */
+function openEmer() {
+  const pet = getAP(); if (!pet) return;
+  document.getElementById('emer-pet-name').textContent = pet.name;
+  const meds   = byPet(pet.id, DB.meds).filter(m=>m.active);
+  const enfs   = byPet(pet.id, DB.enfs);
+  const vax    = byPet(pet.id, DB.vax);
+
+  let html = '';
+
+  // Call vet button
+  if (pet.vphone) {
+    html += `<a class="emer-call-btn" href="tel:${pet.vphone}">
+      📞 Llamar a ${pet.vet||'veterinario'} ahora
+    </a>`;
+  }
+
+  // Basic data
+  html += `<div class="emer-section">
+    <div class="emer-section-title">Datos de ${pet.name}</div>
+    <div class="emer-row"><span class="emer-row-label">Especie / raza</span><span class="emer-row-value">${pet.species}${pet.breed?' · '+pet.breed:''}</span></div>
+    ${pet.weight?`<div class="emer-row"><span class="emer-row-label">Peso</span><span class="emer-row-value">${pet.weight} kg</span></div>`:''}
+    ${pet.chip?`<div class="emer-row"><span class="emer-row-label">Microchip</span><span class="emer-row-value">${pet.chip}</span></div>`:''}
+    ${pet.neut?`<div class="emer-row"><span class="emer-row-label">Esterilizado/a</span><span class="emer-row-value">${pet.neut}</span></div>`:''}
+  </div>`;
+
+  // Allergies — critical
+  if (pet.allerg) {
+    html += `<div class="emer-section" style="background:rgba(255,255,100,.15);border-color:rgba(255,255,100,.3)">
+      <div class="emer-section-title" style="color:rgba(255,255,100,.8)">⚠️ Alergias conocidas</div>
+      <div style="font-size:1rem;font-weight:800;color:white">${pet.allerg}</div>
+    </div>`;
+  }
+
+  // Chronic conditions
+  if (enfs.length) {
+    html += `<div class="emer-section" style="background:rgba(255,255,100,.15);border-color:rgba(255,255,100,.3)">
+      <div class="emer-section-title" style="color:rgba(255,255,100,.8)">⚠️ Enfermedades crónicas</div>
+      ${enfs.map(e=>`<div style="font-size:.9rem;font-weight:700;color:white;padding:4px 0;border-bottom:.5px solid rgba(255,255,255,.1)">${e.name}${e.notes?`<div style="font-size:.75rem;color:rgba(255,255,255,.7);margin-top:2px">${e.notes}</div>`:''}</div>`).join('')}
+    </div>`;
+  }
+
+  // Active meds
+  if (meds.length) {
+    html += `<div class="emer-section">
+      <div class="emer-section-title">💊 Medicamentos actuales</div>
+      ${meds.map(m=>`<div class="emer-row"><span class="emer-row-label">${m.name}</span><span class="emer-row-value">${m.dose||''} · ${m.freq}</span></div>`).join('')}
+    </div>`;
+  }
+
+  // Last vax
+  const lastVax = vax.sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+  if (lastVax) {
+    html += `<div class="emer-section">
+      <div class="emer-section-title">💉 Última vacuna</div>
+      <div class="emer-row"><span class="emer-row-label">${lastVax.name}</span><span class="emer-row-value">${fD(lastVax.date)}</span></div>
+    </div>`;
+  }
+
+  // Vet info
+  if (pet.vet || pet.vphone) {
+    html += `<div class="emer-section">
+      <div class="emer-section-title">🏥 Veterinario de cabecera</div>
+      ${pet.vet?`<div class="emer-row"><span class="emer-row-label">Nombre</span><span class="emer-row-value">Dr. ${pet.vet}</span></div>`:''}
+      ${pet.vphone?`<div class="emer-row"><span class="emer-row-label">Teléfono</span><span class="emer-row-value">${pet.vphone}</span></div>`:''}
+    </div>`;
+  }
+
+  if (!pet.vphone && !pet.vet) {
+    html = `<div class="emer-section"><div style="color:rgba(255,255,255,.7);font-size:.88rem;line-height:1.5">No hay veterinario registrado aún. Ve al perfil de ${pet.name} y agrega el teléfono del vet para poder llamar directo desde aquí.</div></div>` + html;
+  }
+
+  document.getElementById('emer-content').innerHTML = html;
+  document.getElementById('emer-mode').classList.add('open');
+}
+
+function closeEmer() {
+  document.getElementById('emer-mode').classList.remove('open');
+}
+
+/* ================================================================
+   BIRTHDAY DETECTION
+   ================================================================ */
+function checkBirthdays(pets) {
+  const today = new Date();
+  const mm = today.getMonth();
+  const dd = today.getDate();
+  for (const pet of pets) {
+    if (!pet.dob) continue;
+    const bday = new Date(pet.dob + 'T00:00:00');
+    if (bday.getMonth() === mm && bday.getDate() === dd) {
+      const age = calcAge(pet.dob);
+      return { pet, age };
+    }
+    // Also check if birthday is tomorrow
+    const tom = new Date(today); tom.setDate(tom.getDate() + 1);
+    if (bday.getMonth() === tom.getMonth() && bday.getDate() === tom.getDate()) {
+      return { pet, age: calcAge(pet.dob), tomorrow: true };
+    }
+  }
+  return null;
+}
+
+/* ================================================================
+   VISUAL SHARE — genera una tarjeta HTML y la comparte
+   ================================================================ */
+function sharePetVisual(pid) {
+  const pet = DB.pets.find(p=>p.id===pid);
+  if (!pet) return;
+
+  const age    = calcAge(pet.dob);
+  const meds   = byPet(pid, DB.meds).filter(m=>m.active);
+  const vl     = byPet(pid, DB.vax);
+  const vok    = vl.filter(v=>vSt(v)==='ok').length;
+  const enfs   = byPet(pid, DB.enfs);
+  const pesos  = byPet(pid, DB.pesos).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const lp     = pesos[0];
+  const dps    = byPet(pid, DB.despar).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const ldp    = dps[0];
+  const today  = new Date().toLocaleDateString('es',{day:'numeric',month:'long',year:'numeric'});
+
+  // Build a visually rich text that looks great in WhatsApp
+  const line = '─'.repeat(30);
+  let msg = '';
+  msg += `🐾 *${pet.name.toUpperCase()}*\n`;
+  msg += `${pEmo(pet.species)} ${pet.species}${pet.breed?' · '+pet.breed:''}${age?' · '+age:''}\n`;
+  if (lp) msg += `⚖️ ${lp.value} kg\n`;
+  msg += `\n`;
+
+  if (enfs.length) {
+    msg += `⚠️ *CONDICIONES CRÓNICAS*\n`;
+    enfs.forEach(e => msg += `• ${e.name}\n`);
+    msg += `\n`;
+  }
+
+  if (pet.allerg) {
+    msg += `⚠️ *ALERGIAS:* ${pet.allerg}\n\n`;
+  }
+
+  msg += `💉 *VACUNAS:* ${vok} al día${vl.length-vok>0?' · '+(vl.length-vok)+' requieren atención':''}\n`;
+
+  if (meds.length) {
+    msg += `💊 *MEDICAMENTOS ACTIVOS*\n`;
+    meds.forEach(m => msg += `• ${m.name}${m.dose?' '+m.dose:''} — ${m.freq}\n`);
+    msg += `\n`;
+  }
+
+  if (ldp) {
+    msg += `🪱 *DESPARASITACIÓN:* ${ldp.type} · Próxima ${fD(ldp.next)}\n`;
+  }
+
+  if (pet.vet) msg += `🏥 *Vet:* Dr. ${pet.vet}${pet.vphone?' · '+pet.vphone:''}\n`;
+
+  msg += `\n${line}\n`;
+  msg += `_Generado con Pawvida 🐾_\n`;
+  msg += `_Porque ${pet.name} se merece lo mejor_`;
+
+  if (navigator.share) {
+    navigator.share({
+      title: `Ficha de ${pet.name} — Pawvida`,
+      text: msg
+    }).catch(()=>{});
+  } else {
+    navigator.clipboard?.writeText(msg).then(()=>{
+      showToast('Ficha copiada — pégala en WhatsApp 📋');
+    });
+  }
+}
    Fase 2: reemplazar con sincronización automática en la nube
    ================================================================ */
 function exportData(){
