@@ -617,7 +617,7 @@ img{max-width:100%}
       <div class="hdr-sub" id="cuid-sub">Para cuando viajás</div>
     </div>
     <div class="scroll-area" id="cuid-content"></div>
-    <button class="fab" style="background:#5B8FD4;box-shadow:0 3px 14px rgba(91,143,212,.38)" onclick="openM('modal-cuidador')">✏️</button>
+    <button class="fab" style="background:#5B8FD4;box-shadow:0 3px 14px rgba(91,143,212,.38)" onclick="preloadGuide()">✏️</button>
   </div>
 
   <nav class="bnav">
@@ -827,34 +827,37 @@ img{max-width:100%}
 </div>
 
 <div class="moverlay" id="modal-cuidador">
-  <div class="msheet"><div class="mhandle"></div><div class="mtitle">&#x1F9F3; Guía del cuidador</div>
-    <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:14px;line-height:1.5">Completa esta guía antes de viajar. Puedes compartirla por WhatsApp o correo con quien cuide a tu mascota.</p>
+  <div class="msheet"><div class="mhandle"></div><div class="mtitle">🧳 Guía del cuidador</div>
+    <div id="cg-preload-banner" style="display:none;background:#E8F5F3;border:.5px solid var(--coral-bd);border-radius:var(--r-md);padding:11px 13px;margin-bottom:14px;font-size:.8rem;color:#0A4A3E;line-height:1.5">
+      ✓ <strong>Datos precargados desde el perfil</strong> — revisa y ajusta lo que necesites para este viaje.
+    </div>
+    <div id="cg-appts-banner" style="display:none;background:#EBF4FF;border:.5px solid #C8DCEF;border-radius:var(--r-md);padding:11px 13px;margin-bottom:14px;font-size:.8rem;color:#1A4A80;line-height:1.5"></div>
     <div class="fsec">Fechas del viaje</div>
     <div class="fr">
       <div class="fg"><label class="fl">Desde</label><input class="fi" id="cg-from" type="date"></div>
       <div class="fg"><label class="fl">Hasta</label><input class="fi" id="cg-to" type="date"></div>
     </div>
     <div class="fg"><label class="fl">Nombre del cuidador</label><input class="fi" id="cg-cname" placeholder="ej. María, mi mamá"></div>
-    <div class="fg"><label class="fl">Teléfono del cuidador</label><input class="fi" id="cg-cphone" type="tel" placeholder="ej. +1 555 123 4567"></div>
+    <div class="fg"><label class="fl">Teléfono del cuidador</label><input class="fi" id="cg-cphone" type="tel" placeholder="ej. +56 9 1234 5678"></div>
     <div class="fsec">Alimentación</div>
     <div class="fg"><label class="fl">¿Qué come? (marca y tipo)</label><input class="fi" id="cg-food" placeholder="ej. Royal Canin adulto, croquetas"></div>
     <div class="fg"><label class="fl">¿Cuánto por vez?</label><input class="fi" id="cg-foodamt" placeholder="ej. 1 taza rasada (120g)"></div>
     <div class="fg"><label class="fl">Horarios de comida</label><input class="fi" id="cg-foodtime" placeholder="ej. 8:00 AM y 7:00 PM"></div>
     <div class="fg"><label class="fl">Notas de alimentación</label><input class="fi" id="cg-foodnotes" placeholder="ej. No darle sobras, sin pollo"></div>
     <div class="fsec">Medicamentos</div>
-    <div class="fg"><label class="fl">Medicamentos y horarios</label><textarea class="fi" id="cg-meds" rows="3" style="resize:none;line-height:1.5" placeholder="ej. Omeprazol 1 comprimido a las 8AM con desayuno&#10;Metacam 0.5ml a las 8PM con comida"></textarea></div>
+    <div class="fg"><label class="fl">Medicamentos y horarios</label><textarea class="fi" id="cg-meds" rows="3" style="resize:none;line-height:1.5" placeholder="ej. Omeprazol 1 comprimido a las 8AM&#10;Metacam 0.5ml a las 8PM con comida"></textarea></div>
     <div class="fsec">Rutinas y cuidados</div>
     <div class="fg"><label class="fl">Paseos (si aplica)</label><input class="fi" id="cg-walks" placeholder="ej. 2 paseos cortos, 8AM y 7PM"></div>
-    <div class="fg"><label class="fl">Lugar donde duerme</label><input class="fi" id="cg-sleep" placeholder="ej. Su cama en el dormitorio, no sale afuera"></div>
-    <div class="fg"><label class="fl">Comportamiento / personalidad</label><textarea class="fi" id="cg-behav" rows="2" style="resize:none;line-height:1.5" placeholder="ej. Es tímido los primeros días, no forzar contacto. Le gusta su juguete azul."></textarea></div>
-    <div class="fsec">Señales de alerta</div>
-    <div class="fg"><label class="fl">¿Cuándo preocuparse?</label><textarea class="fi" id="cg-alert" rows="3" style="resize:none;line-height:1.5" placeholder="ej. Si no come en más de 24h&#10;Si vomita más de 2 veces&#10;Si no hace sus necesidades en el día"></textarea></div>
+    <div class="fg"><label class="fl">Lugar donde duerme</label><input class="fi" id="cg-sleep" placeholder="ej. Su cama en el dormitorio"></div>
+    <div class="fg"><label class="fl">Comportamiento / personalidad</label><textarea class="fi" id="cg-behav" rows="2" style="resize:none;line-height:1.5" placeholder="ej. Es tímido los primeros días, no forzar contacto."></textarea></div>
+    <div class="fsec">Señales de alerta — ¿cuándo llamar al vet?</div>
+    <div class="fg"><label class="fl">¿Cuándo preocuparse?</label><textarea class="fi" id="cg-alert" rows="3" style="resize:none;line-height:1.5" placeholder="ej. Si no come en más de 24h&#10;Si vomita más de 2 veces"></textarea></div>
     <div class="fsec">Contactos de emergencia</div>
     <div class="fg"><label class="fl">Veterinario de emergencia</label><input class="fi" id="cg-vetname" placeholder="ej. Clínica Vetcare — Dr. García"></div>
-    <div class="fg"><label class="fl">Teléfono veterinario</label><input class="fi" id="cg-vetphone" type="tel" placeholder="ej. +1 555 765 4321"></div>
+    <div class="fg"><label class="fl">Teléfono veterinario</label><input class="fi" id="cg-vetphone" type="tel" placeholder="ej. +56 9 1234 5678"></div>
     <div class="fg"><label class="fl">¿Dónde estará el dueño?</label><input class="fi" id="cg-owner" placeholder="ej. Santiago, disponible por WhatsApp"></div>
     <div class="fsec">Notas adicionales</div>
-    <div class="fg"><label class="fl">Cualquier otra cosa importante</label><textarea class="fi" id="cg-extra" rows="3" style="resize:none;line-height:1.5" placeholder="ej. La llave está en el cajón de la cocina. El veterinario ya tiene toda su historia clínica."></textarea></div>
+    <div class="fg"><label class="fl">Cualquier otra cosa importante</label><textarea class="fi" id="cg-extra" rows="3" style="resize:none;line-height:1.5" placeholder="ej. La llave está en el cajón de la cocina."></textarea></div>
     <div class="mt-12 flex-c" style="gap:8px">
       <button class="btn btn-g" style="flex:1" onclick="closeM('modal-cuidador')">Cancelar</button>
       <button class="btn btn-p" style="flex:2" onclick="saveGuia()">Guardar guía</button>
@@ -1827,6 +1830,113 @@ function saveEnfermedad(){
 }
 
 /* ================================================================
+   PRELOAD GUIDE — rellena automáticamente con datos del perfil
+   ================================================================ */
+function preloadGuide() {
+  const pet = DB.pets.find(p=>p.id===_pid);
+  if (!pet) return;
+
+  // Load existing guide if any
+  const existing = byPet(_pid, DB.guides)[0];
+
+  // --- FOOD ---
+  const food = byPet(_pid, DB.foods)[0];
+  let foodStr = '', foodAmt = '', foodTime = '', foodNotes = '';
+  if (food) {
+    foodStr   = food.brand || '';
+    foodAmt   = food.amount || '';
+    foodTime  = food.times || '';
+    foodNotes = food.notes || '';
+    if (pet.allerg) foodNotes = (foodNotes ? foodNotes + ' · ' : '') + 'Sin ' + pet.allerg;
+  }
+
+  // --- MEDS ---
+  const meds = byPet(_pid, DB.meds).filter(m=>m.active);
+  let medsStr = '';
+  if (meds.length) {
+    medsStr = meds.map(m => {
+      let line = `• ${m.name}`;
+      if (m.dose)  line += ` ${m.dose}`;
+      if (m.freq)  line += ` — ${m.freq}`;
+      if (m.time)  line += ` a las ${m.time}`;
+      if (m.notes) line += ` (${m.notes})`;
+      return line;
+    }).join('\n');
+  }
+
+  // --- VET ---
+  const vetName  = pet.vet   || '';
+  const vetPhone = pet.vphone || '';
+
+  // --- UPCOMING APPTS during travel ---
+  const from = existing?.from || '';
+  const to   = existing?.to   || '';
+  const upAppts = byPet(_pid, DB.appts)
+    .filter(a => dDiff(a.date) >= 0)
+    .sort((a,b) => new Date(a.date) - new Date(b.date));
+
+  // --- FILL FORM ---
+  // Only fill if field is empty OR if it's a fresh guide (not editing)
+  const fill = (id, val, override=false) => {
+    const el = document.getElementById(id);
+    if (el && (override || !el.value.trim())) el.value = val;
+  };
+
+  if (existing) {
+    // Editing — load saved values
+    fill('cg-from',      existing.from || '',      true);
+    fill('cg-to',        existing.to || '',        true);
+    fill('cg-cname',     existing.cname || '',     true);
+    fill('cg-cphone',    existing.cphone || '',    true);
+    fill('cg-food',      existing.food || foodStr, true);
+    fill('cg-foodamt',   existing.foodamt || foodAmt, true);
+    fill('cg-foodtime',  existing.foodtime || foodTime, true);
+    fill('cg-foodnotes', existing.foodnotes || foodNotes, true);
+    fill('cg-meds',      existing.meds || medsStr, true);
+    fill('cg-walks',     existing.walks || '',     true);
+    fill('cg-sleep',     existing.sleep || '',     true);
+    fill('cg-behav',     existing.behav || '',     true);
+    fill('cg-alert',     existing.alert || '',     true);
+    fill('cg-vetname',   existing.vetname || vetName, true);
+    fill('cg-vetphone',  existing.vetphone || vetPhone, true);
+    fill('cg-owner',     existing.owner || '',     true);
+    fill('cg-extra',     existing.extra || '',     true);
+  } else {
+    // New guide — preload from pet data
+    fill('cg-food',      foodStr);
+    fill('cg-foodamt',   foodAmt);
+    fill('cg-foodtime',  foodTime);
+    fill('cg-foodnotes', foodNotes);
+    fill('cg-meds',      medsStr);
+    fill('cg-vetname',   vetName);
+    fill('cg-vetphone',  vetPhone);
+  }
+
+  // Show preload banner if we loaded data
+  const banner = document.getElementById('cg-preload-banner');
+  const apptsBanner = document.getElementById('cg-appts-banner');
+  const hasData = food || meds.length || pet.vet;
+
+  if (hasData && !existing) {
+    banner.style.display = 'block';
+  } else {
+    banner.style.display = 'none';
+  }
+
+  // Show upcoming appointments banner
+  if (upAppts.length) {
+    const apptLines = upAppts.slice(0,3).map(a =>
+      `📅 ${fD(a.date)} ${a.time} — Dr. ${a.vet}${a.place?' · '+a.place:''}`
+    ).join('<br>');
+    apptsBanner.innerHTML = `<strong>📋 Citas próximas de ${pet.name}:</strong><br>${apptLines}<br><span style="font-size:.75rem;opacity:.8">Asegúrate de que el cuidador las tenga en cuenta.</span>`;
+    apptsBanner.style.display = 'block';
+  } else {
+    apptsBanner.style.display = 'none';
+  }
+
+  openM('modal-cuidador');
+}
+/* ================================================================
    GUÍA DEL CUIDADOR
    Fase 2: reemplazar con link/token compartible + checklist en tiempo real
    ================================================================ */
@@ -1845,7 +1955,7 @@ function renderCuidador(pid) {
         <div style="font-size:2.4rem;margin-bottom:10px">🧳</div>
         <div style="font-size:.95rem;font-weight:800;color:#1A4A80;margin-bottom:6px">Sin guía creada aún</div>
         <div style="font-size:.82rem;color:#4A7AB0;line-height:1.5;margin-bottom:16px">Crea la guía antes de viajar para que quien cuide a ${pet.name} sepa exactamente qué hacer cada día.</div>
-        <button class="btn" style="background:#5B8FD4;color:white;font-size:.88rem;font-weight:800;padding:11px 24px;border-radius:var(--r-md)" onclick="openM('modal-cuidador')">+ Crear guía del cuidador</button>
+        <button class="btn" style="background:#5B8FD4;color:white;font-size:.88rem;font-weight:800;padding:11px 24px;border-radius:var(--r-md)" onclick="preloadGuide()">+ Crear guía del cuidador</button>
       </div>`;
     return;
   }
@@ -1864,7 +1974,7 @@ function renderCuidador(pid) {
     <div style="background:#EBF3FF;border-radius:var(--r-lg);padding:14px;margin-bottom:10px;border:.5px solid #C8DCEF">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
         <div style="font-size:.9rem;font-weight:800;color:#1A4A80">Guía activa</div>
-        <button class="btn-cal btn-sm" onclick="openM('modal-cuidador')">✏️ Editar</button>
+        <button class="btn-cal btn-sm" onclick="preloadGuide()">✏️ Editar</button>
       </div>
       ${guide.from&&guide.to?`<div style="font-size:.8rem;color:#4A7AB0;font-weight:600">${fD(guide.from)} → ${fD(guide.to)}</div>`:''}
       ${guide.cname?`<div style="font-size:.8rem;color:#4A7AB0;margin-top:2px">Cuidador: ${guide.cname}${guide.cphone?' · '+guide.cphone:''}</div>`:''}
