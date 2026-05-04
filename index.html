@@ -887,7 +887,7 @@ img{max-width:100%}
 <div class="toast" id="toast"></div>
 
 <script>
-// Polyfill for ctx.roundRect (iOS < 15.4, Chrome < 99)
+/* Polyfill for ctx.roundRect — older iOS and Chrome */
 if (!CanvasRenderingContext2D.prototype.roundRect) {
   CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
     const radius = Array.isArray(r) ? r[0] : (r || 0);
