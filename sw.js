@@ -5,7 +5,7 @@
  *                  El caché nativo lo maneja el framework.
  */
 
-const CACHE_NAME = 'pawvida-v1.0.0';
+const CACHE_NAME = 'pawvida-v1.0.3';
 
 // Recursos a cachear al instalar
 const STATIC_ASSETS = [
@@ -17,6 +17,7 @@ const STATIC_ASSETS = [
 
 // ── INSTALL ──────────────────────────────────────────────────────
 self.addEventListener('install', event => {
+  self.skipWaiting(); // Fuerza activación inmediata sin esperar
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => cache.addAll(STATIC_ASSETS))
