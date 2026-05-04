@@ -459,7 +459,7 @@ img{max-width:100%}
       <div class="wow-title" id="wow-title">—</div>
       <div class="wow-msg" id="wow-msg">—</div>
       <button class="wow-btn" onclick="closeWow()">Ver su perfil →</button>
-      <button class="wow-share" onclick="closeWow();setTimeout(()=>sharePet(_pid),300)">↗ Compartir con quien lo cuida</button>
+      <button class="wow-share" onclick="closeWow();setTimeout(()=>sharePetVisual(_pid),300)">↗ Compartir con quien lo cuida</button>
     </div>
   </div>
 
@@ -1364,141 +1364,6 @@ function renderProfile(pid){
 }
 function dr(l,v){return`<div class="drow"><span class="dlbl">${l}</span><span class="dval">${v}</span></div>`}
 
-/* ================================================================
-   SHARE FICHA CLÍNICA -- Web Share API
-   Fase 2: reemplazar con share() nativo de Flutter/React Native
-   El texto generado es idéntico -- solo cambia el método de envío
-   ================================================================ */
-function sharePet(pid) {
-  const pet = DB.pets.find(p=>p.id===pid);
-  if (!pet) return;
-
-  const age    = calcAge(pet.dob);
-  const vl     = byPet(pid, DB.vax);
-  const meds   = byPet(pid, DB.meds).filter(m=>m.active);
-  const cons   = byPet(pid, DB.cons).sort((a,b)=>new Date(b.date)-new Date(a.date));
-  const dps    = byPet(pid, DB.despar).sort((a,b)=>new Date(b.date)-new Date(a.date));
-  const pesos  = byPet(pid, DB.pesos).sort((a,b)=>new Date(b.date)-new Date(a.date));
-  const enfs   = byPet(pid, DB.enfs);
-  const food   = byPet(pid, DB.foods)[0];
-  const appts  = byPet(pid, DB.appts).filter(a=>dDiff(a.date)>=0).sort((a,b)=>new Date(a.date)-new Date(b.date));
-  const today  = new Date().toLocaleDateString('es',{day:'numeric',month:'long',year:'numeric'});
-
-  let txt = `🐾 FICHA CLÍNICA -- ${pet.name.toUpperCase()}\n`;
-  txt += `Generada el ${today} desde Pawvida\n`;
-  txt += `${'─'.repeat(36)}\n\n`;
-
-  // Datos básicos
-  txt += `📋 DATOS GENERALES\n`;
-  txt += `Especie: ${pet.species}${pet.breed?' · '+pet.breed:''}\n`;
-  if (age)      txt += `Edad: ${age}\n`;
-  if (pet.sex)  txt += `Sexo: ${pet.sex}${pet.neut?' · '+pet.neut:''}izado\n`;
-  if (pet.chip) txt += `Microchip: ${pet.chip}\n`;
-  if (pet.allerg) txt += `Alergias: ${pet.allerg}\n`;
-  if (pet.vet)  txt += `Veterinario de cabecera: Dr. ${pet.vet}${pet.vphone?' · '+pet.vphone:''}\n`;
-
-  // Peso actual
-  if (pesos.length) {
-    const lp = pesos[0];
-    txt += `Peso actual: ${lp.value} kg (${fD(lp.date)})`;
-    if (lp.bcs) txt += ` · BCS ${lp.bcs}`;
-    txt += '\n';
-  }
-
-  // Enfermedades crónicas
-  if (enfs.length) {
-    txt += `\n⚠️ ENFERMEDADES CRÓNICAS\n`;
-    enfs.forEach(e => {
-      txt += `• ${e.name}${e.date?' (desde '+fD(e.date)+')':''}\n`;
-      if (e.notes) txt += `  ${e.notes}\n`;
-    });
-  }
-
-  // Vacunas
-  if (vl.length) {
-    txt += `\n💉 VACUNAS\n`;
-    vl.forEach(v => {
-      const s = vSt(v);
-      const st = s==='ok'?'✓':s==='soon'?'⚠':' ✕';
-      txt += `${st} ${v.name}`;
-      if (v.date)   txt += ` · Aplicada ${fD(v.date)}`;
-      if (v.expiry) txt += ` · Vence ${fD(v.expiry)}`;
-      txt += '\n';
-    });
-  }
-
-  // Medicamentos activos
-  if (meds.length) {
-    txt += `\n💊 MEDICAMENTOS ACTUALES\n`;
-    meds.forEach(m => {
-      txt += `• ${m.name}`;
-      if (m.dose) txt += ` ${m.dose}`;
-      txt += ` -- ${m.freq}`;
-      if (m.notes) txt += ` (${m.notes})`;
-      if (m.end)   txt += ` · Hasta ${fD(m.end)}`;
-      txt += '\n';
-    });
-  }
-
-  // Desparasitación
-  const dpI = dps.find(d=>d.type==='Interna');
-  const dpE = dps.find(d=>d.type==='Externa');
-  if (dpI || dpE) {
-    txt += `\n🪱 DESPARASITACIÓN\n`;
-    if (dpI) txt += `Interna: ${dpI.prod||'--'} · Próxima ${fD(dpI.next)}\n`;
-    if (dpE) txt += `Externa: ${dpE.prod||'--'} · Próxima ${fD(dpE.next)}\n`;
-  }
-
-  // Alimentación
-  if (food) {
-    txt += `\n🍽️ ALIMENTACIÓN\n`;
-    txt += `${food.brand} · ${food.type} · ${food.amount||''} · ${food.times}\n`;
-    if (food.notes) txt += `Notas: ${food.notes}\n`;
-  }
-
-  // Última consulta
-  if (cons.length) {
-    const lc = cons[0];
-    txt += `\n🏥 ÚLTIMA CONSULTA (${fD(lc.date)})\n`;
-    txt += `Veterinario: Dr. ${lc.vet}${lc.place?' · '+lc.place:''}\n`;
-    if (lc.reason) txt += `Motivo: ${lc.reason}\n`;
-    if (lc.diag)   txt += `Diagnóstico: ${lc.diag}\n`;
-    if (lc.treat)  txt += `Tratamiento: ${lc.treat}\n`;
-    if (lc.follow) txt += `Próximo control: ${fD(lc.follow)}\n`;
-    if (cons.length > 1) txt += `(+ ${cons.length-1} consulta${cons.length>2?'s':''} anterior${cons.length>2?'es':''})\n`;
-  }
-
-  // Próximas citas
-  if (appts.length) {
-    txt += `\n📅 PRÓXIMAS CITAS\n`;
-    appts.slice(0,3).forEach(a => {
-      txt += `• ${fD(a.date)} ${a.time} -- Dr. ${a.vet}`;
-      if (a.spec)   txt += ` (${a.spec})`;
-      if (a.place)  txt += ` · ${a.place}`;
-      if (a.reason) txt += `\n  Motivo: ${a.reason}`;
-      txt += '\n';
-    });
-  }
-
-  txt += `\n${'─'.repeat(36)}\n`;
-  txt += `Enviado desde Pawvida 🐾\n`;
-  txt += `Porque ${pet.name} se merece lo mejor.`;
-
-  // Web Share API -- abre el menú nativo del teléfono
-  if (navigator.share) {
-    navigator.share({
-      title: `Ficha clínica de ${pet.name} -- Pawvida`,
-      text: txt
-    }).catch(()=>{});
-  } else {
-    // Fallback para escritorio: copiar al portapapeles
-    navigator.clipboard?.writeText(txt).then(()=>{
-      showToast('Ficha copiada al portapapeles 📋');
-    }).catch(()=>{
-      showToast('Tu navegador no soporta compartir');
-    });
-  }
-}
 
 function delPet(pid){if(!confirm('¿Eliminar esta mascota y todos sus datos?'))return;['pets','vax','meds','appts','cons','despar','pesos','exams','foods','enfs','guides'].forEach(k=>{if(k==='pets')DB.save(k,DB.pets.filter(p=>p.id!==pid));else DB.save(k,DB[k].filter(x=>x.petId!==pid))});showToast('Mascota eliminada');goTo('mascotas')}
 
@@ -2073,61 +1938,242 @@ function saveGuia() {
 }
 
 function shareGuia(pid) {
-  const pet = DB.pets.find(p=>p.id===pid);
+  const pet   = DB.pets.find(p=>p.id===pid);
   const guide = byPet(pid, DB.guides)[0];
   if (!pet || !guide) return;
 
-  let txt = `🧳 GUÍA PARA CUIDAR A ${pet.name.toUpperCase()}\n`;
-  txt += `${pEmo(pet.species)} ${pet.species}${pet.breed?' · '+pet.breed:''}\n`;
-  if (guide.from && guide.to) txt += `Fechas: ${fD(guide.from)} al ${fD(guide.to)}\n`;
-  txt += `${'─'.repeat(36)}\n\n`;
+  // === BUILD SECTIONS ===
+  const sections = [];
 
+  // Dates banner
+  if (guide.from && guide.to) {
+    sections.push({ type:'dates', from: fD(guide.from), to: fD(guide.to) });
+  }
+
+  // Caretaker contact
+  if (guide.cname || guide.cphone) {
+    sections.push({ type:'rows', title:'👤 Cuidador/a', rows:[
+      guide.cname  ? { label:'Nombre', value: guide.cname }  : null,
+      guide.cphone ? { label:'Teléfono', value: guide.cphone } : null
+    ].filter(Boolean)});
+  }
+
+  // Food
   if (guide.food || guide.foodamt || guide.foodtime) {
-    txt += `🍽️ ALIMENTACIÓN\n`;
-    if (guide.food)      txt += `Comida: ${guide.food}\n`;
-    if (guide.foodamt)   txt += `Cantidad: ${guide.foodamt}\n`;
-    if (guide.foodtime)  txt += `Horarios: ${guide.foodtime}\n`;
-    if (guide.foodnotes) txt += `Importante: ${guide.foodnotes}\n`;
-    txt += '\n';
+    const rows = [];
+    if (guide.food)     rows.push({ label:'Alimento', value: guide.food });
+    if (guide.foodamt)  rows.push({ label:'Cantidad', value: guide.foodamt });
+    if (guide.foodtime) rows.push({ label:'Horarios', value: guide.foodtime });
+    if (guide.foodnotes)rows.push({ label:'Importante', value: guide.foodnotes });
+    sections.push({ type:'rows', title:'🍽️ Alimentación', rows });
   }
 
+  // Meds
   if (guide.meds) {
-    txt += `💊 MEDICAMENTOS\n${guide.meds}\n\n`;
+    sections.push({ type:'text', title:'💊 Medicamentos', body: guide.meds });
   }
 
+  // Routines
   if (guide.walks || guide.sleep || guide.behav) {
-    txt += `🐾 RUTINAS\n`;
-    if (guide.walks) txt += `Paseos: ${guide.walks}\n`;
-    if (guide.sleep) txt += `Dónde duerme: ${guide.sleep}\n`;
-    if (guide.behav) txt += `Comportamiento: ${guide.behav}\n`;
-    txt += '\n';
+    const rows = [];
+    if (guide.walks) rows.push({ label:'Paseos', value: guide.walks });
+    if (guide.sleep) rows.push({ label:'Dónde duerme', value: guide.sleep });
+    if (guide.behav) rows.push({ label:'Comportamiento', value: guide.behav });
+    sections.push({ type:'rows', title:'🐾 Rutinas', rows });
   }
 
+  // Alert — red section
   if (guide.alert) {
-    txt += `⚠️ CUÁNDO LLAMAR AL VETERINARIO\n${guide.alert}\n\n`;
+    sections.push({ type:'alert', title:'⚠️ Cuándo llamar al veterinario', body: guide.alert });
   }
 
-  txt += `📞 CONTACTOS\n`;
-  if (guide.vetname)  txt += `Veterinario: ${guide.vetname}${guide.vetphone?' -- '+guide.vetphone:''}\n`;
-  if (guide.owner)    txt += `Dueño/a: ${guide.owner}\n`;
-  txt += '\n';
+  // Contacts
+  const contactRows = [];
+  if (guide.vetname)  contactRows.push({ label:'Veterinario', value: guide.vetname + (guide.vetphone?' · '+guide.vetphone:'') });
+  if (guide.owner)    contactRows.push({ label:'Dueño/a', value: guide.owner });
+  if (contactRows.length) sections.push({ type:'rows', title:'📞 Contactos de emergencia', rows: contactRows });
 
-  if (guide.extra) txt += `📋 NOTAS ADICIONALES\n${guide.extra}\n\n`;
-
-  txt += `${'─'.repeat(36)}\n`;
-  txt += `Enviado desde Pawvida 🐾\n`;
-  txt += `Porque ${pet.name} se merece lo mejor -- incluso cuando el dueño no está.`;
-
-  if (navigator.share) {
-    navigator.share({
-      title: `Cómo cuidar a ${pet.name}`,
-      text: txt
-    }).catch(()=>{});
-  } else {
-    navigator.clipboard?.writeText(txt).then(()=>{
-      showToast('Guía copiada al portapapeles 📋');
-    });
+  // Extra
+  if (guide.extra) {
+    sections.push({ type:'text', title:'📋 Notas adicionales', body: guide.extra });
   }
+
+  // === CANVAS DIMENSIONS ===
+  const W = 600, PAD = 24;
+  const HEADER_H  = 140;
+  const SEC_TITLE = 28;
+  const ROW_H     = 26;
+  const TEXT_LINE = 22;
+  const FOOTER_H  = 44;
+  const DATE_H    = 40;
+
+  let bodyH = 16;
+  sections.forEach(s => {
+    bodyH += 8; // separator
+    if (s.type === 'dates')  bodyH += DATE_H + 12;
+    else if (s.type === 'rows')  bodyH += SEC_TITLE + s.rows.length * ROW_H + 8;
+    else if (s.type === 'text')  bodyH += SEC_TITLE + Math.ceil(s.body.length / 55) * TEXT_LINE + 8;
+    else if (s.type === 'alert') bodyH += SEC_TITLE + Math.ceil(s.body.length / 55) * TEXT_LINE + 16;
+  });
+  bodyH += 8;
+  const TOTAL_H = HEADER_H + bodyH + FOOTER_H;
+
+  const canvas = document.createElement('canvas');
+  canvas.width  = W * 2;
+  canvas.height = TOTAL_H * 2;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(2, 2);
+
+  // --- HEADER ---
+  const grad = ctx.createLinearGradient(0, 0, W, HEADER_H);
+  grad.addColorStop(0, '#22A898');
+  grad.addColorStop(0.55, '#128A7C');
+  grad.addColorStop(1, '#0A6B5E');
+  ctx.fillStyle = grad;
+  ctx.beginPath(); ctx.roundRect(0, 0, W, HEADER_H, 16); ctx.fill();
+
+  // Decorative circles
+  ctx.fillStyle = 'rgba(255,255,255,0.08)';
+  ctx.beginPath(); ctx.arc(W - 40, -30, 110, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(-20, HEADER_H + 20, 80, 0, Math.PI * 2); ctx.fill();
+
+  // Suitcase icon box
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.beginPath(); ctx.roundRect(PAD, 22, 58, 58, 14); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.roundRect(PAD, 22, 58, 58, 14); ctx.stroke();
+  ctx.font = '30px serif'; ctx.textAlign = 'center';
+  ctx.fillStyle = 'white';
+  ctx.fillText('🧳', PAD + 29, 60);
+
+  // Title
+  ctx.textAlign = 'left';
+  ctx.fillStyle = 'white';
+  ctx.font = 'bold 11px Nunito, sans-serif';
+  ctx.fillText('GUÍA DEL CUIDADOR', PAD + 70, 36);
+  ctx.font = 'bold 22px Nunito, sans-serif';
+  ctx.fillText(pet.name, PAD + 70, 58);
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.font = '13px Nunito, sans-serif';
+  const petSub = [pEmo(pet.species), pet.species, pet.breed].filter(Boolean).join(' ');
+  ctx.fillText(petSub, PAD + 70, 76);
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.font = 'bold 9px Nunito, sans-serif';
+  ctx.fillText('PAWVIDA 🐾 · Porque ' + pet.name + ' se merece lo mejor', PAD + 70, 100);
+
+  // --- WHITE BODY ---
+  ctx.fillStyle = 'white';
+  ctx.beginPath(); ctx.roundRect(0, HEADER_H - 8, W, bodyH + 8 + FOOTER_H, [0, 0, 16, 16]); ctx.fill();
+
+  let y = HEADER_H + 14;
+
+  sections.forEach((s, idx) => {
+    // Separator
+    if (idx > 0) {
+      ctx.strokeStyle = '#F0F0EE'; ctx.lineWidth = 0.5;
+      ctx.beginPath(); ctx.moveTo(PAD, y - 4); ctx.lineTo(W - PAD, y - 4); ctx.stroke();
+    }
+
+    if (s.type === 'dates') {
+      ctx.fillStyle = '#E8F5F3';
+      ctx.beginPath(); ctx.roundRect(PAD, y, W - PAD * 2, DATE_H, 10); ctx.fill();
+      ctx.fillStyle = '#0D6B5E';
+      ctx.font = 'bold 12px Nunito, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('📅 Del ' + s.from + ' al ' + s.to, W / 2, y + DATE_H / 2 + 5);
+      ctx.textAlign = 'left';
+      y += DATE_H + 12;
+
+    } else if (s.type === 'rows') {
+      ctx.fillStyle = '#8E8E93';
+      ctx.font = 'bold 9px Nunito, sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText(s.title.toUpperCase(), PAD, y + 12);
+      y += SEC_TITLE - 4;
+      s.rows.forEach(row => {
+        ctx.fillStyle = '#8E8E93'; ctx.font = '12px Nunito, sans-serif'; ctx.textAlign = 'left';
+        ctx.fillText(row.label, PAD, y + 12);
+        ctx.fillStyle = '#1C1C1E'; ctx.font = 'bold 12px Nunito, sans-serif'; ctx.textAlign = 'right';
+        // Wrap long values
+        const val = row.value.length > 40 ? row.value.substring(0, 38) + '...' : row.value;
+        ctx.fillText(val, W - PAD, y + 12);
+        y += ROW_H;
+      });
+      y += 8;
+
+    } else if (s.type === 'text') {
+      ctx.fillStyle = '#8E8E93';
+      ctx.font = 'bold 9px Nunito, sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText(s.title.toUpperCase(), PAD, y + 12);
+      y += SEC_TITLE - 4;
+      // Word wrap
+      const words = s.body.split(' ');
+      let line = '';
+      ctx.fillStyle = '#1C1C1E'; ctx.font = '12px Nunito, sans-serif';
+      words.forEach(word => {
+        const test = line + word + ' ';
+        if (ctx.measureText(test).width > W - PAD * 2 && line) {
+          ctx.fillText(line.trim(), PAD, y + 14);
+          y += TEXT_LINE;
+          line = word + ' ';
+        } else {
+          line = test;
+        }
+      });
+      if (line.trim()) { ctx.fillText(line.trim(), PAD, y + 14); y += TEXT_LINE; }
+      y += 8;
+
+    } else if (s.type === 'alert') {
+      ctx.fillStyle = '#FEF2F2';
+      const alertLines = Math.ceil(s.body.length / 55);
+      const alertH = SEC_TITLE + alertLines * TEXT_LINE + 12;
+      ctx.beginPath(); ctx.roundRect(PAD, y, W - PAD * 2, alertH, 10); ctx.fill();
+      ctx.fillStyle = '#C0392B';
+      ctx.font = 'bold 9px Nunito, sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText(s.title.toUpperCase(), PAD + 10, y + 14);
+      y += SEC_TITLE;
+      const words = s.body.split(' ');
+      let line = '';
+      ctx.font = '12px Nunito, sans-serif';
+      words.forEach(word => {
+        const test = line + word + ' ';
+        if (ctx.measureText(test).width > W - PAD * 3 && line) {
+          ctx.fillText(line.trim(), PAD + 10, y + 12);
+          y += TEXT_LINE;
+          line = word + ' ';
+        } else {
+          line = test;
+        }
+      });
+      if (line.trim()) { ctx.fillText(line.trim(), PAD + 10, y + 12); y += TEXT_LINE; }
+      y += 12;
+    }
+  });
+
+  // --- FOOTER ---
+  const fy = HEADER_H + bodyH;
+  ctx.fillStyle = '#F8F8F7';
+  ctx.beginPath(); ctx.roundRect(0, fy, W, FOOTER_H, [0, 0, 16, 16]); ctx.fill();
+  ctx.strokeStyle = '#ECECEA'; ctx.lineWidth = 0.5;
+  ctx.beginPath(); ctx.moveTo(0, fy); ctx.lineTo(W, fy); ctx.stroke();
+  ctx.fillStyle = '#C0C0BC'; ctx.font = '10px Nunito, sans-serif'; ctx.textAlign = 'left';
+  ctx.fillText('Generado el ' + new Date().toLocaleDateString('es',{day:'numeric',month:'long',year:'numeric'}), PAD, fy + 16);
+  ctx.fillStyle = '#1D9E8F'; ctx.font = 'bold 10px Nunito, sans-serif'; ctx.textAlign = 'right';
+  ctx.fillText('🐾 Pawvida', W - PAD, fy + 16);
+
+  // === SHARE ===
+  canvas.toBlob(async blob => {
+    const file = new File([blob], `guia-${pet.name.toLowerCase()}.png`, {type:'image/png'});
+    if (navigator.share && navigator.canShare && navigator.canShare({files:[file]})) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: `Guía para cuidar a ${pet.name}`,
+          text: `Instrucciones para cuidar a ${pet.name} 🧳`
+        });
+      } catch(e) { fallbackShare(canvas, 'guia-' + pet.name.toLowerCase()); }
+    } else {
+      fallbackShare(canvas, 'guia-' + pet.name.toLowerCase());
+    }
+  }, 'image/png');
 }
 /* ================================================================
    EMERGENCY MODE
