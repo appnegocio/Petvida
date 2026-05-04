@@ -887,6 +887,23 @@ img{max-width:100%}
 <div class="toast" id="toast"></div>
 
 <script>
+// Polyfill for ctx.roundRect (iOS < 15.4, Chrome < 99)
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+  CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+    const radius = Array.isArray(r) ? r[0] : (r || 0);
+    this.beginPath();
+    this.moveTo(x + radius, y);
+    this.lineTo(x + w - radius, y);
+    this.quadraticCurveTo(x + w, y, x + w, y + radius);
+    this.lineTo(x + w, y + h - radius);
+    this.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+    this.lineTo(x + radius, y + h);
+    this.quadraticCurveTo(x, y + h, x, y + h - radius);
+    this.lineTo(x, y + radius);
+    this.quadraticCurveTo(x, y, x + radius, y);
+    this.closePath();
+  };
+}
 /* ================================================================
    DATA LAYER
    ================================================================ */
@@ -903,7 +920,7 @@ const DB={
 function J(k){return JSON.parse(localStorage.getItem(k)||'[]')}
 
 /* ================================================================
-   CALENDAR — .ics NATIVE
+   CALENDAR -- .ics NATIVE
    Generates a .ics file that opens the native calendar app on
    iPhone (Calendar.app) and Android (Google Calendar / Samsung)
    ================================================================ */
@@ -982,7 +999,7 @@ function downloadIcs(title, dateStr, timeStr, description='', location='', durat
 function calCita(a) {
   const pet = getAP();
   downloadIcs(
-    `🐾 Cita de ${pet?.name||'mascota'} — Dr. ${a.vet}`,
+    `🐾 Cita de ${pet?.name||'mascota'} -- Dr. ${a.vet}`,
     a.date, a.time,
     [a.spec, a.reason, a.place].filter(Boolean).join(' · '),
     a.place || ''
@@ -992,9 +1009,9 @@ function calCita(a) {
 function calVax(v, petName) {
   if (!v.expiry) { showToast('Agrega la fecha de vencimiento primero'); return; }
   downloadIcs(
-    `💉 Refuerzo vacuna ${v.name} — ${petName}`,
+    `💉 Refuerzo vacuna ${v.name} -- ${petName}`,
     v.expiry, null,
-    `Vacuna: ${v.name}\nVeterinario: ${v.vet||'—'}\nLote: ${v.batch||'—'}`,
+    `Vacuna: ${v.name}\nVeterinario: ${v.vet||'--'}\nLote: ${v.batch||'--'}`,
     '', 0, true
   );
 }
@@ -1002,9 +1019,9 @@ function calVax(v, petName) {
 function calDespar(dp, petName) {
   if (!dp.next) { showToast('No hay próxima fecha calculada'); return; }
   downloadIcs(
-    `🪱 Desparasitación ${dp.type} — ${petName}`,
+    `🪱 Desparasitación ${dp.type} -- ${petName}`,
     dp.next, null,
-    `Tipo: ${dp.type}\nProducto: ${dp.prod||'—'}\nFrecuencia: cada ${dp.freq} días`,
+    `Tipo: ${dp.type}\nProducto: ${dp.prod||'--'}\nFrecuencia: cada ${dp.freq} días`,
     '', 0, true
   );
 }
@@ -1012,9 +1029,9 @@ function calDespar(dp, petName) {
 function calMed(m, petName) {
   if (!m.end) { showToast('Agrega una fecha de fin al medicamento'); return; }
   downloadIcs(
-    `💊 Fin de ${m.name} — ${petName}`,
+    `💊 Fin de ${m.name} -- ${petName}`,
     m.end, null,
-    `Medicamento: ${m.name}\nDosis: ${m.dose||'—'}\nFrecuencia: ${m.freq}`,
+    `Medicamento: ${m.name}\nDosis: ${m.dose||'--'}\nFrecuencia: ${m.freq}`,
     '', 0, true
   );
 }
@@ -1023,7 +1040,7 @@ function calFollowup(date, petName, vet) {
   downloadIcs(
     `🏥 Control de ${petName}${vet?' con Dr. '+vet:''}`,
     date, null,
-    `Control de seguimiento veterinario\nVeterinario: ${vet||'—'}`,
+    `Control de seguimiento veterinario\nVeterinario: ${vet||'--'}`,
     '', 0, true
   );
 }
@@ -1035,8 +1052,8 @@ const getAP=()=>{const ps=DB.pets;if(!ps.length)return null;return ps.find(p=>p.
 const byPet=(pid,col)=>col.filter(x=>x.petId===pid);
 const pEmo=s=>({Perro:'🐶',Gato:'🐱',Conejo:'🐰',Ave:'🐦'}[s]||'🐾');
 function calcAge(dob){if(!dob)return null;const b=new Date(dob+'T00:00:00'),t=new Date();let y=t.getFullYear()-b.getFullYear(),m=t.getMonth()-b.getMonth();if(m<0){y--;m+=12}return y>0?(y===1?'1 año':`${y} años`):(m<=1?'1 mes':`${m} meses`)}
-function fD(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('es',{day:'numeric',month:'short',year:'numeric'})}
-function fDs(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('es',{day:'numeric',month:'short'})}
+function fD(d){if(!d)return'--';return new Date(d+'T00:00:00').toLocaleDateString('es',{day:'numeric',month:'short',year:'numeric'})}
+function fDs(d){if(!d)return'--';return new Date(d+'T00:00:00').toLocaleDateString('es',{day:'numeric',month:'short'})}
 function dDiff(ds){const t=new Date();t.setHours(0,0,0,0);return Math.round((new Date(ds+'T00:00:00')-t)/86400000)}
 function vSt(v){if(!v.expiry)return'ok';const d=dDiff(v.expiry);return d<0?'expired':d<=30?'soon':'ok'}
 
@@ -1082,8 +1099,8 @@ const ONB_STEPS = [
   },
   {
     ico: '🧳',
-    title: 'Viaja tranquilo/a — quien cuide a tu mascota tendrá todo claro',
-    sub: 'Crea la guía del cuidador y compártela por WhatsApp. Horarios, remedios, señales de alerta — todo en un mensaje.',
+    title: 'Viaja tranquilo/a -- quien cuide a tu mascota tendrá todo claro',
+    sub: 'Crea la guía del cuidador y compártela por WhatsApp. Horarios, remedios, señales de alerta -- todo en un mensaje.',
     btn: 'Empezar ahora →'
   }
 ];
@@ -1204,7 +1221,7 @@ function renderHome(){
       <span style="font-size:1.6rem">${isTomorrow?'🎂':'🎉'}</span>
       <div>
         <div class="bday-text">${isTomorrow?`¡Mañana es el cumpleaños de ${bday.pet.name}!`:`¡Hoy es el cumpleaños de ${bday.pet.name}! 🎂`}</div>
-        <div class="bday-sub">${bday.age?`Cumple ${bday.age} — ¡feliz cumpleaños, ${bday.pet.name}!`:'Un día muy especial 🐾'}</div>
+        <div class="bday-sub">${bday.age?`Cumple ${bday.age} -- ¡feliz cumpleaños, ${bday.pet.name}!`:'Un día muy especial 🐾'}</div>
       </div>
     </div>`;
   } else {
@@ -1217,7 +1234,7 @@ function renderHome(){
       <div class="emer-btn-wrap" style="flex:1;cursor:pointer" onclick="openEmer()">
         <span class="emer-ico">🚨</span>
         <div class="emer-info">
-          <div class="emer-title">Emergencia — ${pet.name}</div>
+          <div class="emer-title">Emergencia -- ${pet.name}</div>
           <div class="emer-sub">${pet.vet?pet.vet+' · ':''}${pet.vphone}</div>
         </div>
         <span style="color:#C0392B;font-size:.9rem;font-weight:700">›</span>
@@ -1277,7 +1294,7 @@ function renderHome(){
     </div>`;
 
   // Alerts
-  document.getElementById('home-alerts').innerHTML=urgent.length?urgent.map(aRow).join(''):`<div class="arow ok"><span class="aicon">✓</span><div><div class="atext">${pet.name} tiene todo bajo control hoy — disfruten su día juntos</div></div></div>`;
+  document.getElementById('home-alerts').innerHTML=urgent.length?urgent.map(aRow).join(''):`<div class="arow ok"><span class="aicon">✓</span><div><div class="atext">${pet.name} tiene todo bajo control hoy -- disfruten su día juntos</div></div></div>`;
   document.getElementById('home-upcoming').innerHTML=upcoming.length?`<div class="stitle mt-8">📅 Próximas citas</div>`+upcoming.map(a=>`<div class="arow ok" style="cursor:pointer" onclick="goTo('citas')"><span class="aicon">📅</span><div style="flex:1"><div class="atext">${a.text}</div>${a.meta?`<div class="ameta">${a.meta}</div>`:''}<div class="adays">Faltan ${a.dU} días</div></div><span style="color:var(--text-lt)">›</span></div>`).join(''):'';
 }
 function aRow(a){return`<div class="arow ${a.type}"><span class="aicon">${a.icon}</span><div><div class="atext">${a.text}</div>${a.meta?`<div class="ameta">${a.meta}</div>`:''}</div></div>`}
@@ -1306,7 +1323,7 @@ function renderProfile(pid){
   const exs=byPet(pid,DB.exams),lex=exs.sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
   const food=byPet(pid,DB.foods)[0],enfs=byPet(pid,DB.enfs);
   let dpBadge=`<span class="badge bgray">Sin registro</span>`;
-  if(ldp?.next){const d=dDiff(ldp.next);dpBadge=d<0?`<span class="badge balert">Vencida</span>`:d<=15?`<span class="badge bwarn">En ${d} días</span>`:`<span class="badge bok">Al día</span>`}
+  if(ldp?.next){const d=dDiff(ldp.next);dpBadge=d<0?`<span class="badge balert">Vencida</span>`:d<=15?`<span class="badge bwarn">En ${d} días</span>`:`<span class="badge bok">Al día</span>`;}
   const upAppts=byPet(pid,DB.appts).filter(a=>dDiff(a.date)>=0).length;
   document.getElementById('pcontent').innerHTML=`
     <div style="display:flex;align-items:center;gap:14px;padding:16px 0 8px">
@@ -1314,7 +1331,7 @@ function renderProfile(pid){
       <div style="flex:1"><div style="font-family:'Playfair Display',serif;font-size:1.45rem;font-weight:700">${pet.name}</div><div class="tm tsm">${pet.species}${pet.breed?' · '+pet.breed:''}${age?' · '+age:''}</div>${pet.weight?`<div class="tsm fw8 mt-8">${pet.weight} kg</div>`:''}</div>
       <button onclick="editPet('${pid}')" style="background:var(--bg);border:.5px solid var(--border-md);border-radius:var(--r-sm);padding:7px 11px;font-size:.78rem;font-weight:700;color:var(--text-muted);flex-shrink:0">✏️ Editar</button>
     </div>
-    <div class="card"><div class="stitle" style="margin-top:0">Información</div>${dr('Sexo',pet.sex||'—')}${dr('Esterilizado',pet.neut||'—')}${dr('Microchip',pet.chip||'—')}${dr('Alergias',pet.allerg||'—')}${dr('Veterinario',pet.vet||'—')}${pet.vphone?dr('Teléfono',`<a href="tel:${pet.vphone}" style="color:var(--coral)">${pet.vphone}</a>`):''}</div>
+    <div class="card"><div class="stitle" style="margin-top:0">Información</div>${dr('Sexo',pet.sex||'--')}${dr('Esterilizado',pet.neut||'--')}${dr('Microchip',pet.chip||'--')}${dr('Alergias',pet.allerg||'--')}${dr('Veterinario',pet.vet||'--')}${pet.vphone?dr('Teléfono',`<a href="tel:${pet.vphone}" style="color:var(--coral)">${pet.vphone}</a>`):''}</div>
     ${enfs.length?`<div class="card" style="border-color:var(--coral-bd);background:var(--coral-lt)"><div class="stitle" style="margin-top:0;color:var(--coral)">⚠️ Enfermedades crónicas activas</div>${enfs.map(e=>`<div style="font-size:.88rem;font-weight:700;padding:4px 0;border-bottom:.5px solid var(--coral-bd)">${e.name}${e.date?' · desde '+fDs(e.date):''}</div>`).join('')}</div>`:''}
     <div class="stitle">Ficha clínica</div>
     <div class="card-flush">
@@ -1348,9 +1365,9 @@ function renderProfile(pid){
 function dr(l,v){return`<div class="drow"><span class="dlbl">${l}</span><span class="dval">${v}</span></div>`}
 
 /* ================================================================
-   SHARE FICHA CLÍNICA — Web Share API
+   SHARE FICHA CLÍNICA -- Web Share API
    Fase 2: reemplazar con share() nativo de Flutter/React Native
-   El texto generado es idéntico — solo cambia el método de envío
+   El texto generado es idéntico -- solo cambia el método de envío
    ================================================================ */
 function sharePet(pid) {
   const pet = DB.pets.find(p=>p.id===pid);
@@ -1367,7 +1384,7 @@ function sharePet(pid) {
   const appts  = byPet(pid, DB.appts).filter(a=>dDiff(a.date)>=0).sort((a,b)=>new Date(a.date)-new Date(b.date));
   const today  = new Date().toLocaleDateString('es',{day:'numeric',month:'long',year:'numeric'});
 
-  let txt = `🐾 FICHA CLÍNICA — ${pet.name.toUpperCase()}\n`;
+  let txt = `🐾 FICHA CLÍNICA -- ${pet.name.toUpperCase()}\n`;
   txt += `Generada el ${today} desde Pawvida\n`;
   txt += `${'─'.repeat(36)}\n\n`;
 
@@ -1416,7 +1433,7 @@ function sharePet(pid) {
     meds.forEach(m => {
       txt += `• ${m.name}`;
       if (m.dose) txt += ` ${m.dose}`;
-      txt += ` — ${m.freq}`;
+      txt += ` -- ${m.freq}`;
       if (m.notes) txt += ` (${m.notes})`;
       if (m.end)   txt += ` · Hasta ${fD(m.end)}`;
       txt += '\n';
@@ -1428,8 +1445,8 @@ function sharePet(pid) {
   const dpE = dps.find(d=>d.type==='Externa');
   if (dpI || dpE) {
     txt += `\n🪱 DESPARASITACIÓN\n`;
-    if (dpI) txt += `Interna: ${dpI.prod||'—'} · Próxima ${fD(dpI.next)}\n`;
-    if (dpE) txt += `Externa: ${dpE.prod||'—'} · Próxima ${fD(dpE.next)}\n`;
+    if (dpI) txt += `Interna: ${dpI.prod||'--'} · Próxima ${fD(dpI.next)}\n`;
+    if (dpE) txt += `Externa: ${dpE.prod||'--'} · Próxima ${fD(dpE.next)}\n`;
   }
 
   // Alimentación
@@ -1455,7 +1472,7 @@ function sharePet(pid) {
   if (appts.length) {
     txt += `\n📅 PRÓXIMAS CITAS\n`;
     appts.slice(0,3).forEach(a => {
-      txt += `• ${fD(a.date)} ${a.time} — Dr. ${a.vet}`;
+      txt += `• ${fD(a.date)} ${a.time} -- Dr. ${a.vet}`;
       if (a.spec)   txt += ` (${a.spec})`;
       if (a.place)  txt += ` · ${a.place}`;
       if (a.reason) txt += `\n  Motivo: ${a.reason}`;
@@ -1467,10 +1484,10 @@ function sharePet(pid) {
   txt += `Enviado desde Pawvida 🐾\n`;
   txt += `Porque ${pet.name} se merece lo mejor.`;
 
-  // Web Share API — abre el menú nativo del teléfono
+  // Web Share API -- abre el menú nativo del teléfono
   if (navigator.share) {
     navigator.share({
-      title: `Ficha clínica de ${pet.name} — Pawvida`,
+      title: `Ficha clínica de ${pet.name} -- Pawvida`,
       text: txt
     }).catch(()=>{});
   } else {
@@ -1688,7 +1705,7 @@ function renderFood(pid){
   document.getElementById('ftitle').textContent='Alimentación de '+pet.name;
   const food=byPet(pid,DB.foods)[0],el=document.getElementById('fcontent');
   if(!food){el.innerHTML=empty('🍽️','Sin dieta registrada','Registra qué come '+pet.name+' para tener la info siempre a mano.')+`<div style="padding:0 0 8px"><button class="btn btn-p btn-f" onclick="openM('modal-alimento')">+ Registrar alimentación</button></div>`;return}
-  el.innerHTML=`<div class="card"><div class="stitle" style="margin-top:0">Dieta actual</div>${dr('Alimento',food.brand)}${dr('Tipo',food.type)}${dr('Cantidad diaria',food.amount||'—')}${dr('Frecuencia',food.times)}${food.notes?`<div style="margin-top:10px;padding:10px;background:var(--bg);border-radius:var(--r-sm);font-size:.85rem;color:var(--text-mid);border-left:2.5px solid var(--coral)">${food.notes}</div>`:''}</div><button class="btn btn-g btn-f btn-sm mt-8" onclick="delItem('foods','${food.id}',()=>renderFood('${pid}'));openM('modal-alimento')">✏️ Actualizar dieta</button>`
+  el.innerHTML=`<div class="card"><div class="stitle" style="margin-top:0">Dieta actual</div>${dr('Alimento',food.brand)}${dr('Tipo',food.type)}${dr('Cantidad diaria',food.amount||'--')}${dr('Frecuencia',food.times)}${food.notes?`<div style="margin-top:10px;padding:10px;background:var(--bg);border-radius:var(--r-sm);font-size:.85rem;color:var(--text-mid);border-left:2.5px solid var(--coral)">${food.notes}</div>`:''}</div><button class="btn btn-g btn-f btn-sm mt-8" onclick="delItem('foods','${food.id}',()=>renderFood('${pid}'));openM('modal-alimento')">✏️ Actualizar dieta</button>`
 }
 
 /* ================================================================
@@ -1703,7 +1720,7 @@ function renderEnfs(pid){
 }
 
 /* ================================================================
-   EDIT FUNCTIONS — todas las colecciones
+   EDIT FUNCTIONS -- todas las colecciones
    ================================================================ */
 
 // EDITAR MASCOTA
@@ -1850,7 +1867,7 @@ function saveMed(){
   const pet=getAP();if(!pet){showToast('Selecciona una mascota');return}
   const item={id:DB.uid(),petId:pet.id,name,dose:g('m-dose'),freq:g('m-freq'),start:g('m-start'),end:g('m-end'),time:g('m-time'),notes:g('m-notes'),active:document.getElementById('m-active').checked,createdAt:new Date().toISOString()};
   const arr=DB.meds;arr.push(item);DB.save('meds',arr);closeM('modal-med');resetF(['m-name','m-dose','m-time','m-notes','m-start','m-end']);document.getElementById('m-active').checked=true;
-  showToast(`Listo — ${pet.name} está cada vez mejor 💊`);renderMeds(pet)
+  showToast(`Listo -- ${pet.name} está cada vez mejor 💊`);renderMeds(pet)
 }
 function saveAppt(){
   const vet=g('a-vet'),date=g('a-date'),time=g('a-time');if(!vet||!date||!time){showToast('Completa veterinario, fecha y hora');return}
@@ -2009,13 +2026,13 @@ function renderCuidador(pid) {
     </div>`:''}
 
     ${guide.alert?`<div style="background:#FFF5F5;border-radius:var(--r-lg);border:.5px solid #FDBDBD;padding:14px;margin-bottom:10px">
-      <div style="font-size:.75rem;font-weight:800;color:#C0392B;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">⚠️ Señales de alerta — cuándo llamar al veterinario</div>
+      <div style="font-size:.75rem;font-weight:800;color:#C0392B;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">⚠️ Señales de alerta -- cuándo llamar al veterinario</div>
       <div style="font-size:.88rem;font-weight:600;color:#8B1A1A;white-space:pre-line;line-height:1.6">${guide.alert}</div>
     </div>`:''}
 
     <div style="background:white;border-radius:var(--r-lg);border:.5px solid #C8DCEF;padding:14px;margin-bottom:10px">
       <div style="font-size:.75rem;font-weight:800;color:#4A7AB0;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">📞 Contactos de emergencia</div>
-      ${row('🏥','Veterinario',guide.vetname+(guide.vetphone?' — '+guide.vetphone:''))}
+      ${row('🏥','Veterinario',guide.vetname+(guide.vetphone?' -- '+guide.vetphone:''))}
       ${row('✈️','Dónde está el dueño',guide.owner)}
     </div>
 
@@ -2091,7 +2108,7 @@ function shareGuia(pid) {
   }
 
   txt += `📞 CONTACTOS\n`;
-  if (guide.vetname)  txt += `Veterinario: ${guide.vetname}${guide.vetphone?' — '+guide.vetphone:''}\n`;
+  if (guide.vetname)  txt += `Veterinario: ${guide.vetname}${guide.vetphone?' -- '+guide.vetphone:''}\n`;
   if (guide.owner)    txt += `Dueño/a: ${guide.owner}\n`;
   txt += '\n';
 
@@ -2099,7 +2116,7 @@ function shareGuia(pid) {
 
   txt += `${'─'.repeat(36)}\n`;
   txt += `Enviado desde Pawvida 🐾\n`;
-  txt += `Porque ${pet.name} se merece lo mejor — incluso cuando el dueño no está.`;
+  txt += `Porque ${pet.name} se merece lo mejor -- incluso cuando el dueño no está.`;
 
   if (navigator.share) {
     navigator.share({
@@ -2140,7 +2157,7 @@ function openEmer() {
     ${pet.neut?`<div class="emer-row"><span class="emer-row-label">Esterilizado/a</span><span class="emer-row-value">${pet.neut}</span></div>`:''}
   </div>`;
 
-  // Allergies — critical
+  // Allergies -- critical
   if (pet.allerg) {
     html += `<div class="emer-section" style="background:rgba(255,255,100,.15);border-color:rgba(255,255,100,.3)">
       <div class="emer-section-title" style="color:rgba(255,255,100,.8)">⚠️ Alergias conocidas</div>
@@ -2218,7 +2235,7 @@ function checkBirthdays(pets) {
 }
 
 /* ================================================================
-   VISUAL SHARE — genera imagen PNG con Canvas y la comparte
+   VISUAL SHARE -- genera imagen PNG con Canvas y la comparte
    Un toque → imagen lista → menú nativo del teléfono
    ================================================================ */
 function sharePetVisual(pid) {
@@ -2262,7 +2279,7 @@ function sharePetVisual(pid) {
   if (lp) sections.push({ type:'rows', title:'⚖️ Peso', rows:[{ label:'Último registro', value:`${lp.value} kg · ${fDs(lp.date)}` }] });
 
   // Vet
-  if (pet.vet||pet.vphone) sections.push({ type:'rows', title:'🏥 Veterinario', rows:[{ label:pet.vet?'Dr. '+pet.vet:'—', value:pet.vphone||'' }] });
+  if (pet.vet||pet.vphone) sections.push({ type:'rows', title:'🏥 Veterinario', rows:[{ label:pet.vet?'Dr. '+pet.vet:'--', value:pet.vphone||'' }] });
 
   // === DRAW ON CANVAS ===
   const W = 600;
@@ -2421,7 +2438,7 @@ function sharePetVisual(pid) {
       try {
         await navigator.share({
           files: [file],
-          title: `Ficha de ${pet.name} — Pawvida`,
+          title: `Ficha de ${pet.name} -- Pawvida`,
           text: `Ficha clínica de ${pet.name} 🐾`
         });
       } catch(e) { fallbackShare(canvas, pet.name); }
@@ -2438,7 +2455,7 @@ function fallbackShare(canvas, name) {
   a.download = `ficha-${name.toLowerCase()}.png`;
   document.body.appendChild(a); a.click();
   setTimeout(()=>a.remove(), 500);
-  showToast('Imagen descargada — compártela desde tu galería 📷');
+  showToast('Imagen descargada -- compártela desde tu galería 📷');
 }
    Fase 2: reemplazar con sincronización automática en la nube
    ================================================================ */
