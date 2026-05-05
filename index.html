@@ -1070,8 +1070,10 @@ function buildAlerts(pid){
   });
   byPet(pid,DB.despar).forEach(dp=>{
     if(!dp.next)return;const d=dDiff(dp.next);
-    if(d<0)all.push({type:'urgent',icon:'🪱',text:`Desparasitación de ${name} vencida`,meta:`${dp.type} · Venció ${fD(dp.next)}`,score:4,kind:'h'});
-    else if(d<=15)all.push({type:d<=3?'warn':'ok',icon:'🪱',text:`Desparasitación de ${name} próxima`,meta:`${dp.type}${dp.prod?' · '+dp.prod:''} · en ${d} días`,score:d<=3?3:1,kind:'h'});
+    if(d<0)all.push({type:'urgent',icon:'🪱',text:`Desparasitación de ${name} vencida`,meta:`${dp.type} · Venció hace ${Math.abs(d)} días`,score:5,kind:'h'});
+    else if(d===0)all.push({type:'urgent',icon:'🪱',text:`¡Hoy toca desparasitar a ${name}!`,meta:`${dp.type}${dp.prod?' · '+dp.prod:''}`,score:5,kind:'h'});
+    else if(d<=7)all.push({type:'warn',icon:'🪱',text:`Desparasitación de ${name} en ${d} días`,meta:`${dp.type}${dp.prod?' · '+dp.prod:''} · No lo dejes pasar`,score:4,kind:'h'});
+    else if(d<=30)all.push({type:'ok',icon:'🪱',text:`Desparasitación de ${name} próxima`,meta:`${dp.type}${dp.prod?' · '+dp.prod:''} · Faltan ${d} días`,score:2,kind:'h'});
   });
   byPet(pid,DB.meds).filter(m=>m.active).forEach(m=>{
     all.push({type:'ok',icon:'💊',text:`Es hora del remedio de ${name}`,meta:`${m.name}${m.dose?' · '+m.dose:''}${m.time?' · '+m.time:''}`,score:2,kind:'m'});
@@ -1310,6 +1312,18 @@ function renderHome(){
     }
   }
 
+  // Guide shortcut
+  const guide = byPet(pet.id, DB.guides)[0];
+  const guideHTML = `
+    <div class="action-row" onclick="_pid='${pet.id}';goTo('cuidador')">
+      <div class="action-icon" style="background:#EBF4FF">🧳</div>
+      <div class="action-body">
+        <div class="action-title">Guía del cuidador</div>
+        <div class="action-sub">${guide ? 'Lista para compartir · toca para ver o editar' : 'Créala antes de tu próximo viaje'}</div>
+      </div>
+      <span class="action-arrow">›</span>
+    </div>`;
+
   actionsEl.innerHTML=`
     ${progHTML}
     ${checkHTML}
@@ -1329,7 +1343,8 @@ function renderHome(){
         <div class="action-sub">${medSub}</div>
       </div>
       <span class="action-arrow">›</span>
-    </div>`;
+    </div>
+    ${guideHTML}`;
 
   // Alerts
   document.getElementById('home-alerts').innerHTML=urgent.length?urgent.map(aRow).join(''):`<div class="arow ok"><span class="aicon">✓</span><div><div class="atext">${pet.name} tiene todo bajo control hoy -- disfruten su día juntos</div></div></div>`;
