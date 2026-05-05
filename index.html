@@ -1276,9 +1276,44 @@ function renderHome(){
       </div>
     </div>` : '';
 
+  // Daily med check card
+  const today = new Date().toISOString().split('T')[0];
+  const checks = JSON.parse(localStorage.getItem('pv2_checks')||'{}');
+  let checkHTML = '';
+  if (meds.length) {
+    const allDone = meds.every(m => checks[m.id+'_'+today]);
+    if (allDone) {
+      checkHTML = `<div class="stitle">💊 Remedios de hoy</div>
+        <div style="background:var(--green-lt);border-radius:var(--r-lg);padding:11px 13px;margin-bottom:7px;display:flex;align-items:center;gap:8px">
+          <span style="font-size:1.2rem">🎉</span>
+          <div>
+            <div style="font-size:.82rem;font-weight:800;color:var(--green)">¡Todos los remedios de ${pet.name} dados hoy!</div>
+            <div style="font-size:.72rem;color:var(--green);opacity:.8;margin-top:2px">Eres un dueño increíble 🐾</div>
+          </div>
+        </div>`;
+    } else {
+      const rows = meds.map(m => {
+        const done = !!checks[m.id+'_'+today];
+        return `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:.5px solid var(--border)">
+          <button onclick="toggleCheck('${m.id}','${pet.name}');renderHome()" style="width:22px;height:22px;border-radius:50%;border:1.5px solid ${done?'var(--green)':'var(--border-md)'};background:${done?'var(--green-lt)':'transparent'};display:flex;align-items:center;justify-content:center;font-size:.65rem;color:var(--green);flex-shrink:0">${done?'✓':''}</button>
+          <div style="flex:1">
+            <div style="font-size:.8rem;font-weight:700;color:${done?'var(--text-muted)':'var(--text)'};text-decoration:${done?'line-through':'none'}">${m.name}${m.dose?' · '+m.dose:''}</div>
+            <div style="font-size:.68rem;color:var(--text-muted)">${done?'✓ Dado hoy':m.freq+(m.time?' · '+m.time:'')}</div>
+          </div>
+        </div>`;
+      }).join('');
+      checkHTML = `<div class="stitle">💊 Remedios de hoy</div>
+        <div style="background:var(--card);border:.5px solid var(--border);border-radius:var(--r-lg);padding:8px 12px;margin-bottom:7px">
+          <div style="font-size:.78rem;font-weight:800;color:var(--text);margin-bottom:4px">¿Ya le diste los remedios a ${pet.name}?</div>
+          ${rows}
+        </div>`;
+    }
+  }
+
   actionsEl.innerHTML=`
     ${progHTML}
-    <div class="stitle" style="margin-top:${prog.pct<100?'4':'4'}px">Acciones rápidas</div>
+    ${checkHTML}
+    <div class="stitle" style="margin-top:4px">Acciones rápidas</div>
     <div class="action-row" onclick="_pid='${pet.id}';goSub('consultas');setTimeout(()=>openM('modal-consulta'),200)">
       <div class="action-icon mi-c">🏥</div>
       <div class="action-body">
