@@ -934,7 +934,7 @@ img{max-width:100%}
 <div class="toast" id="toast"></div>
 
 <script>
-/* Polyfill for ctx.roundRect — older iOS and Chrome */
+/* Polyfill for ctx.roundRect -- older iOS and Chrome */
 if (!CanvasRenderingContext2D.prototype.roundRect) {
   CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
     const radius = Array.isArray(r) ? r[0] : (r || 0);
@@ -1925,7 +1925,7 @@ function saveEnfermedad(){
 }
 
 /* ================================================================
-   PRELOAD GUIDE — rellena automáticamente con datos del perfil
+   PRELOAD GUIDE -- rellena automáticamente con datos del perfil
    ================================================================ */
 function preloadGuide() {
   const pet = DB.pets.find(p=>p.id===_pid);
@@ -1952,7 +1952,7 @@ function preloadGuide() {
     medsStr = meds.map(m => {
       let line = `• ${m.name}`;
       if (m.dose)  line += ` ${m.dose}`;
-      if (m.freq)  line += ` — ${m.freq}`;
+      if (m.freq)  line += ` -- ${m.freq}`;
       if (m.time)  line += ` a las ${m.time}`;
       if (m.notes) line += ` (${m.notes})`;
       return line;
@@ -1978,7 +1978,7 @@ function preloadGuide() {
   };
 
   if (existing) {
-    // Editing — load saved values
+    // Editing -- load saved values
     fill('cg-from',      existing.from || '',      true);
     fill('cg-to',        existing.to || '',        true);
     fill('cg-cname',     existing.cname || '',     true);
@@ -1997,7 +1997,7 @@ function preloadGuide() {
     fill('cg-owner',     existing.owner || '',     true);
     fill('cg-extra',     existing.extra || '',     true);
   } else {
-    // New guide — preload from pet data
+    // New guide -- preload from pet data
     fill('cg-food',      foodStr);
     fill('cg-foodamt',   foodAmt);
     fill('cg-foodtime',  foodTime);
@@ -2021,7 +2021,7 @@ function preloadGuide() {
   // Show upcoming appointments banner
   if (upAppts.length) {
     const apptLines = upAppts.slice(0,3).map(a =>
-      `📅 ${fD(a.date)} ${a.time} — Dr. ${a.vet}${a.place?' · '+a.place:''}`
+      `📅 ${fD(a.date)} ${a.time} -- Dr. ${a.vet}${a.place?' · '+a.place:''}`
     ).join('<br>');
     apptsBanner.innerHTML = `<strong>📋 Citas próximas de ${pet.name}:</strong><br>${apptLines}<br><span style="font-size:.75rem;opacity:.8">Asegúrate de que el cuidador las tenga en cuenta.</span>`;
     apptsBanner.style.display = 'block';
@@ -2187,7 +2187,7 @@ function shareGuia(pid) {
     sections.push({ type:'rows', title:'🐾 Rutinas', rows });
   }
 
-  // Alert — red section
+  // Alert -- red section
   if (guide.alert) {
     sections.push({ type:'alert', title:'⚠️ Cuándo llamar al veterinario', body: guide.alert });
   }
@@ -2390,12 +2390,12 @@ function openEmer() {
   const enfs = byPet(pet.id, DB.enfs);
   let html = '';
 
-  // 1 — CALL BUTTON always first
+  // 1 -- CALL BUTTON always first
   if (pet.vphone) {
     html += `<a class="emer-call-btn" href="tel:${pet.vphone}">📞 Llamar a ${pet.vet||'veterinario'} ahora</a>`;
   }
 
-  // 2 — ALLERGIES critical, yellow
+  // 2 -- ALLERGIES critical, yellow
   if (pet.allerg) {
     html += `<div class="emer-section emer-warn">
       <div class="emer-section-title">⚠️ Alergias conocidas</div>
@@ -2403,7 +2403,7 @@ function openEmer() {
     </div>`;
   }
 
-  // 3 — CHRONIC CONDITIONS critical, yellow
+  // 3 -- CHRONIC CONDITIONS critical, yellow
   if (enfs.length) {
     html += `<div class="emer-section emer-warn">
       <div class="emer-section-title">⚠️ Enfermedades crónicas</div>
@@ -2411,7 +2411,7 @@ function openEmer() {
     </div>`;
   }
 
-  // 4 — ACTIVE MEDS
+  // 4 -- ACTIVE MEDS
   if (meds.length) {
     html += `<div class="emer-section emer-normal">
       <div class="emer-section-title">💊 Medicamentos actuales</div>
@@ -2419,7 +2419,7 @@ function openEmer() {
     </div>`;
   }
 
-  // 5 — BASIC DATA
+  // 5 -- BASIC DATA
   html += `<div class="emer-section emer-normal">
     <div class="emer-section-title">🐾 Datos de ${pet.name}</div>
     <div class="emer-row"><span class="emer-row-label">Especie / raza</span><span class="emer-row-value">${pet.species}${pet.breed?' · '+pet.breed:''}</span></div>
@@ -2428,7 +2428,7 @@ function openEmer() {
     ${pet.chip?`<div class="emer-row"><span class="emer-row-label">Microchip</span><span class="emer-row-value">${pet.chip}</span></div>`:''}
   </div>`;
 
-  // 6 — VET INFO
+  // 6 -- VET INFO
   if (pet.vet||pet.vphone) {
     html += `<div class="emer-section emer-normal">
       <div class="emer-section-title">🏥 Veterinario</div>
@@ -2457,7 +2457,7 @@ function closeEmer() {
   // Build all events
   const events=[];
   byPet(pid,DB.vax).forEach(v=>{if(v.date)events.push({date:v.date,type:'vax',icon:'💉',title:v.name,detail:v.vet?'Dr. '+v.vet:'',badge:vSt(v)==='ok'?{t:'Al día',c:'tb-g'}:vSt(v)==='soon'?{t:'Por vencer',c:'tb-o'}:{t:'Vencida',c:'tb-r'}})});
-  byPet(pid,DB.cons).forEach(c=>{if(c.date)events.push({date:c.date,type:'cons',icon:'🏥',title:c.type+' — Dr. '+c.vet,detail:c.reason||c.diag||'',badge:c.treat?{t:'Con tratamiento',c:'tb-b'}:null})});
+  byPet(pid,DB.cons).forEach(c=>{if(c.date)events.push({date:c.date,type:'cons',icon:'🏥',title:c.type+' -- Dr. '+c.vet,detail:c.reason||c.diag||'',badge:c.treat?{t:'Con tratamiento',c:'tb-b'}:null})});
   byPet(pid,DB.despar).forEach(d=>{if(d.date)events.push({date:d.date,type:'despar',icon:'🪱',title:'Desparasitación '+d.type,detail:d.prod||'',badge:d.next?{t:'Próxima '+fDs(d.next),c:'tb-g'}:null})});
   byPet(pid,DB.pesos).forEach(w=>{if(w.date)events.push({date:w.date,type:'peso',icon:'⚖️',title:'Peso: '+w.value+' kg',detail:w.notes||'',badge:w.bcs?{t:w.bcs,c:'tb-b'}:null})});
   byPet(pid,DB.exams).forEach(e=>{if(e.date)events.push({date:e.date,type:'exam',icon:'🧪',title:e.type,detail:e.lab||'',badge:e.result?{t:'Con resultado',c:'tb-g'}:null})});
