@@ -29,6 +29,7 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-tap-highlight-color:transparent}
 body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body.welcome-active{overflow:hidden;height:100dvh}
 button{font-family:inherit;cursor:pointer;border:none;background:none}
 input,select,textarea{font-family:inherit}
 img{max-width:100%}
@@ -171,10 +172,11 @@ img{max-width:100%}
 
 /* ── WELCOME SCREEN ── */
 #swelcome{
-  position:fixed;inset:0;overflow:hidden;
+  position:relative;overflow:hidden;
   background:linear-gradient(160deg,#22A898 0%,#128A7C 55%,#0A6B5E 100%);
   color:white;display:flex;flex-direction:column;
-  height:100%;z-index:200;
+  height:100dvh;max-height:100dvh;
+  touch-action:none;
 }
 .w-circle{position:absolute;border-radius:50%;pointer-events:none;}
 .w-top{padding:54px 28px 0;position:relative;z-index:1;}
@@ -2798,10 +2800,10 @@ function showToast(msg){const el=document.getElementById('toast');el.textContent
 function startApp(){
   document.getElementById('swelcome').style.display='none';
   document.getElementById('main-app').style.display='block';
+  document.body.classList.remove('welcome-active');
   localStorage.setItem('pv2_ok','1');
   renderHome();renderPets();
-  // Show onboarding for new users
-  if(!localStorage.getItem('pv2_onb') && !DB.pets.length) {
+  if(!localStorage.getItem('pv2_onb') && !DB.pets.length){
     setTimeout(()=>showOnboarding(), 300);
   }
 }
@@ -2809,8 +2811,11 @@ function init(){
   if(localStorage.getItem('pv2_ok')){
     document.getElementById('swelcome').style.display='none';
     document.getElementById('main-app').style.display='block';
+    document.body.classList.remove('welcome-active');
     renderHome();renderPets();
     const pet=getAP();renderVax(pet);renderMeds(pet);renderAppts(pet);
+  } else {
+    document.body.classList.add('welcome-active');
   }
 }
 if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
