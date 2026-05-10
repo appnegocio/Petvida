@@ -171,10 +171,10 @@ img{max-width:100%}
 
 /* ── WELCOME SCREEN ── */
 #swelcome{
-  position:relative;overflow:hidden;
+  position:fixed;inset:0;overflow:hidden;
   background:linear-gradient(160deg,#22A898 0%,#128A7C 55%,#0A6B5E 100%);
   color:white;display:flex;flex-direction:column;
-  min-height:100dvh;padding:0;
+  height:100%;z-index:200;
 }
 .w-circle{position:absolute;border-radius:50%;pointer-events:none;}
 .w-top{padding:54px 28px 0;position:relative;z-index:1;}
