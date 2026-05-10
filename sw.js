@@ -5,7 +5,7 @@
  *                  El caché nativo lo maneja el framework.
  */
 
-const CACHE_NAME = 'pawvida-v1.0.3';
+const CACHE_NAME = 'pawvida-v1.0.5';
 
 // Recursos a cachear al instalar
 const STATIC_ASSETS = [
