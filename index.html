@@ -321,16 +321,16 @@ img{max-width:100%}
 }
 .cal-hint-text{font-size:.8rem;font-weight:700;color:var(--blue);flex:1;line-height:1.4}
 
-/* EMERGENCY MODE */
+/* EMERGENCY MODE — rojo vivo */
 .emer-mode-overlay{
   display:none;position:fixed;inset:0;
-  background:#C0392B;z-index:400;
-  flex-direction:column;overflow-y:auto;
+  background:linear-gradient(170deg,#E8291A,#C0200F);
+  z-index:400;flex-direction:column;overflow-y:auto;
   animation:sIn .2s ease;
 }
 .emer-mode-overlay.open{display:flex}
 .emer-mode-header{
-  padding:52px 20px 20px;
+  padding:52px 20px 16px;
   display:flex;align-items:flex-start;justify-content:space-between;
   flex-shrink:0;
 }
@@ -345,36 +345,69 @@ img{max-width:100%}
   display:flex;align-items:center;justify-content:center;
   flex-shrink:0;cursor:pointer;
 }
-.emer-section{
-  background:rgba(255,255,255,.12);
-  border-radius:var(--r-lg);margin:0 16px 12px;padding:14px;
-  border:.5px solid rgba(255,255,255,.2);
-}
-.emer-section-title{
-  font-size:.68rem;font-weight:800;color:rgba(255,255,255,.6);
-  text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;
-}
-.emer-row{
-  display:flex;align-items:center;gap:10px;
-  padding:8px 0;border-bottom:.5px solid rgba(255,255,255,.1);
-}
-.emer-row:last-child{border-bottom:none}
-.emer-row-label{font-size:.78rem;color:rgba(255,255,255,.65);flex-shrink:0;min-width:90px;}
-.emer-row-value{font-size:.88rem;font-weight:700;color:white;flex:1;}
 .emer-call-btn{
-  background:white;color:#C0392B;
-  border-radius:var(--r-md);padding:14px;
+  background:white;color:#C0200F;
+  border-radius:var(--r-md);padding:16px;
   font-size:1rem;font-weight:900;
   display:flex;align-items:center;justify-content:center;gap:8px;
-  margin:0 16px 12px;text-decoration:none;
-  box-shadow:0 4px 18px rgba(0,0,0,.2);
+  margin:0 16px 14px;text-decoration:none;
+  box-shadow:0 4px 18px rgba(0,0,0,.15);
 }
+.emer-call-btn:active{opacity:.88}
+.emer-section{
+  border-radius:var(--r-lg);margin:0 16px 10px;padding:13px 14px;
+  border:.5px solid rgba(255,255,255,.2);
+}
+.emer-normal{background:rgba(255,255,255,.12)}
+.emer-warn{background:rgba(255,220,0,.15);border-color:rgba(255,220,0,.3)}
+.emer-section-title{
+  font-size:.68rem;font-weight:800;color:rgba(255,255,255,.55);
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:9px;
+}
+.emer-warn .emer-section-title{color:rgba(255,220,0,.8)}
+.emer-row{
+  display:flex;align-items:center;gap:10px;
+  padding:6px 0;border-bottom:.5px solid rgba(255,255,255,.1);
+}
+.emer-row:last-child{border-bottom:none}
+.emer-row-label{font-size:.78rem;color:rgba(255,255,255,.65);flex-shrink:0;min-width:90px}
+.emer-row-value{font-size:.88rem;font-weight:700;color:white;flex:1}
 .emer-tag{
-  background:rgba(255,255,255,.15);color:white;
+  background:rgba(255,220,0,.2);color:#FFE55C;
   padding:4px 10px;border-radius:20px;
   font-size:.72rem;font-weight:700;
-  display:inline-flex;margin:2px;
+  display:inline-flex;margin:3px 4px 3px 0;
 }
+.emer-tag-r{background:rgba(255,150,150,.2);color:#FFB8B8}
+
+/* TIMELINE DE SALUD */
+.tl-screen{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.tl-year{
+  font-size:.7rem;font-weight:800;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:.5px;
+  padding:8px 16px 4px;
+}
+.tl-item{display:flex;gap:0;padding:0 16px;margin-bottom:4px}
+.tl-line-col{display:flex;flex-direction:column;align-items:center;width:24px;flex-shrink:0}
+.tl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.tl-stem{width:1.5px;flex:1;background:var(--border);margin-top:3px;min-height:12px}
+.tl-card{
+  flex:1;background:var(--card);
+  border:.5px solid var(--border);
+  border-radius:var(--r-md);
+  padding:9px 11px;margin-bottom:4px;
+}
+.tl-date{font-size:.68rem;color:var(--text-muted);margin-bottom:3px}
+.tl-event{font-size:.82rem;font-weight:800;color:var(--text);line-height:1.3}
+.tl-detail{font-size:.72rem;color:var(--text-muted);margin-top:3px;line-height:1.4}
+.tl-badge{
+  display:inline-flex;padding:2px 8px;border-radius:10px;
+  font-size:.65rem;font-weight:700;margin-top:5px;
+}
+.tb-g{background:var(--green-lt);color:var(--green)}
+.tb-b{background:var(--blue-lt);color:var(--blue)}
+.tb-o{background:#FFF5E0;color:#C05A00}
+.tb-r{background:#FEF2F2;color:#C0392B}
 
 /* BIRTHDAY BANNER */
 .bday-banner{
@@ -463,8 +496,14 @@ img{max-width:100%}
     </div>
   </div>
 
-  <!-- EMERGENCY MODE -->
-  <div class="emer-mode-overlay" id="emer-mode">
+  <div id="screen-timeline" class="screen">
+    <div class="hdr">
+      <div class="hdr-back" onclick="goTo('pet-profile')">&#8592; Perfil</div>
+      <div class="hdr-title" id="tl-title">Historial de salud</div>
+      <div class="hdr-sub">Línea de tiempo</div>
+    </div>
+    <div class="scroll-area" id="tl-content"></div>
+  </div>
     <div class="emer-mode-header">
       <div>
         <div style="font-size:.72rem;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">🚨 Emergencia</div>
@@ -1190,7 +1229,7 @@ function goTo(sid){navigate(sid,document.querySelector(`[data-nav="${sid}"]`))}
 function goSub(sid){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+sid).classList.add('active');renderS(sid)}
 function renderS(id){
   const pet=getAP();
-  ({home:renderHome,mascotas:renderPets,'pet-profile':()=>renderProfile(_pid),vacunas:()=>renderVax(pet),medicamentos:()=>renderMeds(pet),citas:()=>renderAppts(pet),consultas:()=>renderCons(_pid),desparasitacion:()=>renderDespar(_pid),peso:()=>renderPeso(_pid),examenes:()=>renderExams(_pid),alimentacion:()=>renderFood(_pid),enfermedades:()=>renderEnfs(_pid),cuidador:()=>renderCuidador(_pid),ajustes:()=>{}})[id]?.()
+  ({home:renderHome,mascotas:renderPets,'pet-profile':()=>renderProfile(_pid),vacunas:()=>renderVax(pet),medicamentos:()=>renderMeds(pet),citas:()=>renderAppts(pet),consultas:()=>renderCons(_pid),desparasitacion:()=>renderDespar(_pid),peso:()=>renderPeso(_pid),examenes:()=>renderExams(_pid),alimentacion:()=>renderFood(_pid),enfermedades:()=>renderEnfs(_pid),cuidador:()=>renderCuidador(_pid),ajustes:()=>{},timeline:()=>renderTimeline(_pid)})[id]?.()
 }
 
 /* ================================================================
@@ -1403,7 +1442,8 @@ function renderProfile(pid){
     </div>
     <div style="display:flex;gap:8px;padding-bottom:8px">
       <button class="btn btn-p btn-sm" style="flex:2" onclick="sharePetVisual('${pid}')">↗ Compartir ficha</button>
-      <button class="btn" style="flex:1;background:#FEF2F2;color:#C0392B;border:.5px solid #FAD;font-size:.78rem;font-weight:800" onclick="openEmer()">🚨</button>
+      <button class="btn btn-sm" style="flex:1.5;background:#EBF4FF;color:#1A5FA0;border-color:#C8DCEF;font-size:.78rem;font-weight:800" onclick="_pid='${pid}';goTo('timeline')">📅 Historial</button>
+      <button class="btn" style="flex:0 0 38px;padding:8px;background:#FEF2F2;color:#C0200F;border-color:#FAD;border-radius:var(--r-sm)" onclick="openEmer()">🚨</button>
       <button class="btn btn-d btn-sm" style="flex:0 0 38px;padding:8px" onclick="delPet('${pid}')">🗑</button>
     </div>
     <div style="background:#EBF3FF;border:.5px solid #C8DCEF;border-radius:var(--r-lg);padding:13px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="goSub('cuidador')">
@@ -2341,80 +2381,121 @@ function shareGuia(pid) {
 function openEmer() {
   const pet = getAP(); if (!pet) return;
   document.getElementById('emer-pet-name').textContent = pet.name;
-  const meds   = byPet(pet.id, DB.meds).filter(m=>m.active);
-  const enfs   = byPet(pet.id, DB.enfs);
-  const vax    = byPet(pet.id, DB.vax);
-
+  const meds = byPet(pet.id, DB.meds).filter(m=>m.active);
+  const enfs = byPet(pet.id, DB.enfs);
   let html = '';
 
-  // Call vet button
+  // 1 — CALL BUTTON always first
   if (pet.vphone) {
-    html += `<a class="emer-call-btn" href="tel:${pet.vphone}">
-      📞 Llamar a ${pet.vet||'veterinario'} ahora
-    </a>`;
+    html += `<a class="emer-call-btn" href="tel:${pet.vphone}">📞 Llamar a ${pet.vet||'veterinario'} ahora</a>`;
   }
 
-  // Basic data
-  html += `<div class="emer-section">
-    <div class="emer-section-title">Datos de ${pet.name}</div>
-    <div class="emer-row"><span class="emer-row-label">Especie / raza</span><span class="emer-row-value">${pet.species}${pet.breed?' · '+pet.breed:''}</span></div>
-    ${pet.weight?`<div class="emer-row"><span class="emer-row-label">Peso</span><span class="emer-row-value">${pet.weight} kg</span></div>`:''}
-    ${pet.chip?`<div class="emer-row"><span class="emer-row-label">Microchip</span><span class="emer-row-value">${pet.chip}</span></div>`:''}
-    ${pet.neut?`<div class="emer-row"><span class="emer-row-label">Esterilizado/a</span><span class="emer-row-value">${pet.neut}</span></div>`:''}
-  </div>`;
-
-  // Allergies -- critical
+  // 2 — ALLERGIES critical, yellow
   if (pet.allerg) {
-    html += `<div class="emer-section" style="background:rgba(255,255,100,.15);border-color:rgba(255,255,100,.3)">
-      <div class="emer-section-title" style="color:rgba(255,255,100,.8)">⚠️ Alergias conocidas</div>
-      <div style="font-size:1rem;font-weight:800;color:white">${pet.allerg}</div>
+    html += `<div class="emer-section emer-warn">
+      <div class="emer-section-title">⚠️ Alergias conocidas</div>
+      <div style="font-size:.95rem;font-weight:800;color:#FFE55C">${pet.allerg}</div>
     </div>`;
   }
 
-  // Chronic conditions
+  // 3 — CHRONIC CONDITIONS critical, yellow
   if (enfs.length) {
-    html += `<div class="emer-section" style="background:rgba(255,255,100,.15);border-color:rgba(255,255,100,.3)">
-      <div class="emer-section-title" style="color:rgba(255,255,100,.8)">⚠️ Enfermedades crónicas</div>
-      ${enfs.map(e=>`<div style="font-size:.9rem;font-weight:700;color:white;padding:4px 0;border-bottom:.5px solid rgba(255,255,255,.1)">${e.name}${e.notes?`<div style="font-size:.75rem;color:rgba(255,255,255,.7);margin-top:2px">${e.notes}</div>`:''}</div>`).join('')}
+    html += `<div class="emer-section emer-warn">
+      <div class="emer-section-title">⚠️ Enfermedades crónicas</div>
+      ${enfs.map(e=>`<div style="font-size:.88rem;font-weight:700;color:white;padding:5px 0;border-bottom:.5px solid rgba(255,255,255,.1)">${e.name}${e.notes?`<div style="font-size:.75rem;color:rgba(255,255,255,.65);margin-top:2px">${e.notes}</div>`:''}</div>`).join('')}
     </div>`;
   }
 
-  // Active meds
+  // 4 — ACTIVE MEDS
   if (meds.length) {
-    html += `<div class="emer-section">
+    html += `<div class="emer-section emer-normal">
       <div class="emer-section-title">💊 Medicamentos actuales</div>
       ${meds.map(m=>`<div class="emer-row"><span class="emer-row-label">${m.name}</span><span class="emer-row-value">${m.dose||''} · ${m.freq}</span></div>`).join('')}
     </div>`;
   }
 
-  // Last vax
-  const lastVax = vax.sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
-  if (lastVax) {
-    html += `<div class="emer-section">
-      <div class="emer-section-title">💉 Última vacuna</div>
-      <div class="emer-row"><span class="emer-row-label">${lastVax.name}</span><span class="emer-row-value">${fD(lastVax.date)}</span></div>
-    </div>`;
-  }
+  // 5 — BASIC DATA
+  html += `<div class="emer-section emer-normal">
+    <div class="emer-section-title">🐾 Datos de ${pet.name}</div>
+    <div class="emer-row"><span class="emer-row-label">Especie / raza</span><span class="emer-row-value">${pet.species}${pet.breed?' · '+pet.breed:''}</span></div>
+    ${pet.weight?`<div class="emer-row"><span class="emer-row-label">Peso</span><span class="emer-row-value">${pet.weight} kg</span></div>`:''}
+    ${pet.neut?`<div class="emer-row"><span class="emer-row-label">Esterilizado/a</span><span class="emer-row-value">${pet.neut}</span></div>`:''}
+    ${pet.chip?`<div class="emer-row"><span class="emer-row-label">Microchip</span><span class="emer-row-value">${pet.chip}</span></div>`:''}
+  </div>`;
 
-  // Vet info
-  if (pet.vet || pet.vphone) {
-    html += `<div class="emer-section">
-      <div class="emer-section-title">🏥 Veterinario de cabecera</div>
+  // 6 — VET INFO
+  if (pet.vet||pet.vphone) {
+    html += `<div class="emer-section emer-normal">
+      <div class="emer-section-title">🏥 Veterinario</div>
       ${pet.vet?`<div class="emer-row"><span class="emer-row-label">Nombre</span><span class="emer-row-value">Dr. ${pet.vet}</span></div>`:''}
       ${pet.vphone?`<div class="emer-row"><span class="emer-row-label">Teléfono</span><span class="emer-row-value">${pet.vphone}</span></div>`:''}
     </div>`;
   }
 
   if (!pet.vphone && !pet.vet) {
-    html = `<div class="emer-section"><div style="color:rgba(255,255,255,.7);font-size:.88rem;line-height:1.5">No hay veterinario registrado aún. Ve al perfil de ${pet.name} y agrega el teléfono del vet para poder llamar directo desde aquí.</div></div>` + html;
+    html = `<div class="emer-section emer-normal" style="margin-top:16px"><div style="color:rgba(255,255,255,.7);font-size:.88rem;line-height:1.5">Agrega el veterinario de ${pet.name} en su perfil para poder llamar directo desde aquí.</div></div>` + html;
   }
 
+  html += '<div style="height:24px"></div>';
   document.getElementById('emer-content').innerHTML = html;
   document.getElementById('emer-mode').classList.add('open');
 }
 
 function closeEmer() {
   document.getElementById('emer-mode').classList.remove('open');
+}
+  if(!pid)return;
+  const pet=DB.pets.find(p=>p.id===pid);if(!pet)return;
+  document.getElementById('tl-title').textContent='Historial de '+pet.name;
+  const el=document.getElementById('tl-content');
+
+  // Build all events
+  const events=[];
+  byPet(pid,DB.vax).forEach(v=>{if(v.date)events.push({date:v.date,type:'vax',icon:'💉',title:v.name,detail:v.vet?'Dr. '+v.vet:'',badge:vSt(v)==='ok'?{t:'Al día',c:'tb-g'}:vSt(v)==='soon'?{t:'Por vencer',c:'tb-o'}:{t:'Vencida',c:'tb-r'}})});
+  byPet(pid,DB.cons).forEach(c=>{if(c.date)events.push({date:c.date,type:'cons',icon:'🏥',title:c.type+' — Dr. '+c.vet,detail:c.reason||c.diag||'',badge:c.treat?{t:'Con tratamiento',c:'tb-b'}:null})});
+  byPet(pid,DB.despar).forEach(d=>{if(d.date)events.push({date:d.date,type:'despar',icon:'🪱',title:'Desparasitación '+d.type,detail:d.prod||'',badge:d.next?{t:'Próxima '+fDs(d.next),c:'tb-g'}:null})});
+  byPet(pid,DB.pesos).forEach(w=>{if(w.date)events.push({date:w.date,type:'peso',icon:'⚖️',title:'Peso: '+w.value+' kg',detail:w.notes||'',badge:w.bcs?{t:w.bcs,c:'tb-b'}:null})});
+  byPet(pid,DB.exams).forEach(e=>{if(e.date)events.push({date:e.date,type:'exam',icon:'🧪',title:e.type,detail:e.lab||'',badge:e.result?{t:'Con resultado',c:'tb-g'}:null})});
+
+  if(!events.length){
+    el.innerHTML=empty('📅','Sin historial aún','Registra consultas, vacunas, pesos y más para ver la línea de tiempo.');
+    return;
+  }
+
+  // Sort newest first
+  events.sort((a,b)=>new Date(b.date)-new Date(a.date));
+
+  // Group by year
+  const byYear={};
+  events.forEach(e=>{
+    const y=e.date.split('-')[0];
+    if(!byYear[y])byYear[y]=[];
+    byYear[y].push(e);
+  });
+
+  const dotColors={vax:'#1D9E75',cons:'#1D9E8F',despar:'#F0A050',peso:'#1A5FA0',exam:'#8B5CF6'};
+
+  let html='';
+  Object.keys(byYear).sort((a,b)=>b-a).forEach(year=>{
+    html+=`<div class="tl-year">${year}</div>`;
+    byYear[year].forEach((e,i)=>{
+      const isLast=i===byYear[year].length-1;
+      html+=`<div class="tl-item">
+        <div class="tl-line-col">
+          <div class="tl-dot" style="background:${dotColors[e.type]||'#888'}"></div>
+          ${!isLast?'<div class="tl-stem"></div>':''}
+        </div>
+        <div class="tl-card">
+          <div class="tl-date">${fD(e.date)}</div>
+          <div class="tl-event">${e.icon} ${e.title}</div>
+          ${e.detail?`<div class="tl-detail">${e.detail}</div>`:''}
+          ${e.badge?`<span class="tl-badge ${e.badge.c}">${e.badge.t}</span>`:''}
+        </div>
+      </div>`;
+    });
+  });
+
+  el.innerHTML=html;
 }
 
 /* ================================================================
