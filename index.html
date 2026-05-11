@@ -934,23 +934,8 @@ img{max-width:100%}
 <div class="toast" id="toast"></div>
 
 <script>
-/* Polyfill for ctx.roundRect -- older iOS and Chrome */
-if (!CanvasRenderingContext2D.prototype.roundRect) {
-  CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
-    const radius = Array.isArray(r) ? r[0] : (r || 0);
-    this.beginPath();
-    this.moveTo(x + radius, y);
-    this.lineTo(x + w - radius, y);
-    this.quadraticCurveTo(x + w, y, x + w, y + radius);
-    this.lineTo(x + w, y + h - radius);
-    this.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
-    this.lineTo(x + radius, y + h);
-    this.quadraticCurveTo(x, y + h, x, y + h - radius);
-    this.lineTo(x, y + radius);
-    this.quadraticCurveTo(x, y, x + radius, y);
-    this.closePath();
-  };
-}
+if(typeof CanvasRenderingContext2D!=="undefined"&&!CanvasRenderingContext2D.prototype.roundRect){CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){var rd=Array.isArray(r)?r[0]:(r||0);this.beginPath();this.moveTo(x+rd,y);this.lineTo(x+w-rd,y);this.quadraticCurveTo(x+w,y,x+w,y+rd);this.lineTo(x+w,y+h-rd);this.quadraticCurveTo(x+w,y+h,x+w-rd,y+h);this.lineTo(x+rd,y+h);this.quadraticCurveTo(x,y+h,x,y+h-rd);this.lineTo(x,y+rd);this.quadraticCurveTo(x,y,x+rd,y);this.closePath();};}
+
 /* ================================================================
    DATA LAYER
    ================================================================ */
@@ -1867,7 +1852,7 @@ function saveDespar(){
   } else {
     const item={id:DB.uid(),petId:_pid,type:g('dp-type')||'Interna',prod:g('dp-prod'),date,freq:g('dp-freq'),next:g('dp-next'),notes:g('dp-notes'),createdAt:new Date().toISOString()};
     const arr=DB.despar;arr.push(item);DB.save('despar',arr);closeM('modal-despar');resetF(['dp-prod','dp-date','dp-notes','dp-next']);
-    const pet=DB.pets.find(p=>p.id===_pid);showToast(`Desparasitación de ${pet?.name||''} registrada 🪱`);renderDespar(_pid);
+    const pet=DB.pets.find(p=>p.id===_pid);showToast('Desparasitación registrada 🪱');renderDespar(_pid);
   }
 }
 function savePeso(){
@@ -1949,13 +1934,13 @@ function preloadGuide() {
   const meds = byPet(_pid, DB.meds).filter(m=>m.active);
   let medsStr = '';
   if (meds.length) {
-    medsStr = meds.map(m => {
-      let line = `• ${m.name}`;
-      if (m.dose)  line += ` ${m.dose}`;
-      if (m.freq)  line += ` -- ${m.freq}`;
-      if (m.time)  line += ` a las ${m.time}`;
-      if (m.notes) line += ` (${m.notes})`;
-      return line;
+    medsStr = meds.map(function(m) {
+      var ln = '- ' + m.name;
+      if (m.dose)  ln += ' ' + m.dose;
+      if (m.freq)  ln += ' -- ' + m.freq;
+      if (m.time)  ln += ' a las ' + m.time;
+      if (m.notes) ln += ' (' + m.notes + ')';
+      return ln;
     }).join('\n');
   }
 
@@ -2335,20 +2320,20 @@ function shareGuia(pid) {
       ctx.font = 'bold 9px Nunito, sans-serif'; ctx.textAlign = 'left';
       ctx.fillText(s.title.toUpperCase(), PAD + 10, y + 14);
       y += SEC_TITLE;
-      const words = s.body.split(' ');
-      let line = '';
+      const aWords = s.body.split(' ');
+      let aLine = '';
       ctx.font = '12px Nunito, sans-serif';
-      words.forEach(word => {
-        const test = line + word + ' ';
-        if (ctx.measureText(test).width > W - PAD * 3 && line) {
-          ctx.fillText(line.trim(), PAD + 10, y + 12);
+      aWords.forEach(aWord => {
+        const aTest = aLine + aWord + ' ';
+        if (ctx.measureText(aTest).width > W - PAD * 3 && aLine) {
+          ctx.fillText(aLine.trim(), PAD + 10, y + 12);
           y += TEXT_LINE;
-          line = word + ' ';
+          aLine = aWord + ' ';
         } else {
-          line = test;
+          aLine = aTest;
         }
       });
-      if (line.trim()) { ctx.fillText(line.trim(), PAD + 10, y + 12); y += TEXT_LINE; }
+      if (aLine.trim()) { ctx.fillText(aLine.trim(), PAD + 10, y + 12); y += TEXT_LINE; }
       y += 12;
     }
   });
@@ -2481,22 +2466,14 @@ function closeEmer() {
   const dotColors={vax:'#1D9E75',cons:'#1D9E8F',despar:'#F0A050',peso:'#1A5FA0',exam:'#8B5CF6'};
 
   let html='';
-  Object.keys(byYear).sort((a,b)=>b-a).forEach(year=>{
-    html+=`<div class="tl-year">${year}</div>`;
-    byYear[year].forEach((e,i)=>{
+  Object.keys(byYear).sort((a,b)=>b-a).forEach(function(year){
+    html+='<div class="tl-year">'+year+'</div>';
+    byYear[year].forEach(function(e,i){
       const isLast=i===byYear[year].length-1;
-      html+=`<div class="tl-item">
-        <div class="tl-line-col">
-          <div class="tl-dot" style="background:${dotColors[e.type]||'#888'}"></div>
-          ${!isLast?'<div class="tl-stem"></div>':''}
-        </div>
-        <div class="tl-card">
-          <div class="tl-date">${fD(e.date)}</div>
-          <div class="tl-event">${e.icon} ${e.title}</div>
-          ${e.detail?`<div class="tl-detail">${e.detail}</div>`:''}
-          ${e.badge?`<span class="tl-badge ${e.badge.c}">${e.badge.t}</span>`:''}
-        </div>
-      </div>`;
+      const detailHtml=e.detail?'<div class="tl-detail">'+e.detail+'</div>':'';
+      const badgeHtml=e.badge?'<span class="tl-badge '+e.badge.c+'">'+e.badge.t+'</span>':'';
+      const stemHtml=isLast?'':'<div class="tl-stem"></div>';
+      html+='<div class="tl-item"><div class="tl-line-col"><div class="tl-dot" style="background:'+( dotColors[e.type]||'#888')+'"></div>'+stemHtml+'</div><div class="tl-card"><div class="tl-date">'+fD(e.date)+'</div><div class="tl-event">'+e.icon+' '+e.title+'</div>'+detailHtml+badgeHtml+'</div></div>';
     });
   });
 
