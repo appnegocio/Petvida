@@ -1260,24 +1260,26 @@ function renderHome(){
 
   // Emergency vet button
   if (pet.vphone) {
-    emerEl.innerHTML=`<div style="display:flex;gap:8px;margin:8px 16px 0">
-      <div class="emer-btn-wrap" style="flex:1;cursor:pointer" onclick="openEmer()">
-        <span class="emer-ico">🚨</span>
-        <div class="emer-info">
-          <div class="emer-title">Emergencia -- ${pet.name}</div>
-          <div class="emer-sub">${pet.vet?pet.vet+' · ':''}${pet.vphone}</div>
+    emerEl.innerHTML=`<div style="margin:8px 16px 0">
+      <div style="background:#FEF2F2;border:.5px solid #FDBDBD;border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:10px;cursor:pointer" onclick="openEmer()">
+        <span style="font-size:1.2rem;flex-shrink:0">🚨</span>
+        <div style="flex:1">
+          <div style="font-size:.82rem;font-weight:800;color:#C0392B">Emergencia · ${pet.name}</div>
+          <div style="font-size:.72rem;color:#E07070;margin-top:2px">${pet.vet?pet.vet+' · ':''}${pet.vphone}</div>
         </div>
-        <span style="color:#C0392B;font-size:.9rem;font-weight:700">›</span>
+        <span style="color:#C0392B;font-size:1rem;font-weight:700">›</span>
       </div>
     </div>`;
   } else if (pet.vet) {
-    emerEl.innerHTML=`<div style="margin:8px 16px 0"><div class="emer-btn-wrap" onclick="openEmer()" style="cursor:pointer">
-      <span class="emer-ico">🏥</span>
-      <div class="emer-info">
-        <div class="emer-title">Veterinario de ${pet.name}</div>
-        <div class="emer-sub">${pet.vet} · Agrega el teléfono para llamar directo</div>
+    emerEl.innerHTML=`<div style="margin:8px 16px 0">
+      <div style="background:#FEF2F2;border:.5px solid #FDBDBD;border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:10px;cursor:pointer" onclick="openEmer()">
+        <span style="font-size:1.2rem;flex-shrink:0">🏥</span>
+        <div style="flex:1">
+          <div style="font-size:.82rem;font-weight:800;color:#C0392B">Veterinario de ${pet.name}</div>
+          <div style="font-size:.72rem;color:#E07070;margin-top:2px">${pet.vet} · Agrega el teléfono para llamar directo</div>
+        </div>
       </div>
-    </div></div>`;
+    </div>`;
   } else {
     emerEl.innerHTML='';
   }
