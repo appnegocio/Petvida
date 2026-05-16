@@ -1415,6 +1415,22 @@ function renderProfile(pid){
       <div style="flex:1"><div style="font-family:'Playfair Display',serif;font-size:1.45rem;font-weight:700">${pet.name}</div><div class="tm tsm">${pet.species}${pet.breed?' · '+pet.breed:''}${age?' · '+age:''}</div>${pet.weight?`<div class="tsm fw8 mt-8">${pet.weight} kg</div>`:''}</div>
       <button onclick="editPet('${pid}')" style="background:var(--bg);border:.5px solid var(--border-md);border-radius:var(--r-sm);padding:7px 11px;font-size:.78rem;font-weight:700;color:var(--text-muted);flex-shrink:0">✏️ Editar</button>
     </div>
+
+    <!-- HISTORIAL + EMERGENCIA — siempre visibles arriba -->
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <div onclick="_pid='${pid}';goTo('timeline')" style="flex:1;background:linear-gradient(135deg,#1D9E8F,#0F7A6E);border-radius:var(--r-lg);padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:10px">
+        <span style="font-size:1.3rem">📅</span>
+        <div>
+          <div style="font-size:.85rem;font-weight:800;color:white">Línea de tiempo</div>
+          <div style="font-size:.7rem;color:rgba(255,255,255,.7);margin-top:1px">${cons.length+vl.length+ps.length} eventos registrados</div>
+        </div>
+        <span style="color:rgba(255,255,255,.7);font-size:1rem;margin-left:auto">›</span>
+      </div>
+      <div onclick="openEmer()" style="background:#FEF2F2;border:.5px solid #FDBDBD;border-radius:var(--r-lg);padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:64px">
+        <span style="font-size:1.3rem">🚨</span>
+        <div style="font-size:.65rem;font-weight:800;color:#C0392B;text-align:center">Emergencia</div>
+      </div>
+    </div>
     <div class="card"><div class="stitle" style="margin-top:0">Información</div>${dr('Sexo',pet.sex||'--')}${dr('Esterilizado',pet.neut||'--')}${dr('Microchip',pet.chip||'--')}${dr('Alergias',pet.allerg||'--')}${dr('Veterinario',pet.vet||'--')}${pet.vphone?dr('Teléfono',`<a href="tel:${pet.vphone}" style="color:var(--coral)">${pet.vphone}</a>`):''}</div>
     ${enfs.length?`<div class="card" style="border-color:var(--coral-bd);background:var(--coral-lt)"><div class="stitle" style="margin-top:0;color:var(--coral)">⚠️ Enfermedades crónicas activas</div>${enfs.map(e=>`<div style="font-size:.88rem;font-weight:700;padding:4px 0;border-bottom:.5px solid var(--coral-bd)">${e.name}${e.date?' · desde '+fDs(e.date):''}</div>`).join('')}</div>`:''}
     <div class="stitle">Ficha clínica</div>
@@ -1433,9 +1449,7 @@ function renderProfile(pid){
       <div class="mrow" onclick="goTo('citas')"><div class="micon mi-b">📅</div><div class="minfo"><div class="mname">Citas veterinarias</div><div class="msub">${upAppts} próxima${upAppts!==1?'s':''}</div></div><span class="marrow">›</span></div>
     </div>
     <div style="display:flex;gap:8px;padding-bottom:8px">
-      <button class="btn btn-p btn-sm" style="flex:2" onclick="sharePetVisual('${pid}')">↗ Compartir ficha</button>
-      <button class="btn btn-sm" style="flex:1.5;background:#EBF4FF;color:#1A5FA0;border-color:#C8DCEF;font-size:.78rem;font-weight:800" onclick="_pid='${pid}';goTo('timeline')">📅 Historial</button>
-      <button class="btn" style="flex:0 0 38px;padding:8px;background:#FEF2F2;color:#C0200F;border-color:#FAD;border-radius:var(--r-sm)" onclick="openEmer()">🚨</button>
+      <button class="btn btn-p btn-sm" style="flex:1" onclick="sharePetVisual('${pid}')">↗ Compartir ficha</button>
       <button class="btn btn-d btn-sm" style="flex:0 0 38px;padding:8px" onclick="delPet('${pid}')">🗑</button>
     </div>
     <div style="background:#EBF3FF;border:.5px solid #C8DCEF;border-radius:var(--r-lg);padding:13px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="goSub('cuidador')">
