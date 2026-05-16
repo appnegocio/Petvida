@@ -51,6 +51,8 @@ img{max-width:100%}
 .sd-ok{background:#A8FFD8}.sd-warn{background:#FFD8A8}.sd-urgent{background:#FFB8B8}
 .pet-pills{display:flex;gap:7px;overflow-x:auto;padding:12px 16px 4px;flex-shrink:0}
 .pet-pills::-webkit-scrollbar{display:none}
+#home-emer{color:#1C1C1E}
+#home-bday{color:#1C1C1E}
 .pet-pill{display:flex;align-items:center;gap:6px;padding:7px 13px;background:var(--card);border-radius:24px;border:1.5px solid var(--border);font-size:.82rem;font-weight:700;white-space:nowrap;flex-shrink:0;color:var(--text-muted);transition:all .15s;cursor:pointer}
 .pet-pill.active{border-color:var(--coral);background:var(--coral-lt);color:var(--coral)}
 .bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;height:calc(var(--nav-h) + var(--safe));padding-bottom:var(--safe);background:var(--card);border-top:.5px solid var(--border);display:flex;align-items:center;justify-content:space-around;z-index:100;box-shadow:0 -2px 16px rgba(28,28,30,.06)}
@@ -505,6 +507,8 @@ img{max-width:100%}
     </div>
     <div class="scroll-area" id="tl-content"></div>
   </div>
+
+  <div class="emer-mode-overlay" id="emer-mode">
     <div class="emer-mode-header">
       <div>
         <div style="font-size:.72rem;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">🚨 Emergencia</div>
@@ -1260,7 +1264,7 @@ function renderHome(){
 
   // Emergency vet button
   if (pet.vphone) {
-    emerEl.innerHTML=`<div style="margin:8px 16px 0">
+    emerEl.innerHTML=`<div style="margin:8px 16px 0;color:#1C1C1E">
       <div style="background:#FEF2F2;border:.5px solid #FDBDBD;border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:10px;cursor:pointer" onclick="openEmer()">
         <span style="font-size:1.2rem;flex-shrink:0">🚨</span>
         <div style="flex:1">
@@ -1271,7 +1275,7 @@ function renderHome(){
       </div>
     </div>`;
   } else if (pet.vet) {
-    emerEl.innerHTML=`<div style="margin:8px 16px 0">
+    emerEl.innerHTML=`<div style="margin:8px 16px 0;color:#1C1C1E">
       <div style="background:#FEF2F2;border:.5px solid #FDBDBD;border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:10px;cursor:pointer" onclick="openEmer()">
         <span style="font-size:1.2rem;flex-shrink:0">🏥</span>
         <div style="flex:1">
