@@ -2430,6 +2430,8 @@ function openEmer() {
 function closeEmer() {
   document.getElementById('emer-mode').classList.remove('open');
 }
+
+function renderTimeline(pid){
   if(!pid)return;
   const pet=DB.pets.find(p=>p.id===pid);if(!pet)return;
   document.getElementById('tl-title').textContent='Historial de '+pet.name;
