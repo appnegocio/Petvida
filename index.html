@@ -1433,6 +1433,12 @@ function renderProfile(pid){
     </div>
     <div class="card"><div class="stitle" style="margin-top:0">Información</div>${dr('Sexo',pet.sex||'--')}${dr('Esterilizado',pet.neut||'--')}${dr('Microchip',pet.chip||'--')}${dr('Alergias',pet.allerg||'--')}${dr('Veterinario',pet.vet||'--')}${pet.vphone?dr('Teléfono',`<a href="tel:${pet.vphone}" style="color:var(--coral)">${pet.vphone}</a>`):''}</div>
     ${enfs.length?`<div class="card" style="border-color:var(--coral-bd);background:var(--coral-lt)"><div class="stitle" style="margin-top:0;color:var(--coral)">⚠️ Enfermedades crónicas activas</div>${enfs.map(e=>`<div style="font-size:.88rem;font-weight:700;padding:4px 0;border-bottom:.5px solid var(--coral-bd)">${e.name}${e.date?' · desde '+fDs(e.date):''}</div>`).join('')}</div>`:''}
+    <div class="stitle">Salud diaria</div>
+    <div class="card-flush">
+      <div class="mrow" onclick="goTo('vacunas')"><div class="micon mi-g">💉</div><div class="minfo"><div class="mname">Vacunas</div><div class="msub">${vl.length?`${vok} al día${vw?' · '+vw+' requieren atención':''}`:'Sin vacunas registradas'}</div></div>${vw?`<span class="badge bwarn">Atención</span>`:`<span class="badge bok">Al día</span>`}</div>
+      <div class="mrow" onclick="goTo('medicamentos')"><div class="micon mi-g">💊</div><div class="minfo"><div class="mname">Medicamentos</div><div class="msub">${byPet(pid,DB.meds).filter(m=>m.active).length?byPet(pid,DB.meds).filter(m=>m.active).length+' activo'+(byPet(pid,DB.meds).filter(m=>m.active).length>1?'s':''):'Sin medicamentos activos'}</div></div><span class="marrow">›</span></div>
+      <div class="mrow" onclick="goTo('citas')"><div class="micon mi-b">📅</div><div class="minfo"><div class="mname">Citas veterinarias</div><div class="msub">${upAppts} próxima${upAppts!==1?'s':''}</div></div><span class="marrow">›</span></div>
+    </div>
     <div class="stitle">Ficha clínica</div>
     <div class="card-flush">
       <div class="mrow" onclick="goSub('consultas')"><div class="micon mi-c">🏥</div><div class="minfo"><div class="mname">Historial de consultas</div><div class="msub">${cons.length?`${cons.length} consulta${cons.length>1?'s':''} · Última ${fDs(lcon.date)}`:'Sin consultas aún'}</div></div><span class="marrow">›</span></div>
@@ -1441,12 +1447,6 @@ function renderProfile(pid){
       <div class="mrow" onclick="goSub('examenes')"><div class="micon mi-p">🧪</div><div class="minfo"><div class="mname">Exámenes de laboratorio</div><div class="msub">${lex?`${lex.type} · ${fDs(lex.date)}`:'Sin exámenes registrados'}</div></div><span class="marrow">›</span></div>
       <div class="mrow" onclick="goSub('alimentacion')"><div class="micon mi-gr">🍽️</div><div class="minfo"><div class="mname">Alimentación</div><div class="msub">${food?`${food.brand} · ${food.amount||''} · ${food.times}`:'Sin registrar'}</div></div><span class="marrow">›</span></div>
       <div class="mrow" onclick="goSub('enfermedades')"><div class="micon mi-c">🦠</div><div class="minfo"><div class="mname">Enfermedades crónicas</div><div class="msub">${enfs.length?`${enfs.length} condición${enfs.length>1?'es':''} registrada${enfs.length>1?'s':''}`:'Sin condiciones registradas'}</div></div><span class="marrow">›</span></div>
-    </div>
-    <div class="stitle">Salud diaria</div>
-    <div class="card-flush">
-      <div class="mrow" onclick="goTo('vacunas')"><div class="micon mi-g">💉</div><div class="minfo"><div class="mname">Vacunas</div><div class="msub">${vl.length?`${vok} al día${vw?' · '+vw+' requieren atención':''}`:'Sin vacunas registradas'}</div></div>${vw?`<span class="badge bwarn">Atención</span>`:`<span class="badge bok">Al día</span>`}</div>
-      <div class="mrow" onclick="goTo('medicamentos')"><div class="micon mi-g">💊</div><div class="minfo"><div class="mname">Medicamentos</div><div class="msub">${byPet(pid,DB.meds).filter(m=>m.active).length?byPet(pid,DB.meds).filter(m=>m.active).length+' activo'+(byPet(pid,DB.meds).filter(m=>m.active).length>1?'s':''):'Sin medicamentos activos'}</div></div><span class="marrow">›</span></div>
-      <div class="mrow" onclick="goTo('citas')"><div class="micon mi-b">📅</div><div class="minfo"><div class="mname">Citas veterinarias</div><div class="msub">${upAppts} próxima${upAppts!==1?'s':''}</div></div><span class="marrow">›</span></div>
     </div>
     <div style="display:flex;gap:8px;padding-bottom:8px">
       <button class="btn btn-p btn-sm" style="flex:1" onclick="sharePetVisual('${pid}')">↗ Compartir ficha</button>
