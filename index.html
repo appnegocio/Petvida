@@ -2934,15 +2934,133 @@ function startApp(){
     setTimeout(()=>showOnboarding(), 300);
   }
 }
+
+function loadDemoData(){
+  const P1='demo_pet_max', P2='demo_pet_luna';
+  const hoy=new Date();
+  const hace=(d)=>{const f=new Date(hoy);f.setDate(f.getDate()-d);return f.toISOString().split('T')[0];}
+  const en=(d)=>{const f=new Date(hoy);f.setDate(f.getDate()+d);return f.toISOString().split('T')[0];}
+
+  localStorage.setItem('pv2_pets', JSON.stringify([
+    {id:P1,name:'Max',species:'Perro',breed:'Labrador',dob:'2021-03-15',weight:'28.5',sex:'Macho',neut:'Sí',chip:'982000123456789',allerg:'Pollo',vet:'García',vphone:'+56912345678',photo:'',createdAt:hace(90)},
+    {id:P2,name:'Luna',species:'Gato',breed:'Siamés',dob:'2022-07-20',weight:'4.2',sex:'Hembra',neut:'Sí',chip:'',allerg:'',vet:'García',vphone:'+56912345678',photo:'',createdAt:hace(60)}
+  ]));
+  localStorage.setItem('pv2_aid', P1);
+
+  localStorage.setItem('pv2_vax', JSON.stringify([
+    {id:'dv1',petId:P1,name:'Antirrábica',date:hace(180),expiry:en(185),vet:'García',batch:'LOT2024A',sticker:'',createdAt:hace(180)},
+    {id:'dv2',petId:P1,name:'Séxtuple',date:hace(90),expiry:en(275),vet:'García',batch:'LOT2024B',sticker:'',createdAt:hace(90)},
+    {id:'dv3',petId:P2,name:'Triple Felina',date:hace(60),expiry:en(305),vet:'García',batch:'LOT2024C',sticker:'',createdAt:hace(60)},
+    {id:'dv4',petId:P2,name:'Leucemia Felina',date:hace(60),expiry:en(305),vet:'García',batch:'LOT2024D',sticker:'',createdAt:hace(60)}
+  ]));
+
+  localStorage.setItem('pv2_meds', JSON.stringify([
+    {id:'dm1',petId:P1,name:'Metacam',dose:'0.5ml',freq:'1 vez al día',start:hace(30),end:en(30),time:'08:00',notes:'Con comida',active:true,createdAt:hace(30)},
+    {id:'dm2',petId:P1,name:'Omeprazol',dose:'5mg',freq:'Cada 12 horas',start:hace(14),end:en(16),time:'08:00',notes:'En ayunas',active:true,createdAt:hace(14)},
+    {id:'dm3',petId:P1,name:'Antibiótico',dose:'250mg',freq:'1 vez al día',start:hace(60),end:hace(50),time:'08:00',notes:'',active:false,createdAt:hace(60)}
+  ]));
+
+  // Simular racha de 12 dias
+  const checks={};
+  const meds=['dm1','dm2'];
+  for(let i=1;i<=12;i++){
+    const d=new Date(hoy);d.setDate(d.getDate()-i);
+    const ds=d.toISOString().split('T')[0];
+    meds.forEach(m=>{checks[m+'_'+ds]=true;});
+  }
+  localStorage.setItem('pv2_checks', JSON.stringify(checks));
+
+  localStorage.setItem('pv2_cons', JSON.stringify([
+    {id:'dc1',petId:P1,date:hace(5),type:'Control',vet:'García',place:'Clínica Vetcare',reason:'Vómitos frecuentes',diag:'Gastroenteritis leve',treat:'Dieta blanda 3 días, Metacam y Omeprazol',follow:en(25),photo:'',createdAt:hace(5)},
+    {id:'dc2',petId:P1,date:hace(45),type:'Control',vet:'García',place:'Clínica Vetcare',reason:'Control anual',diag:'Todo normal',treat:'Ninguno',follow:en(320),photo:'',createdAt:hace(45)},
+    {id:'dc3',petId:P2,date:hace(20),type:'Urgencia',vet:'García',place:'Clínica Vetcare',reason:'No comía hace 2 días',diag:'Estrés por cambio de ambiente',treat:'Feliway difusor, dieta blanda',follow:en(10),photo:'',createdAt:hace(20)}
+  ]));
+
+  localStorage.setItem('pv2_despar', JSON.stringify([
+    {id:'dd1',petId:P1,type:'Interna',prod:'Drontal Plus',date:hace(60),freq:'90',next:en(30),notes:'',createdAt:hace(60)},
+    {id:'dd2',petId:P1,type:'Externa',prod:'Bravecto',date:hace(30),freq:'90',next:en(60),notes:'',createdAt:hace(30)},
+    {id:'dd3',petId:P2,type:'Interna',prod:'Milbemax',date:hace(45),freq:'90',next:en(45),notes:'',createdAt:hace(45)}
+  ]));
+
+  localStorage.setItem('pv2_pesos', JSON.stringify([
+    {id:'dp1',petId:P1,value:'29.0',date:hace(90),bcs:'6-7',notes:'Algo de sobrepeso',createdAt:hace(90)},
+    {id:'dp2',petId:P1,value:'28.8',date:hace(60),bcs:'4-5',notes:'Bajando bien',createdAt:hace(60)},
+    {id:'dp3',petId:P1,value:'28.5',date:hace(30),bcs:'4-5',notes:'Control de peso',createdAt:hace(30)},
+    {id:'dp4',petId:P1,value:'28.2',date:hace(5),bcs:'4-5',notes:'Consulta post gastroenteritis',createdAt:hace(5)},
+    {id:'dp5',petId:P2,value:'4.2',date:hace(20),bcs:'4-5',notes:'',createdAt:hace(20)}
+  ]));
+
+  localStorage.setItem('pv2_appts', JSON.stringify([
+    {id:'da1',petId:P1,vet:'García',spec:'Control post tratamiento',date:en(20),time:'10:30',place:'Clínica Vetcare',reason:'Seguimiento gastroenteritis',done:false,createdAt:hace(5)},
+    {id:'da2',petId:P2,vet:'García',spec:'Control rutinario',date:en(10),time:'11:00',place:'Clínica Vetcare',reason:'Control anual + vacunas',done:false,createdAt:hace(20)},
+    {id:'da3',petId:P1,vet:'García',spec:'Control anual',date:hace(45),time:'09:00',place:'Clínica Vetcare',reason:'Revisión general',done:true,doneNote:'Todo normal, bajar 500g de peso',createdAt:hace(50)}
+  ]));
+
+  localStorage.setItem('pv2_exams', JSON.stringify([
+    {id:'de1',petId:P1,type:'Examen de sangre',date:hace(45),lab:'Clínica Vetcare',result:'Todos los valores dentro del rango normal. Colesterol levemente elevado.',photo:'',createdAt:hace(45)}
+  ]));
+
+  localStorage.setItem('pv2_foods', JSON.stringify([
+    {id:'df1',petId:P1,brand:'Royal Canin Maxi Adult',type:'Seco (croquetas)',amount:'2 tazas',times:'2 veces al día',notes:'Sin pollo por alergia',createdAt:hace(90)},
+    {id:'df2',petId:P2,brand:'Hills Indoor Cat',type:'Seco (croquetas)',amount:'1/2 taza',times:'2 veces al día',notes:'',createdAt:hace(60)}
+  ]));
+
+  localStorage.setItem('pv2_enfs', JSON.stringify([
+    {id:'den1',petId:P1,name:'Displasia de cadera',date:hace(365),vet:'García',notes:'Control cada 6 meses. Evitar saltos. Metacam cuando hay dolor.',createdAt:hace(365)}
+  ]));
+
+  localStorage.setItem('pv2_guides', JSON.stringify([
+    {id:'dg1',petId:P1,from:en(5),to:en(12),cname:'María (mi mamá)',cphone:'+56987654321',
+     food:'Royal Canin Maxi Adult, SIN POLLO',foodamt:'2 tazas rasadas',foodtime:'8:00 AM y 7:00 PM',foodnotes:'No darle sobras ni comida humana',
+     meds:'Metacam 0.5ml con la comida de la mañana\nOmeprazol 5mg en ayunas a las 7:30 AM',
+     walks:'2 paseos cortos, 8 AM y 7 PM, máximo 20 min',sleep:'Su cama en el dormitorio',
+     behav:'Es tranquilo pero le gusta su pelota azul. No le gusta que lo bañen.',
+     alert:'Si no come en más de 24h, si vomita más de 2 veces, si cojea más de lo normal',
+     vetname:'Dr. García - Clínica Vetcare',vetphone:'+56912345678',
+     owner:'Estoy en Buenos Aires, disponible por WhatsApp siempre',
+     extra:'La llave de repuesto está en el cajón de la cocina. Max ya conoce el lugar.',
+     createdAt:hace(3)}
+  ]));
+
+  localStorage.setItem('pv2_ok','1');
+  localStorage.setItem('pv2_onb','1');
+  console.log('Datos demo cargados para Pawvida');
+}
+
 function init(){
+  // Detectar URL demo
+  const urlParams = new URLSearchParams(window.location.search);
+  const isDemo = urlParams.get('demo') === 'true';
+
+  if(isDemo && !localStorage.getItem('pv2_demo_loaded')){
+    loadDemoData();
+    localStorage.setItem('pv2_demo_loaded','1');
+    // Mostrar banner demo
+    const banner = document.createElement('div');
+    banner.id = 'demo-banner';
+    banner.innerHTML = `<div style="background:#1D9E8F;color:white;text-align:center;padding:8px 16px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px">
+      🐾 Modo demo -- Max y Luna ya están cargados · 
+      <span onclick="clearDemo()" style="text-decoration:underline;cursor:pointer;opacity:.8">Borrar datos y empezar con mi mascota</span>
+    </div>`;
+    document.body.prepend(banner);
+  }
+
   if(localStorage.getItem('pv2_ok')){
     document.getElementById('swelcome').style.display='none';
     document.getElementById('main-app').style.display='block';
-      renderHome();renderPets();
+    renderHome();renderPets();
     const pet=getAP();renderVax(pet);renderMeds(pet);renderAppts(pet);
-
   }
 }
+
+function clearDemo(){
+  if(!confirm('¿Borrar los datos demo y empezar con tu propia mascota?')) return;
+  const keys=['pv2_pets','pv2_vax','pv2_meds','pv2_cons','pv2_despar','pv2_pesos','pv2_appts','pv2_exams','pv2_foods','pv2_enfs','pv2_guides','pv2_ok','pv2_onb','pv2_aid','pv2_checks','pv2_demo_loaded'];
+  keys.forEach(k=>localStorage.removeItem(k));
+  document.getElementById('demo-banner')?.remove();
+  location.reload();
+}
+
 if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 init();
 </script>
